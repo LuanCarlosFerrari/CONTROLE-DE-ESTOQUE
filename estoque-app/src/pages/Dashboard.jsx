@@ -1,0 +1,207 @@
+import { useEffect, useState } from 'react'
+import { Package, Users, ShoppingCart, AlertTriangle, TrendingUp, ArrowUpRight } from 'lucide-react'
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
+import { supabase } from '../lib/supabase'
+
+const CustomTooltip = ({ active, payload, label }) => {
+  if (active && payload?.length) {
+    return (
+      <div style={{
+        background: 'var(--bg-600)', border: '1px solid var(--bg-400)',
+        borderRadius: 8, padding: '10px 14px', fontSize: 13,
+        boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
+      }}>
+        <p style={{ color: 'var(--text-muted)', marginBottom: 4, fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{label}</p>
+        <p style={{ color: 'var(--amber)', fontWeight: 700, fontFamily: 'JetBrains Mono, monospace', fontSize: 15 }}>
+          R$ {Number(payload[0].value).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+        </p>
+      </div>
+    )
+  }
+  return null
+}
+
+const PageHeader = ({ title, subtitle }) => (
+  <div style={{ marginBottom: 32, paddingBottom: 24, borderBottom: '1px solid var(--bg-600)' }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 4 }}>
+      <div style={{ width: 3, height: 22, background: 'var(--amber)', borderRadius: 2 }} />
+      <h1 style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 26, fontWeight: 700, color: 'var(--text)', letterSpacing: '-0.01em' }}>{title}</h1>
+    </div>
+    <p style={{ fontSize: 14, color: 'var(--text-muted)', paddingLeft: 15 }}>{subtitle}</p>
+  </div>
+)
+
+export default function Dashboard() {
+  const [stats, setStats] = useState({ produtos: 0, clientes: 0, vendas_hoje: 0, estoque_baixo: 0, total_mes: 0 })
+  const [salesChart, setSalesChart] = useState([])
+  const [recentSales, setRecentSales] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => { loadDashboard() }, [])
+
+  const loadDashboard = async () => {
+    try {
+      const [{ count: produtos }, { count: clientes }, { data: vendas }, { data: estoqueBaixo }, { data: vendasMes }] = await Promise.all([
+        supabase.from('produtos').select('*', { count: 'exact', head: true }),
+        supabase.from('clientes').select('*', { count: 'exact', head: true }),
+        supabase.from('vendas').select('total, created_at, clientes(nome)').order('created_at', { ascending: false }).limit(5),
+        supabase.from('produtos').select('*').filter('quantidade', 'lte', 'estoque_minimo'),
+        supabase.from('vendas').select('total, created_at').gte('created_at', new Date(Date.now() - 30 * 86400000).toISOString()),
+      ])
+      const hoje = new Date().toDateString()
+      const vendasHoje = (vendas || []).filter(v => new Date(v.created_at).toDateString() === hoje)
+      const totalHoje = vendasHoje.reduce((s, v) => s + Number(v.total), 0)
+      const totalMes = (vendasMes || []).reduce((s, v) => s + Number(v.total), 0)
+      setStats({ produtos: produtos || 0, clientes: clientes || 0, vendas_hoje: totalHoje, estoque_baixo: (estoqueBaixo || []).length, total_mes: totalMes })
+      setRecentSales(vendas || [])
+      const days = []
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date(Date.now() - i * 86400000)
+        const label = d.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit' })
+        const total = (vendasMes || []).filter(v => new Date(v.created_at).toDateString() === d.toDateString()).reduce((s, v) => s + Number(v.total), 0)
+        days.push({ name: label, total })
+      }
+      setSalesChart(days)
+    } catch (e) { console.error(e) }
+    finally { setLoading(false) }
+  }
+
+  const statCards = [
+    { label: 'Produtos', sublabel: 'cadastrados', value: stats.produtos, icon: Package, color: '#F59E0B', border: 'rgba(245,158,11,0.3)', glow: 'rgba(245,158,11,0.06)' },
+    { label: 'Clientes', sublabel: 'ativos', value: stats.clientes, icon: Users, color: '#3B82F6', border: 'rgba(59,130,246,0.3)', glow: 'rgba(59,130,246,0.06)' },
+    { label: 'Vendas', sublabel: 'hoje', value: `R$ ${stats.vendas_hoje.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, icon: ShoppingCart, color: '#10B981', border: 'rgba(16,185,129,0.3)', glow: 'rgba(16,185,129,0.06)', mono: true },
+    { label: 'Estoque', sublabel: 'crítico', value: stats.estoque_baixo, icon: AlertTriangle, color: stats.estoque_baixo > 0 ? '#EF4444' : '#10B981', border: stats.estoque_baixo > 0 ? 'rgba(239,68,68,0.3)' : 'rgba(16,185,129,0.3)', glow: stats.estoque_baixo > 0 ? 'rgba(239,68,68,0.06)' : 'rgba(16,185,129,0.06)' },
+  ]
+
+  if (loading) return (
+    <div style={{ padding: '32px 36px' }}>
+      <div style={{ height: 60, background: 'var(--bg-700)', borderRadius: 8, marginBottom: 32, width: 200 }} className="skeleton" />
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 16, marginBottom: 24 }}>
+        {[...Array(4)].map((_, i) => <div key={i} className="skeleton" style={{ height: 110, borderRadius: 12 }} />)}
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: '3fr 2fr', gap: 16 }}>
+        {[...Array(2)].map((_, i) => <div key={i} className="skeleton" style={{ height: 280, borderRadius: 12 }} />)}
+      </div>
+    </div>
+  )
+
+  return (
+    <div style={{ padding: '32px 36px', maxWidth: 1200 }} className="animate-fade-in">
+      <PageHeader title="Dashboard" subtitle={`${new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}`} />
+
+      {/* Stat cards */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(210px,1fr))', gap: 16, marginBottom: 28 }}>
+        {statCards.map(({ label, sublabel, value, icon: Icon, color, border, glow, mono }) => (
+          <div key={label} style={{
+            background: `linear-gradient(135deg, var(--bg-700) 0%, ${glow} 100%)`,
+            border: `1px solid ${border}`,
+            borderRadius: 14, padding: '20px 22px',
+            transition: 'transform 0.2s, box-shadow 0.2s',
+            cursor: 'default',
+          }}
+            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = `0 8px 32px ${glow}` }}
+            onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'none' }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--text-subtle)' }}>{label}</span>
+                <span style={{ fontSize: 11, color: 'var(--text-subtle)', letterSpacing: '0.04em' }}>{sublabel}</span>
+              </div>
+              <div style={{ width: 36, height: 36, borderRadius: 9, background: `${color}18`, border: `1px solid ${color}30`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Icon size={17} color={color} />
+              </div>
+            </div>
+            <p style={{ fontFamily: mono ? 'JetBrains Mono, monospace' : 'Syne, sans-serif', fontSize: mono ? 20 : 32, fontWeight: 700, color, lineHeight: 1, letterSpacing: mono ? 0 : '-0.02em' }}>
+              {value}
+            </p>
+          </div>
+        ))}
+      </div>
+
+      {/* Charts */}
+      <div style={{ display: 'grid', gridTemplateColumns: '3fr 2fr', gap: 16, marginBottom: 20 }}>
+        {/* Bar chart */}
+        <div style={{ background: 'var(--bg-800)', border: '1px solid var(--bg-500)', borderRadius: 14, padding: '24px 24px 16px', overflow: 'hidden' }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 24 }}>
+            <div>
+              <p style={{ fontFamily: 'Syne, sans-serif', fontSize: 15, fontWeight: 700, color: 'var(--text)', marginBottom: 3 }}>Receita — últimos 7 dias</p>
+              <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+                Total acumulado: <span style={{ fontFamily: 'JetBrains Mono, monospace', color: 'var(--amber)', fontWeight: 600 }}>
+                  R$ {salesChart.reduce((s, d) => s + d.total, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                </span>
+              </p>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.2)', borderRadius: 6, padding: '4px 10px' }}>
+              <TrendingUp size={13} color="var(--amber)" />
+              <span style={{ fontSize: 11, color: 'var(--amber)', fontWeight: 600 }}>7d</span>
+            </div>
+          </div>
+          <ResponsiveContainer width="100%" height={190}>
+            <BarChart data={salesChart} barSize={24} barCategoryGap="35%">
+              <XAxis dataKey="name" tick={{ fill: 'var(--text-subtle)', fontSize: 10, fontFamily: 'DM Sans' }} axisLine={false} tickLine={false} />
+              <YAxis hide />
+              <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255,255,255,0.02)', radius: 4 }} />
+              <Bar dataKey="total" fill="var(--amber)" radius={[5, 5, 0, 0]} opacity={0.85} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* Recent sales */}
+        <div style={{ background: 'var(--bg-800)', border: '1px solid var(--bg-500)', borderRadius: 14, padding: 24, display: 'flex', flexDirection: 'column' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+            <p style={{ fontFamily: 'Syne, sans-serif', fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>Vendas recentes</p>
+            <ShoppingCart size={15} color="var(--text-subtle)" />
+          </div>
+          {recentSales.length === 0 ? (
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+              <ShoppingCart size={32} color="var(--bg-500)" />
+              <p style={{ color: 'var(--text-subtle)', fontSize: 13 }}>Nenhuma venda ainda</p>
+            </div>
+          ) : (
+            <div style={{ flex: 1 }}>
+              {recentSales.map((v, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 0', borderBottom: i < recentSales.length - 1 ? '1px solid var(--bg-600)' : 'none' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <div style={{ width: 28, height: 28, borderRadius: 7, background: 'var(--bg-600)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', fontFamily: 'Syne, sans-serif' }}>
+                        {(v.clientes?.nome || '?')[0].toUpperCase()}
+                      </span>
+                    </div>
+                    <div>
+                      <p style={{ fontSize: 13, color: 'var(--text)', fontWeight: 500, marginBottom: 1 }}>{v.clientes?.nome || '—'}</p>
+                      <p style={{ fontSize: 11, color: 'var(--text-subtle)' }}>{new Date(v.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}</p>
+                    </div>
+                  </div>
+                  <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 13, fontWeight: 600, color: '#34D399' }}>
+                    R$ {Number(v.total).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Month total */}
+      <div style={{
+        background: 'linear-gradient(135deg, rgba(245,158,11,0.08) 0%, rgba(245,158,11,0.03) 50%, transparent 100%)',
+        border: '1px solid rgba(245,158,11,0.18)',
+        borderRadius: 14, padding: '24px 28px',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        position: 'relative', overflow: 'hidden',
+      }}>
+        <div style={{ position: 'absolute', right: -20, top: -20, width: 140, height: 140, borderRadius: '50%', background: 'rgba(245,158,11,0.04)', pointerEvents: 'none' }} />
+        <div>
+          <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--amber)', marginBottom: 8 }}>Faturamento do mês</p>
+          <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 38, fontWeight: 700, color: 'var(--text)', letterSpacing: '-0.02em', lineHeight: 1 }}>
+            R$ {stats.total_mes.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+          </p>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.25)', borderRadius: 10, padding: '10px 16px' }}>
+          <ArrowUpRight size={20} color="var(--amber)" />
+          <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--amber)' }}>30 dias</span>
+        </div>
+      </div>
+    </div>
+  )
+}
