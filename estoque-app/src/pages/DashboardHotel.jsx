@@ -87,11 +87,12 @@ export default function DashboardHotel() {
 
   const ocupacaoPct = stats.total_quartos > 0 ? Math.round((stats.ocupados / stats.total_quartos) * 100) : 0
 
+  const G = { color: 'var(--amber)', border: 'rgba(16,185,129,0.3)', glow: 'rgba(16,185,129,0.06)' }
   const statCards = [
-    { label: 'Disponíveis', sublabel: 'agora', value: stats.disponiveis,    icon: BedDouble, color: 'var(--amber)', border: 'rgba(16,185,129,0.3)',  glow: 'rgba(16,185,129,0.06)' },
-    { label: 'Ocupados',    sublabel: 'agora', value: stats.ocupados,       icon: BedDouble, color: '#60A5FA',      border: 'rgba(96,165,250,0.3)',  glow: 'rgba(96,165,250,0.06)' },
-    { label: 'Check-ins',   sublabel: 'hoje',  value: stats.checkins_hoje,  icon: LogIn,     color: '#34D399',      border: 'rgba(52,211,153,0.3)',  glow: 'rgba(52,211,153,0.06)' },
-    { label: 'Check-outs',  sublabel: 'hoje',  value: stats.checkouts_hoje, icon: LogOut,    color: '#A78BFA',      border: 'rgba(167,139,250,0.3)', glow: 'rgba(167,139,250,0.06)' },
+    { label: 'Disponíveis', sublabel: 'agora', value: stats.disponiveis,    icon: BedDouble, ...G },
+    { label: 'Ocupados',    sublabel: 'agora', value: stats.ocupados,       icon: BedDouble, ...G },
+    { label: 'Check-ins',   sublabel: 'hoje',  value: stats.checkins_hoje,  icon: LogIn,     ...G },
+    { label: 'Check-outs',  sublabel: 'hoje',  value: stats.checkouts_hoje, icon: LogOut,    ...G },
   ]
 
   if (loading) return (

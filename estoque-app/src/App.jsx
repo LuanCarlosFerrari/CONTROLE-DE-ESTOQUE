@@ -10,6 +10,7 @@ import Dashboard from './pages/Dashboard'
 import Estoque from './pages/Estoque'
 import Clientes from './pages/Clientes'
 import Vendas from './pages/Vendas'
+import Caixa from './pages/Caixa'
 import Veiculos from './pages/Veiculos'
 import OrdensServico from './pages/OrdensServico'
 import Quartos from './pages/Quartos'
@@ -35,6 +36,7 @@ export default function App() {
             <Route path="estoque" element={<Estoque />} />
             <Route path="clientes" element={<Clientes />} />
             <Route path="vendas" element={<Vendas />} />
+            <Route path="caixa" element={<Caixa />} />
             <Route path="veiculos" element={<Veiculos />} />
             <Route path="ordens" element={<OrdensServico />} />
             <Route path="quartos" element={<Quartos />} />

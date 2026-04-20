@@ -2,7 +2,7 @@ import { NavLink, useNavigate } from 'react-router-dom'
 import {
   LayoutDashboard, Package, Users, ShoppingCart, LogOut,
   Clock, CheckCircle, Sun, Moon,
-  Wrench, BedDouble, Wine, Truck, Car, Calendar, Settings,
+  Wrench, BedDouble, Wine, Truck, Car, Calendar, Settings, Wallet,
 } from 'lucide-react'
 import stockTagImg from '../assets/Stock_Tag.png'
 import { useAuth } from '../contexts/AuthContext'
@@ -11,9 +11,9 @@ import { useTheme } from '../contexts/ThemeContext'
 const MENUS = {
   estoque: [
     { to: '/app/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-    { to: '/app/estoque', icon: Package, label: 'Estoque' },
-    { to: '/app/clientes', icon: Users, label: 'Clientes' },
-    { to: '/app/vendas', icon: ShoppingCart, label: 'Vendas' },
+    { to: '/app/estoque',   icon: Package,         label: 'Estoque' },
+    { to: '/app/clientes',  icon: Users,           label: 'Clientes' },
+    { to: '/app/caixa',     icon: Wallet,          label: 'Caixa' },
   ],
   oficina: [
     { to: '/app/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
@@ -33,7 +33,7 @@ const MENUS = {
     { to: '/app/vinhos', icon: Wine, label: 'Vinhos / Lotes', soon: true },
     { to: '/app/fornecedores', icon: Truck, label: 'Fornecedores', soon: true },
     { to: '/app/clientes', icon: Users, label: 'Clientes' },
-    { to: '/app/vendas', icon: ShoppingCart, label: 'Vendas' },
+    { to: '/app/caixa', icon: Wallet, label: 'Caixa' },
   ],
 }
 

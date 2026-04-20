@@ -74,11 +74,13 @@ export default function Dashboard() {
     finally { setLoading(false) }
   }
 
+  const G = { color: 'var(--amber)', border: 'rgba(16,185,129,0.3)', glow: 'rgba(16,185,129,0.06)' }
+  const R = { color: '#EF4444',      border: 'rgba(239,68,68,0.3)',  glow: 'rgba(239,68,68,0.06)'  }
   const statCards = [
-    { label: 'Produtos',  sublabel: 'cadastrados', value: stats.produtos, icon: Package, color: 'var(--amber)', border: 'rgba(16,185,129,0.3)', glow: 'rgba(16,185,129,0.06)' },
-    { label: 'Clientes',  sublabel: 'ativos',       value: stats.clientes, icon: Users,        color: '#60A5FA', border: 'rgba(96,165,250,0.3)',  glow: 'rgba(96,165,250,0.06)' },
-    { label: 'Vendas',    sublabel: 'hoje',          value: `R$ ${stats.vendas_hoje.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, icon: ShoppingCart, color: '#34D399', border: 'rgba(52,211,153,0.3)', glow: 'rgba(52,211,153,0.06)', mono: true },
-    { label: 'Estoque',   sublabel: 'crítico',       value: stats.estoque_baixo, icon: AlertTriangle, color: stats.estoque_baixo > 0 ? '#EF4444' : '#A78BFA', border: stats.estoque_baixo > 0 ? 'rgba(239,68,68,0.3)' : 'rgba(167,139,250,0.3)', glow: stats.estoque_baixo > 0 ? 'rgba(239,68,68,0.06)' : 'rgba(167,139,250,0.06)' },
+    { label: 'Produtos', sublabel: 'cadastrados', value: stats.produtos,   icon: Package,       ...G },
+    { label: 'Clientes', sublabel: 'ativos',       value: stats.clientes,   icon: Users,         ...G },
+    { label: 'Vendas',   sublabel: 'hoje',          value: `R$ ${stats.vendas_hoje.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, icon: ShoppingCart, ...G, mono: true },
+    { label: 'Estoque',  sublabel: 'crítico',       value: stats.estoque_baixo, icon: AlertTriangle, ...(stats.estoque_baixo > 0 ? R : G) },
   ]
 
   if (loading) return (

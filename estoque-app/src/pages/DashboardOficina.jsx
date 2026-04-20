@@ -87,11 +87,12 @@ export default function DashboardOficina() {
     finally { setLoading(false) }
   }
 
+  const G = { color: 'var(--amber)', border: 'rgba(16,185,129,0.3)', glow: 'rgba(16,185,129,0.06)' }
   const statCards = [
-    { label: 'OS Abertas',    sublabel: 'aguardando',   value: stats.abertas,         icon: Clock,        color: 'var(--amber)', border: 'rgba(16,185,129,0.3)',  glow: 'rgba(16,185,129,0.06)' },
-    { label: 'Em andamento',  sublabel: 'em execução',  value: stats.em_andamento,    icon: Wrench,       color: '#60A5FA',      border: 'rgba(96,165,250,0.3)',  glow: 'rgba(96,165,250,0.06)' },
-    { label: 'Concluídas',    sublabel: 'hoje',         value: stats.concluidas_hoje, icon: CheckCircle,  color: '#34D399',      border: 'rgba(52,211,153,0.3)',  glow: 'rgba(52,211,153,0.06)' },
-    { label: 'Veículos',      sublabel: 'cadastrados',  value: stats.veiculos,        icon: Car,          color: '#A78BFA',      border: 'rgba(167,139,250,0.3)', glow: 'rgba(167,139,250,0.06)' },
+    { label: 'OS Abertas',   sublabel: 'aguardando',  value: stats.abertas,         icon: Clock,       ...G },
+    { label: 'Em andamento', sublabel: 'em execução', value: stats.em_andamento,    icon: Wrench,      ...G },
+    { label: 'Concluídas',   sublabel: 'hoje',        value: stats.concluidas_hoje, icon: CheckCircle, ...G },
+    { label: 'Veículos',     sublabel: 'cadastrados', value: stats.veiculos,        icon: Car,         ...G },
   ]
 
   if (loading) return (
