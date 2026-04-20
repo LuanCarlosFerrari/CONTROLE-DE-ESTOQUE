@@ -24,7 +24,7 @@ export default function TrialExpired() {
           Período de trial encerrado
         </h1>
         <p style={{ color: 'var(--text-muted)', fontSize: 16, lineHeight: 1.7, marginBottom: 32 }}>
-          Seu trial de 7 dias expirou. Para continuar usando o <strong style={{ color: 'var(--text)' }}>StockPro</strong>, assine um plano e mantenha seu negócio sempre organizado.
+          Seu trial de 7 dias expirou. Para continuar usando o <strong style={{ color: 'var(--text)' }}>StockTag</strong>, assine um plano e mantenha seu negócio sempre organizado.
         </p>
 
         <div style={{
@@ -48,7 +48,7 @@ export default function TrialExpired() {
         </div>
 
         <a
-          href={`mailto:contato@stockpro.com.br?subject=Quero assinar o StockPro&body=Email: ${user?.email}`}
+          href={`mailto:contato@stocktag.com.br?subject=Quero assinar o StockTag&body=Email: ${user?.email}`}
           className="btn-primary"
           style={{ textDecoration: 'none', display: 'inline-flex', padding: '13px 28px', fontSize: 15, marginBottom: 16 }}
         >

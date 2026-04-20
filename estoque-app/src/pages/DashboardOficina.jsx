@@ -88,26 +88,26 @@ export default function DashboardOficina() {
   }
 
   const statCards = [
-    { label: 'OS Abertas', sublabel: 'aguardando', value: stats.abertas, icon: Clock, color: '#60A5FA', border: 'rgba(96,165,250,0.3)', glow: 'rgba(96,165,250,0.06)' },
-    { label: 'Em andamento', sublabel: 'em execução', value: stats.em_andamento, icon: Wrench, color: '#F59E0B', border: 'rgba(245,158,11,0.3)', glow: 'rgba(245,158,11,0.06)' },
-    { label: 'Concluídas', sublabel: 'hoje', value: stats.concluidas_hoje, icon: CheckCircle, color: '#34D399', border: 'rgba(52,211,153,0.3)', glow: 'rgba(52,211,153,0.06)' },
-    { label: 'Veículos', sublabel: 'cadastrados', value: stats.veiculos, icon: Car, color: 'var(--amber)', border: 'rgba(16,185,129,0.3)', glow: 'rgba(16,185,129,0.06)' },
+    { label: 'OS Abertas',    sublabel: 'aguardando',   value: stats.abertas,         icon: Clock,        color: 'var(--amber)', border: 'rgba(16,185,129,0.3)',  glow: 'rgba(16,185,129,0.06)' },
+    { label: 'Em andamento',  sublabel: 'em execução',  value: stats.em_andamento,    icon: Wrench,       color: '#60A5FA',      border: 'rgba(96,165,250,0.3)',  glow: 'rgba(96,165,250,0.06)' },
+    { label: 'Concluídas',    sublabel: 'hoje',         value: stats.concluidas_hoje, icon: CheckCircle,  color: '#34D399',      border: 'rgba(52,211,153,0.3)',  glow: 'rgba(52,211,153,0.06)' },
+    { label: 'Veículos',      sublabel: 'cadastrados',  value: stats.veiculos,        icon: Car,          color: '#A78BFA',      border: 'rgba(167,139,250,0.3)', glow: 'rgba(167,139,250,0.06)' },
   ]
 
   if (loading) return (
-    <div style={{ padding: '32px 36px' }}>
+    <div className="page-content">
       <div style={{ height: 60, background: 'var(--bg-700)', borderRadius: 8, marginBottom: 32, width: 240 }} className="skeleton" />
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 16, marginBottom: 24 }}>
+      <div className="stats-grid-4" style={{ marginBottom: 24 }}>
         {[...Array(4)].map((_, i) => <div key={i} className="skeleton" style={{ height: 110, borderRadius: 12 }} />)}
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: '3fr 2fr', gap: 16 }}>
+      <div className="chart-grid">
         {[...Array(2)].map((_, i) => <div key={i} className="skeleton" style={{ height: 280, borderRadius: 12 }} />)}
       </div>
     </div>
   )
 
   return (
-    <div style={{ padding: '32px 36px', maxWidth: 1200 }} className="animate-fade-in">
+    <div style={{ maxWidth: 1200 }} className="animate-fade-in page-content">
       {/* Header */}
       <div style={{ marginBottom: 32, paddingBottom: 24, borderBottom: '1px solid var(--bg-600)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 4 }}>
@@ -120,7 +120,7 @@ export default function DashboardOficina() {
       </div>
 
       {/* Stat cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 28 }}>
+      <div className="stats-grid-4" style={{ marginBottom: 28 }}>
         {statCards.map(({ label, sublabel, value, icon: Icon, color, border, glow }) => (
           <div key={label} style={{
             background: `linear-gradient(135deg, var(--bg-700) 0%, ${glow} 100%)`,
@@ -144,7 +144,7 @@ export default function DashboardOficina() {
       </div>
 
       {/* Chart + OS recentes */}
-      <div style={{ display: 'grid', gridTemplateColumns: '3fr 2fr', gap: 16, marginBottom: 20 }}>
+      <div className="chart-grid" style={{ marginBottom: 20 }}>
         <div style={{ background: 'var(--bg-800)', border: '1px solid var(--bg-500)', borderRadius: 14, padding: '24px 24px 16px', overflow: 'hidden' }}>
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 24 }}>
             <div>

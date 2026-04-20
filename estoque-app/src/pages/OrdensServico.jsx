@@ -192,7 +192,7 @@ export default function OrdensServico() {
   })
 
   return (
-    <div style={{ padding: '32px 36px', maxWidth: 1200 }} className="animate-fade-in">
+    <div style={{ maxWidth: 1200 }} className="animate-fade-in page-content">
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 28, paddingBottom: 24, borderBottom: '1px solid var(--bg-600)', flexWrap: 'wrap', gap: 16 }}>
         <div>

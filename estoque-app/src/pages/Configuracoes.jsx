@@ -81,7 +81,7 @@ export default function Configuracoes() {
   const nameChanged = name !== businessName
 
   return (
-    <div style={{ padding: '32px 36px', maxWidth: 760 }} className="animate-fade-in">
+    <div style={{ maxWidth: 760 }} className="animate-fade-in page-content">
       {/* Header */}
       <div style={{ marginBottom: 32, paddingBottom: 24, borderBottom: '1px solid var(--bg-600)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 4 }}>
@@ -224,7 +224,7 @@ export default function Configuracoes() {
               ))}
             </ul>
             <a
-              href={`mailto:contato@stockpro.com.br?subject=Quero assinar o StockPro&body=Email: ${user?.email}`}
+              href={`mailto:contato@stocktag.com.br?subject=Quero assinar o StockTag&body=Email: ${user?.email}`}
               className="btn-primary"
               style={{ textDecoration: 'none', display: 'inline-flex', padding: '10px 20px', fontSize: 14 }}
             >

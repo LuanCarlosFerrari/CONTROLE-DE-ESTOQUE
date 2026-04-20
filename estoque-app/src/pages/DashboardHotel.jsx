@@ -95,19 +95,19 @@ export default function DashboardHotel() {
   ]
 
   if (loading) return (
-    <div style={{ padding: '32px 36px' }}>
+    <div className="page-content">
       <div style={{ height: 60, background: 'var(--bg-700)', borderRadius: 8, marginBottom: 32, width: 240 }} className="skeleton" />
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 16, marginBottom: 24 }}>
+      <div className="stats-grid-4" style={{ marginBottom: 24 }}>
         {[...Array(4)].map((_, i) => <div key={i} className="skeleton" style={{ height: 110, borderRadius: 12 }} />)}
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: '3fr 2fr', gap: 16 }}>
+      <div className="chart-grid">
         {[...Array(2)].map((_, i) => <div key={i} className="skeleton" style={{ height: 280, borderRadius: 12 }} />)}
       </div>
     </div>
   )
 
   return (
-    <div style={{ padding: '32px 36px', maxWidth: 1200 }} className="animate-fade-in">
+    <div style={{ maxWidth: 1200 }} className="animate-fade-in page-content">
       {/* Header */}
       <div style={{ marginBottom: 32, paddingBottom: 24, borderBottom: '1px solid var(--bg-600)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 4 }}>
@@ -120,7 +120,7 @@ export default function DashboardHotel() {
       </div>
 
       {/* Stat cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 28 }}>
+      <div className="stats-grid-4" style={{ marginBottom: 28 }}>
         {statCards.map(({ label, sublabel, value, icon: Icon, color, border, glow }) => (
           <div key={label} style={{ background: `linear-gradient(135deg, var(--bg-700) 0%, ${glow} 100%)`, border: `1px solid ${border}`, borderRadius: 14, padding: '20px 22px', transition: 'transform 0.2s, box-shadow 0.2s', cursor: 'default' }}
             onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = `0 8px 32px ${glow}` }}
@@ -141,7 +141,7 @@ export default function DashboardHotel() {
       </div>
 
       {/* Chart + Reservas recentes */}
-      <div style={{ display: 'grid', gridTemplateColumns: '3fr 2fr', gap: 16, marginBottom: 20 }}>
+      <div className="chart-grid" style={{ marginBottom: 20 }}>
         <div style={{ background: 'var(--bg-800)', border: '1px solid var(--bg-500)', borderRadius: 14, padding: '24px 24px 16px', overflow: 'hidden' }}>
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 24 }}>
             <div>
@@ -206,7 +206,7 @@ export default function DashboardHotel() {
       </div>
 
       {/* Ocupação + receita do mês */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 16 }}>
+      <div className="bottom-grid-hotel">
         {/* Taxa de ocupação */}
         <div style={{ background: 'var(--bg-800)', border: '1px solid var(--bg-500)', borderRadius: 14, padding: '24px 28px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16 }}>
           <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--text-subtle)' }}>Taxa de ocupação</p>

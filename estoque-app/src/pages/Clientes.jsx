@@ -14,7 +14,7 @@ const Label = ({ children, required }) => (
 
 function Avatar({ nome }) {
   const initials = nome ? nome.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase() : '?'
-  const colors = ['#10B981','#3B82F6','#10B981','#8B5CF6','#EC4899','#F97316']
+  const colors = ['#10B981','#3B82F6','#6366F1','#8B5CF6','#EC4899','#F97316']
   const color = colors[nome?.charCodeAt(0) % colors.length] || colors[0]
   return (
     <div style={{ width: 34, height: 34, borderRadius: 10, background: `${color}18`, border: `1px solid ${color}30`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
@@ -73,7 +73,7 @@ export default function Clientes() {
   )
 
   return (
-    <div style={{ padding: '32px 36px', maxWidth: 1200 }} className="animate-fade-in">
+    <div style={{ maxWidth: 1200 }} className="animate-fade-in page-content">
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 28, paddingBottom: 24, borderBottom: '1px solid var(--bg-600)', flexWrap: 'wrap', gap: 16 }}>
         <div>

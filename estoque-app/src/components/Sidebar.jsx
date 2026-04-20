@@ -1,9 +1,10 @@
 import { NavLink, useNavigate } from 'react-router-dom'
 import {
   LayoutDashboard, Package, Users, ShoppingCart, LogOut,
-  TrendingUp, Clock, CheckCircle, Sun, Moon,
+  Clock, CheckCircle, Sun, Moon,
   Wrench, BedDouble, Wine, Truck, Car, Calendar, Settings,
 } from 'lucide-react'
+import stockTagImg from '../assets/Stock_Tag.png'
 import { useAuth } from '../contexts/AuthContext'
 import { useTheme } from '../contexts/ThemeContext'
 
@@ -43,7 +44,7 @@ const LABELS = {
   adega: 'Adega / Vinhos',
 }
 
-export default function Sidebar() {
+export default function Sidebar({ isOpen, onClose }) {
   const { signOut, user, trialDaysLeft, isTrial, isActive, businessType, businessName } = useAuth()
   const { theme, toggle } = useTheme()
   const navigate = useNavigate()
@@ -60,20 +61,17 @@ export default function Sidebar() {
   const trialBorder = trialDaysLeft <= 2 ? 'rgba(239,68,68,0.25)' : trialDaysLeft <= 4 ? 'rgba(249,115,22,0.25)' : 'rgba(245,158,11,0.25)'
 
   return (
-    <aside style={{
+    <aside className={`sidebar-root${isOpen ? ' open' : ''}`} style={{
       width: 220, minWidth: 220,
       background: 'var(--bg-800)',
       borderRight: '1px solid var(--bg-600)',
-      height: '100vh', position: 'sticky', top: 0,
       display: 'flex', flexDirection: 'column',
     }}>
       {/* Logo */}
       <div style={{ padding: '24px 20px 16px', borderBottom: '1px solid var(--bg-600)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-          <div style={{ width: 32, height: 32, borderRadius: 8, background: 'var(--amber)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <TrendingUp size={16} color="#000" />
-          </div>
-          <span style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 16, color: 'var(--text)' }}>StockPro</span>
+          <img src={stockTagImg} alt="StockTag" style={{ width: 32, height: 32, objectFit: 'contain', borderRadius: 8 }} />
+          <span style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 16, color: 'var(--text)' }}>StockTag</span>
         </div>
         <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--text-subtle)', paddingLeft: 2 }}>
           {businessName || LABELS[businessType] || 'Estoque Geral'}
@@ -103,7 +101,7 @@ export default function Sidebar() {
               </span>
             </div>
           ) : (
-            <NavLink key={to} to={to} className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}>
+            <NavLink key={to} to={to} onClick={onClose} className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}>
               <Icon size={16} />{label}
             </NavLink>
           )
@@ -112,7 +110,7 @@ export default function Sidebar() {
 
       {/* Configurações — fixo no fundo da nav */}
       <div style={{ padding: '0 12px 8px', borderTop: '1px solid var(--bg-600)', paddingTop: 8 }}>
-        <NavLink to="/app/configuracoes" className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}>
+        <NavLink to="/app/configuracoes" onClick={onClose} className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}>
           <Settings size={16} /> Configurações
         </NavLink>
       </div>

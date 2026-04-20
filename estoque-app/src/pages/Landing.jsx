@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
-import { TrendingUp, Package, Users, ShoppingCart, ArrowRight, BarChart2, Shield, Zap } from 'lucide-react'
+import { Package, Users, ShoppingCart, ArrowRight, BarChart2, Shield, Zap } from 'lucide-react'
+import stockTagImg from '../assets/Stock_Tag.png'
 
 const features = [
   { icon: Package, title: 'Controle de Estoque', desc: 'Gerencie produtos, categorias, quantidades e alertas de estoque mínimo em tempo real.' },
@@ -24,10 +25,8 @@ export default function Landing() {
       }}>
         <div style={{ maxWidth: 1100, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 64 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{ width: 34, height: 34, borderRadius: 8, background: 'var(--amber)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <TrendingUp size={18} color="#000" />
-            </div>
-            <span style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 18, color: 'var(--text)' }}>StockPro</span>
+            <img src={stockTagImg} alt="StockTag" style={{ width: 34, height: 34, objectFit: 'contain', borderRadius: 8 }} />
+            <span style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 18, color: 'var(--text)' }}>StockTag</span>
           </div>
           <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
             <Link to="/login"
@@ -119,12 +118,12 @@ export default function Landing() {
             {/* Mock browser bar */}
             <div style={{ background: 'var(--bg-700)', padding: '12px 16px', borderBottom: '1px solid var(--bg-600)', display: 'flex', alignItems: 'center', gap: 8 }}>
               <div style={{ display: 'flex', gap: 6 }}>
-                {['#EF4444', '#10B981', '#10B981'].map(c => (
-                  <div key={c} style={{ width: 10, height: 10, borderRadius: '50%', background: c, opacity: 0.7 }} />
+                {['#EF4444', '#10B981', '#10B981'].map((c, i) => (
+                  <div key={i} style={{ width: 10, height: 10, borderRadius: '50%', background: c, opacity: 0.7 }} />
                 ))}
               </div>
               <div style={{ flex: 1, background: 'var(--bg-600)', borderRadius: 4, height: 22, maxWidth: 280, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <span style={{ fontSize: 11, color: 'var(--text-subtle)' }}>app.stockpro.com.br/dashboard</span>
+                <span style={{ fontSize: 11, color: 'var(--text-subtle)' }}>app.stocktag.com.br/dashboard</span>
               </div>
             </div>
 
@@ -228,7 +227,7 @@ export default function Landing() {
       {/* Footer */}
       <footer style={{ borderTop: '1px solid var(--bg-600)', padding: '24px 40px', textAlign: 'center' }}>
         <p style={{ color: 'var(--text-subtle)', fontSize: 13 }}>
-          © 2025 StockPro — Sistema de Controle de Estoque
+          © 2025 StockTag — Controle Multiplataforma
         </p>
       </footer>
 

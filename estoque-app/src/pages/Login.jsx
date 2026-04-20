@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { TrendingUp, Eye, EyeOff, ArrowLeft } from 'lucide-react'
+import { Eye, EyeOff, ArrowLeft } from 'lucide-react'
+import stockTagImg from '../assets/Stock_Tag.png'
 import { useAuth } from '../contexts/AuthContext'
 
 export default function Login() {
@@ -44,10 +45,8 @@ export default function Login() {
         <div style={{ background: 'var(--bg-800)', border: '1px solid var(--bg-500)', borderRadius: 16, padding: '36px 32px' }}>
           {/* Logo */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 28 }}>
-            <div style={{ width: 36, height: 36, borderRadius: 10, background: 'var(--amber)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <TrendingUp size={18} color="#000" />
-            </div>
-            <span style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 18, color: 'var(--text)' }}>StockPro</span>
+            <img src={stockTagImg} alt="StockTag" style={{ width: 36, height: 36, objectFit: 'contain', borderRadius: 10 }} />
+            <span style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 18, color: 'var(--text)' }}>StockTag</span>
           </div>
 
           <h1 style={{ fontFamily: 'Syne, sans-serif', fontSize: 24, fontWeight: 700, color: 'var(--text)', marginBottom: 6 }}>

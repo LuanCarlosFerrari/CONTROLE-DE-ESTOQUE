@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { TrendingUp, Eye, EyeOff, ArrowLeft, CheckCircle, Package, Wrench, BedDouble, Wine, ArrowRight } from 'lucide-react'
+import { Eye, EyeOff, ArrowLeft, CheckCircle, Package, Wrench, BedDouble, Wine, ArrowRight } from 'lucide-react'
+import stockTagImg from '../assets/Stock_Tag.png'
 import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabase'
 
@@ -106,10 +107,8 @@ export default function Register() {
           {/* Logo + progress */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 28 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <div style={{ width: 36, height: 36, borderRadius: 10, background: 'var(--amber)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <TrendingUp size={18} color="#000" />
-              </div>
-              <span style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 18, color: 'var(--text)' }}>StockPro</span>
+              <img src={stockTagImg} alt="StockTag" style={{ width: 36, height: 36, objectFit: 'contain', borderRadius: 10 }} />
+              <span style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 18, color: 'var(--text)' }}>StockTag</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               {[1, 2].map(s => (

@@ -39,7 +39,7 @@ export default function TrialBanner() {
   const borderCol  = isUrgent ? 'rgba(239,68,68,0.25)' : isWarning ? 'rgba(249,115,22,0.25)' : 'rgba(245,158,11,0.2)'
 
   return (
-    <div style={{
+    <div className="trial-banner-wrap" style={{
       background: bg,
       borderBottom: `1px solid ${borderCol}`,
       padding: '10px 24px',
@@ -47,7 +47,6 @@ export default function TrialBanner() {
       alignItems: 'center',
       justifyContent: 'space-between',
       gap: 16,
-      flexWrap: 'wrap',
     }}>
       {/* Esquerda */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -65,7 +64,7 @@ export default function TrialBanner() {
       </div>
 
       {/* Centro — contador de unidades */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+      <div className="trial-banner-center" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
         {[
           { val: pad(timeLeft.days),    label: 'dias' },
           { val: pad(timeLeft.hours),   label: 'horas' },
@@ -96,7 +95,7 @@ export default function TrialBanner() {
       {/* Direita */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
         <a
-          href="mailto:contato@stockpro.com.br?subject=Quero assinar o StockPro"
+          href="mailto:contato@stocktag.com.br?subject=Quero assinar o StockTag"
           style={{
             display: 'inline-flex', alignItems: 'center', gap: 6,
             background: color, color: '#000',

@@ -75,30 +75,30 @@ export default function Dashboard() {
   }
 
   const statCards = [
-    { label: 'Produtos', sublabel: 'cadastrados', value: stats.produtos, icon: Package, color: 'var(--amber)', border: 'rgba(16,185,129,0.3)', glow: 'rgba(16,185,129,0.06)' },
-    { label: 'Clientes', sublabel: 'ativos', value: stats.clientes, icon: Users, color: 'var(--amber)', border: 'rgba(16,185,129,0.3)', glow: 'rgba(16,185,129,0.06)' },
-    { label: 'Vendas', sublabel: 'hoje', value: `R$ ${stats.vendas_hoje.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, icon: ShoppingCart, color: '#10B981', border: 'rgba(16,185,129,0.3)', glow: 'rgba(16,185,129,0.06)', mono: true },
-    { label: 'Estoque', sublabel: 'crítico', value: stats.estoque_baixo, icon: AlertTriangle, color: stats.estoque_baixo > 0 ? '#EF4444' : '#10B981', border: stats.estoque_baixo > 0 ? 'rgba(239,68,68,0.3)' : 'rgba(16,185,129,0.3)', glow: stats.estoque_baixo > 0 ? 'rgba(239,68,68,0.06)' : 'rgba(16,185,129,0.06)' },
+    { label: 'Produtos',  sublabel: 'cadastrados', value: stats.produtos, icon: Package, color: 'var(--amber)', border: 'rgba(16,185,129,0.3)', glow: 'rgba(16,185,129,0.06)' },
+    { label: 'Clientes',  sublabel: 'ativos',       value: stats.clientes, icon: Users,        color: '#60A5FA', border: 'rgba(96,165,250,0.3)',  glow: 'rgba(96,165,250,0.06)' },
+    { label: 'Vendas',    sublabel: 'hoje',          value: `R$ ${stats.vendas_hoje.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, icon: ShoppingCart, color: '#34D399', border: 'rgba(52,211,153,0.3)', glow: 'rgba(52,211,153,0.06)', mono: true },
+    { label: 'Estoque',   sublabel: 'crítico',       value: stats.estoque_baixo, icon: AlertTriangle, color: stats.estoque_baixo > 0 ? '#EF4444' : '#A78BFA', border: stats.estoque_baixo > 0 ? 'rgba(239,68,68,0.3)' : 'rgba(167,139,250,0.3)', glow: stats.estoque_baixo > 0 ? 'rgba(239,68,68,0.06)' : 'rgba(167,139,250,0.06)' },
   ]
 
   if (loading) return (
-    <div style={{ padding: '32px 36px' }}>
+    <div className="page-content">
       <div style={{ height: 60, background: 'var(--bg-700)', borderRadius: 8, marginBottom: 32, width: 200 }} className="skeleton" />
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 16, marginBottom: 24 }}>
+      <div className="stats-grid-4" style={{ marginBottom: 24 }}>
         {[...Array(4)].map((_, i) => <div key={i} className="skeleton" style={{ height: 110, borderRadius: 12 }} />)}
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: '3fr 2fr', gap: 16 }}>
+      <div className="chart-grid">
         {[...Array(2)].map((_, i) => <div key={i} className="skeleton" style={{ height: 280, borderRadius: 12 }} />)}
       </div>
     </div>
   )
 
   return (
-    <div style={{ padding: '32px 36px', maxWidth: 1200 }} className="animate-fade-in">
+    <div style={{ maxWidth: 1200 }} className="animate-fade-in page-content">
       <PageHeader title="Dashboard" subtitle={`${new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}`} />
 
       {/* Stat cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 28 }}>
+      <div className="stats-grid-4" style={{ marginBottom: 28 }}>
         {statCards.map(({ label, sublabel, value, icon: Icon, color, border, glow, mono }) => (
           <div key={label} style={{
             background: `linear-gradient(135deg, var(--bg-700) 0%, ${glow} 100%)`,
@@ -127,7 +127,7 @@ export default function Dashboard() {
       </div>
 
       {/* Charts */}
-      <div style={{ display: 'grid', gridTemplateColumns: '3fr 2fr', gap: 16, marginBottom: 20 }}>
+      <div className="chart-grid" style={{ marginBottom: 20 }}>
         {/* Bar chart */}
         <div style={{ background: 'var(--bg-800)', border: '1px solid var(--bg-500)', borderRadius: 14, padding: '24px 24px 16px', overflow: 'hidden' }}>
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 24 }}>
