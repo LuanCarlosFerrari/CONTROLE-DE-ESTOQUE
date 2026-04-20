@@ -139,7 +139,7 @@ export default function DashboardOficina() {
                 <Icon size={17} color={color} />
               </div>
             </div>
-            <p style={{ fontFamily: 'Syne, sans-serif', fontSize: 32, fontWeight: 700, color, lineHeight: 1, letterSpacing: '-0.02em' }}>{value}</p>
+            <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 32, fontWeight: 700, color, lineHeight: 1, letterSpacing: '-0.02em' }}>{value}</p>
           </div>
         ))}
       </div>
@@ -149,7 +149,7 @@ export default function DashboardOficina() {
         <div style={{ background: 'var(--bg-800)', border: '1px solid var(--bg-500)', borderRadius: 14, padding: '24px 24px 16px', overflow: 'hidden' }}>
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 24 }}>
             <div>
-              <p style={{ fontFamily: 'Syne, sans-serif', fontSize: 15, fontWeight: 700, color: 'var(--text)', marginBottom: 3 }}>Receita — últimos 7 dias</p>
+              <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 15, fontWeight: 700, color: 'var(--text)', marginBottom: 3 }}>Receita — últimos 7 dias</p>
               <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>
                 Total: <span style={{ fontFamily: 'JetBrains Mono, monospace', color: 'var(--amber)', fontWeight: 600 }}>
                   R$ {fmt(chartData.reduce((s, d) => s + d.total, 0))}
@@ -174,7 +174,7 @@ export default function DashboardOficina() {
         {/* OS recentes */}
         <div style={{ background: 'var(--bg-800)', border: '1px solid var(--bg-500)', borderRadius: 14, padding: 24, display: 'flex', flexDirection: 'column' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-            <p style={{ fontFamily: 'Syne, sans-serif', fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>OS recentes</p>
+            <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>OS recentes</p>
             <Wrench size={15} color="var(--text-subtle)" />
           </div>
           {recentOS.length === 0 ? (

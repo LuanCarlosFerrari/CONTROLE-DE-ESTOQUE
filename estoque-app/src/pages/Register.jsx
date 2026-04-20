@@ -81,7 +81,7 @@ export default function Register() {
           <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'rgba(16,185,129,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
             <CheckCircle size={32} color="var(--emerald)" />
           </div>
-          <h2 style={{ fontFamily: 'Syne, sans-serif', fontSize: 24, fontWeight: 700, color: 'var(--text)', marginBottom: 12 }}>Conta criada!</h2>
+          <h2 style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 24, fontWeight: 700, color: 'var(--text)', marginBottom: 12 }}>Conta criada!</h2>
           <p style={{ color: 'var(--text-muted)', fontSize: 15, marginBottom: 24 }}>
             Verifique seu email para confirmar a conta e depois faça login.
           </p>
@@ -107,8 +107,8 @@ export default function Register() {
           {/* Logo + progress */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 28 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <img src={stockTagImg} alt="StockTag" style={{ width: 36, height: 36, objectFit: 'contain', borderRadius: 10 }} />
-              <span style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 18, color: 'var(--text)' }}>StockTag</span>
+              <img src={stockTagImg} alt="StockTag" style={{ width: 104, height: 104, objectFit: 'contain', borderRadius: 16 }} />
+              <span style={{ fontFamily: 'DM Sans, sans-serif', fontWeight: 700, fontSize: 18, color: 'var(--text)' }}>StockTag</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               {[1, 2].map(s => (
@@ -120,7 +120,7 @@ export default function Register() {
           {/* Step 1 — Tipo de negócio */}
           {step === 1 && (
             <>
-              <h1 style={{ fontFamily: 'Syne, sans-serif', fontSize: 22, fontWeight: 700, color: 'var(--text)', marginBottom: 6 }}>
+              <h1 style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 22, fontWeight: 700, color: 'var(--text)', marginBottom: 6 }}>
                 Qual é o seu negócio?
               </h1>
               <p style={{ color: 'var(--text-muted)', fontSize: 14, marginBottom: 24 }}>
@@ -177,7 +177,7 @@ export default function Register() {
                 <ArrowLeft size={13} /> Voltar
               </button>
 
-              <h1 style={{ fontFamily: 'Syne, sans-serif', fontSize: 22, fontWeight: 700, color: 'var(--text)', marginBottom: 6 }}>
+              <h1 style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 22, fontWeight: 700, color: 'var(--text)', marginBottom: 6 }}>
                 Criar conta
               </h1>
               <p style={{ color: 'var(--text-muted)', fontSize: 14, marginBottom: 24 }}>

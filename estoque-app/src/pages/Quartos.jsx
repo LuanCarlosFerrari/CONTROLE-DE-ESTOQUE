@@ -138,7 +138,7 @@ export default function Quartos() {
         ].map(({ key, label, color, bg, border }) => (
           <div key={key} style={{ background: bg, border: `1px solid ${border}`, borderRadius: 12, padding: '14px 18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{label}</span>
-            <span style={{ fontFamily: 'Syne, sans-serif', fontSize: 28, fontWeight: 700, color }}>{counts[key]}</span>
+            <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 28, fontWeight: 700, color }}>{counts[key]}</span>
           </div>
         ))}
       </div>
@@ -172,7 +172,7 @@ export default function Quartos() {
           <div style={{ width: 64, height: 64, borderRadius: 16, background: 'var(--bg-700)', border: '1px solid var(--bg-500)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
             <BedDouble size={28} color="var(--bg-400)" />
           </div>
-          <p style={{ fontFamily: 'Syne, sans-serif', fontSize: 16, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 6 }}>
+          <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 16, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 6 }}>
             {search || filterStatus !== 'todos' ? 'Nenhum quarto encontrado' : 'Nenhum quarto cadastrado'}
           </p>
           <p style={{ fontSize: 13, color: 'var(--text-subtle)' }}>
@@ -196,7 +196,7 @@ export default function Quartos() {
 
                 <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
                   <div>
-                    <p style={{ fontFamily: 'Syne, sans-serif', fontSize: 22, fontWeight: 800, color: 'var(--text)', lineHeight: 1 }}>
+                    <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 22, fontWeight: 800, color: 'var(--text)', lineHeight: 1 }}>
                       {q.numero}
                     </p>
                     <p style={{ fontSize: 12, color: 'var(--text-subtle)', marginTop: 3 }}>{TIPOS[q.tipo] || q.tipo}</p>

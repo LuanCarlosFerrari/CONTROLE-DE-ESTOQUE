@@ -17,16 +17,18 @@ const MENUS = {
   ],
   oficina: [
     { to: '/app/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-    { to: '/app/ordens', icon: Wrench, label: 'Ordens de Serviço' },
-    { to: '/app/veiculos', icon: Car, label: 'Veículos' },
-    { to: '/app/estoque', icon: Package, label: 'Peças / Estoque' },
-    { to: '/app/clientes', icon: Users, label: 'Clientes' },
+    { to: '/app/ordens',    icon: Wrench,          label: 'Ordens de Serviço' },
+    { to: '/app/veiculos',  icon: Car,             label: 'Veículos' },
+    { to: '/app/estoque',   icon: Package,         label: 'Peças / Estoque' },
+    { to: '/app/clientes',  icon: Users,           label: 'Clientes' },
+    { to: '/app/caixa',     icon: Wallet,          label: 'Caixa' },
   ],
   hotel: [
     { to: '/app/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-    { to: '/app/quartos', icon: BedDouble, label: 'Quartos' },
-    { to: '/app/reservas', icon: Calendar, label: 'Reservas' },
-    { to: '/app/clientes', icon: Users, label: 'Clientes' },
+    { to: '/app/quartos',   icon: BedDouble,       label: 'Quartos' },
+    { to: '/app/reservas',  icon: Calendar,        label: 'Reservas' },
+    { to: '/app/clientes',  icon: Users,           label: 'Clientes' },
+    { to: '/app/caixa',     icon: Wallet,          label: 'Caixa' },
   ],
   adega: [
     { to: '/app/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
@@ -70,8 +72,8 @@ export default function Sidebar({ isOpen, onClose }) {
       {/* Logo */}
       <div style={{ padding: '24px 20px 16px', borderBottom: '1px solid var(--bg-600)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-          <img src={stockTagImg} alt="StockTag" style={{ width: 32, height: 32, objectFit: 'contain', borderRadius: 8 }} />
-          <span style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 16, color: 'var(--text)' }}>StockTag</span>
+          <img src={stockTagImg} alt="StockTag" style={{ width: 96, height: 96, objectFit: 'contain', borderRadius: 14 }} />
+          <span style={{ fontFamily: 'DM Sans, sans-serif', fontWeight: 700, fontSize: 16, color: 'var(--text)' }}>StockTag</span>
         </div>
         <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--text-subtle)', paddingLeft: 2 }}>
           {businessName || LABELS[businessType] || 'Estoque Geral'}

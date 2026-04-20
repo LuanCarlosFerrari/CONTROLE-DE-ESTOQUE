@@ -17,7 +17,7 @@ export default function Modal({ title, onClose, children, size = 'md' }) {
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           padding: '20px 24px 16px', borderBottom: '1px solid var(--bg-500)'
         }}>
-          <h3 style={{ fontFamily: 'Syne, sans-serif', fontSize: 18, fontWeight: 600, color: 'var(--text)' }}>
+          <h3 style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 18, fontWeight: 600, color: 'var(--text)' }}>
             {title}
           </h3>
           <button onClick={onClose} style={{

@@ -20,7 +20,7 @@ export default function TrialExpired() {
           <Lock size={32} color="var(--red)" />
         </div>
 
-        <h1 style={{ fontFamily: 'Syne, sans-serif', fontSize: 28, fontWeight: 700, color: 'var(--text)', marginBottom: 12 }}>
+        <h1 style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 28, fontWeight: 700, color: 'var(--text)', marginBottom: 12 }}>
           Período de trial encerrado
         </h1>
         <p style={{ color: 'var(--text-muted)', fontSize: 16, lineHeight: 1.7, marginBottom: 32 }}>
@@ -35,7 +35,7 @@ export default function TrialExpired() {
             Plano mensal
           </p>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 12 }}>
-            <span style={{ fontFamily: 'Syne, sans-serif', fontSize: 36, fontWeight: 800, color: 'var(--text)' }}>R$ 29</span>
+            <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 36, fontWeight: 800, color: 'var(--text)' }}>R$ 29</span>
             <span style={{ color: 'var(--text-muted)', fontSize: 14 }}>/mês</span>
           </div>
           <ul style={{ listStyle: 'none', padding: 0 }}>

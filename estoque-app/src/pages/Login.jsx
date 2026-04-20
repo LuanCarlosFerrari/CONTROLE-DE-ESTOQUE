@@ -45,11 +45,11 @@ export default function Login() {
         <div style={{ background: 'var(--bg-800)', border: '1px solid var(--bg-500)', borderRadius: 16, padding: '36px 32px' }}>
           {/* Logo */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 28 }}>
-            <img src={stockTagImg} alt="StockTag" style={{ width: 36, height: 36, objectFit: 'contain', borderRadius: 10 }} />
-            <span style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 18, color: 'var(--text)' }}>StockTag</span>
+            <img src={stockTagImg} alt="StockTag" style={{ width: 104, height: 104, objectFit: 'contain', borderRadius: 16 }} />
+            <span style={{ fontFamily: 'DM Sans, sans-serif', fontWeight: 700, fontSize: 18, color: 'var(--text)' }}>StockTag</span>
           </div>
 
-          <h1 style={{ fontFamily: 'Syne, sans-serif', fontSize: 24, fontWeight: 700, color: 'var(--text)', marginBottom: 6 }}>
+          <h1 style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 24, fontWeight: 700, color: 'var(--text)', marginBottom: 6 }}>
             Entrar na conta
           </h1>
           <p style={{ color: 'var(--text-muted)', fontSize: 14, marginBottom: 28 }}>

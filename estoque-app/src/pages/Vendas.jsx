@@ -141,7 +141,7 @@ export default function Vendas() {
             <div style={{ width: 64, height: 64, borderRadius: 16, background: 'var(--bg-700)', border: '1px solid var(--bg-500)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
               <Receipt size={28} color="var(--bg-400)" />
             </div>
-            <p style={{ fontFamily: 'Syne, sans-serif', fontSize: 16, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 6 }}>
+            <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 16, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 6 }}>
               {search ? 'Nenhuma venda encontrada' : 'Nenhuma venda registrada'}
             </p>
             <p style={{ fontSize: 13, color: 'var(--text-subtle)' }}>
@@ -284,7 +284,7 @@ export default function Vendas() {
                 <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#34D399', marginBottom: 2 }}>Total da venda</p>
                 <p style={{ fontSize: 12, color: 'var(--text-subtle)' }}>{itens.filter(i => i.produto_id).length} produto{itens.filter(i => i.produto_id).length !== 1 ? 's' : ''}</p>
               </div>
-              <span style={{ fontFamily: 'Syne, sans-serif', fontSize: 26, fontWeight: 800, color: '#34D399', letterSpacing: '-0.02em' }}>
+              <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 26, fontWeight: 800, color: '#34D399', letterSpacing: '-0.02em' }}>
                 R$ {fmt(total)}
               </span>
             </div>

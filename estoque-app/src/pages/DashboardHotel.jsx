@@ -136,7 +136,7 @@ export default function DashboardHotel() {
                 <Icon size={17} color={color} />
               </div>
             </div>
-            <p style={{ fontFamily: 'Syne, sans-serif', fontSize: 32, fontWeight: 700, color, lineHeight: 1, letterSpacing: '-0.02em' }}>{value}</p>
+            <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 32, fontWeight: 700, color, lineHeight: 1, letterSpacing: '-0.02em' }}>{value}</p>
           </div>
         ))}
       </div>
@@ -146,7 +146,7 @@ export default function DashboardHotel() {
         <div style={{ background: 'var(--bg-800)', border: '1px solid var(--bg-500)', borderRadius: 14, padding: '24px 24px 16px', overflow: 'hidden' }}>
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 24 }}>
             <div>
-              <p style={{ fontFamily: 'Syne, sans-serif', fontSize: 15, fontWeight: 700, color: 'var(--text)', marginBottom: 3 }}>Receita — últimos 7 dias</p>
+              <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 15, fontWeight: 700, color: 'var(--text)', marginBottom: 3 }}>Receita — últimos 7 dias</p>
               <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>
                 Total: <span style={{ fontFamily: 'JetBrains Mono, monospace', color: 'var(--amber)', fontWeight: 600 }}>
                   R$ {fmt(chartData.reduce((s, d) => s + d.total, 0))}
@@ -171,7 +171,7 @@ export default function DashboardHotel() {
         {/* Próximos check-ins */}
         <div style={{ background: 'var(--bg-800)', border: '1px solid var(--bg-500)', borderRadius: 14, padding: 24, display: 'flex', flexDirection: 'column' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-            <p style={{ fontFamily: 'Syne, sans-serif', fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>Próximos check-ins</p>
+            <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>Próximos check-ins</p>
             <Calendar size={15} color="var(--text-subtle)" />
           </div>
           {proximosCheckins.length === 0 ? (
@@ -220,7 +220,7 @@ export default function DashboardHotel() {
               />
             </svg>
             <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <span style={{ fontFamily: 'Syne, sans-serif', fontSize: 22, fontWeight: 800, color: '#60A5FA' }}>{ocupacaoPct}%</span>
+              <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 22, fontWeight: 800, color: '#60A5FA' }}>{ocupacaoPct}%</span>
             </div>
           </div>
           <p style={{ fontSize: 13, color: 'var(--text-muted)', textAlign: 'center' }}>

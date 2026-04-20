@@ -25,8 +25,8 @@ export default function Landing() {
       }}>
         <div style={{ maxWidth: 1100, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 64 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <img src={stockTagImg} alt="StockTag" style={{ width: 34, height: 34, objectFit: 'contain', borderRadius: 8 }} />
-            <span style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 18, color: 'var(--text)' }}>StockTag</span>
+            <img src={stockTagImg} alt="StockTag" style={{ width: 88, height: 88, objectFit: 'contain', borderRadius: 14 }} />
+            <span style={{ fontFamily: 'DM Sans, sans-serif', fontWeight: 700, fontSize: 18, color: 'var(--text)' }}>StockTag</span>
           </div>
           <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
             <Link to="/login"
@@ -76,7 +76,7 @@ export default function Landing() {
             </div>
 
             <h1 style={{
-              fontFamily: 'Syne, sans-serif',
+              fontFamily: 'DM Sans, sans-serif',
               fontSize: 'clamp(40px, 6vw, 72px)',
               fontWeight: 800,
               lineHeight: 1.05,
@@ -179,7 +179,7 @@ export default function Landing() {
       {/* Features */}
       <section style={{ maxWidth: 1100, margin: '0 auto', padding: '40px 40px 100px' }}>
         <div style={{ textAlign: 'center', marginBottom: 60 }}>
-          <h2 style={{ fontFamily: 'Syne, sans-serif', fontSize: 36, fontWeight: 700, color: 'var(--text)', marginBottom: 12 }}>
+          <h2 style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 36, fontWeight: 700, color: 'var(--text)', marginBottom: 12 }}>
             Tudo que você precisa
           </h2>
           <p style={{ color: 'var(--text-muted)', fontSize: 16 }}>
@@ -195,7 +195,7 @@ export default function Landing() {
               }}>
                 <Icon size={20} color="var(--amber)" />
               </div>
-              <h3 style={{ fontFamily: 'Syne, sans-serif', fontSize: 16, fontWeight: 600, color: 'var(--text)', marginBottom: 8 }}>
+              <h3 style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 16, fontWeight: 600, color: 'var(--text)', marginBottom: 8 }}>
                 {title}
               </h3>
               <p style={{ fontSize: 14, color: 'var(--text-muted)', lineHeight: 1.6 }}>{desc}</p>
@@ -211,7 +211,7 @@ export default function Landing() {
           border: '1px solid rgba(16,185,129,0.2)',
           borderRadius: 20, padding: '60px 40px', textAlign: 'center',
         }}>
-          <h2 style={{ fontFamily: 'Syne, sans-serif', fontSize: 36, fontWeight: 700, color: 'var(--text)', marginBottom: 16 }}>
+          <h2 style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 36, fontWeight: 700, color: 'var(--text)', marginBottom: 16 }}>
             Comece agora mesmo
           </h2>
           <p style={{ color: 'var(--text-muted)', fontSize: 16, marginBottom: 32 }}>

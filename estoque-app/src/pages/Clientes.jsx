@@ -18,7 +18,7 @@ function Avatar({ nome }) {
   const color = colors[nome?.charCodeAt(0) % colors.length] || colors[0]
   return (
     <div style={{ width: 34, height: 34, borderRadius: 10, background: `${color}18`, border: `1px solid ${color}30`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-      <span style={{ fontSize: 12, fontWeight: 700, color, fontFamily: 'Syne, sans-serif' }}>{initials}</span>
+      <span style={{ fontSize: 12, fontWeight: 700, color, fontFamily: 'DM Sans, sans-serif' }}>{initials}</span>
     </div>
   )
 }
@@ -106,7 +106,7 @@ export default function Clientes() {
             <div style={{ width: 64, height: 64, borderRadius: 16, background: 'var(--bg-700)', border: '1px solid var(--bg-500)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
               <Users size={28} color="var(--bg-400)" />
             </div>
-            <p style={{ fontFamily: 'Syne, sans-serif', fontSize: 16, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 6 }}>
+            <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 16, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 6 }}>
               {search ? 'Nenhum cliente encontrado' : 'Nenhum cliente cadastrado'}
             </p>
             <p style={{ fontSize: 13, color: 'var(--text-subtle)' }}>

@@ -107,7 +107,7 @@ export default function Veiculos() {
             <div style={{ width: 64, height: 64, borderRadius: 16, background: 'var(--bg-700)', border: '1px solid var(--bg-500)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
               <Car size={28} color="var(--bg-400)" />
             </div>
-            <p style={{ fontFamily: 'Syne, sans-serif', fontSize: 16, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 6 }}>
+            <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 16, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 6 }}>
               {search ? 'Nenhum veículo encontrado' : 'Nenhum veículo cadastrado'}
             </p>
             <p style={{ fontSize: 13, color: 'var(--text-subtle)' }}>
