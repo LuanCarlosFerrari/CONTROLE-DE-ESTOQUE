@@ -13,6 +13,7 @@ const features = [
 export default function Landing() {
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg-900)' }} className="landing-grid">
+
       {/* Header */}
       <header style={{
         position: 'sticky', top: 0, zIndex: 40,
@@ -29,7 +30,8 @@ export default function Landing() {
             <span style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 18, color: 'var(--text)' }}>StockPro</span>
           </div>
           <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-            <Link to="/login" style={{ color: 'var(--text-muted)', textDecoration: 'none', fontSize: 14, fontWeight: 500, transition: 'color 0.2s' }}
+            <Link to="/login"
+              style={{ color: 'var(--text-muted)', textDecoration: 'none', fontSize: 14, fontWeight: 500, transition: 'color 0.2s' }}
               onMouseEnter={e => e.target.style.color = 'var(--text)'}
               onMouseLeave={e => e.target.style.color = 'var(--text-muted)'}
             >
@@ -42,113 +44,136 @@ export default function Landing() {
         </div>
       </header>
 
-      {/* Hero */}
-      <section style={{ maxWidth: 1100, margin: '0 auto', padding: '100px 40px 80px' }}>
-        <div className="animate-fade-in" style={{ textAlign: 'center', maxWidth: 760, margin: '0 auto' }}>
-          <div style={{
-            display: 'inline-flex', alignItems: 'center', gap: 8,
-            background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.25)',
-            borderRadius: 20, padding: '6px 14px', marginBottom: 32,
-            fontSize: 13, color: 'var(--amber)', fontWeight: 500,
-          }}>
-            <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--amber)', display: 'inline-block' }} />
-            Sistema completo de gestão
-          </div>
+      {/* Hero com imagem de fundo */}
+      <section style={{ position: 'relative', overflow: 'hidden' }}>
+        {/* Imagem de fundo — armazém/estoque */}
+        <div style={{
+          position: 'absolute', inset: 0,
+          backgroundImage: 'url(https://images.unsplash.com/photo-1553413077-190dd305871c?w=1920&q=80)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          filter: 'brightness(0.2)',
+          zIndex: 0,
+        }} />
+        {/* Overlay degradê para fundir com o fundo escuro */}
+        <div style={{
+          position: 'absolute', inset: 0,
+          background: 'linear-gradient(to bottom, rgba(12,12,12,0.2) 0%, rgba(12,12,12,0.75) 70%, var(--bg-900) 100%)',
+          zIndex: 1,
+        }} />
 
-          <h1 style={{
-            fontFamily: 'Syne, sans-serif',
-            fontSize: 'clamp(40px, 6vw, 72px)',
-            fontWeight: 800,
-            lineHeight: 1.05,
-            color: 'var(--text)',
-            marginBottom: 24,
-            letterSpacing: '-0.03em',
-          }}>
-            Controle seu negócio{' '}
-            <span style={{ color: 'var(--amber)' }} className="glow-text">
-              com precisão
-            </span>
-          </h1>
+        <div style={{ position: 'relative', zIndex: 2, maxWidth: 1100, margin: '0 auto', padding: '120px 40px 80px' }}>
 
-          <p style={{ fontSize: 18, color: 'var(--text-muted)', lineHeight: 1.7, marginBottom: 40, maxWidth: 560, margin: '0 auto 40px' }}>
-            Gerencie estoque, clientes e vendas em um único lugar. Simples, rápido e integrado ao Supabase.
-          </p>
-
-          <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <Link to="/register" className="btn-primary" style={{ textDecoration: 'none', padding: '13px 28px', fontSize: 15 }}>
-              Criar conta grátis
-              <ArrowRight size={16} />
-            </Link>
-            <Link to="/login" className="btn-secondary" style={{ textDecoration: 'none', padding: '13px 28px', fontSize: 15 }}>
-              Já tenho conta
-            </Link>
-          </div>
-        </div>
-
-        {/* Dashboard Preview */}
-        <div className="animate-fade-in" style={{
-          marginTop: 72,
-          background: 'var(--bg-800)',
-          border: '1px solid var(--bg-500)',
-          borderRadius: 16,
-          overflow: 'hidden',
-          boxShadow: '0 40px 80px rgba(0,0,0,0.5)',
-          animationDelay: '0.2s', opacity: 0,
-        }}>
-          {/* Mock browser bar */}
-          <div style={{ background: 'var(--bg-700)', padding: '12px 16px', borderBottom: '1px solid var(--bg-600)', display: 'flex', alignItems: 'center', gap: 8 }}>
-            <div style={{ display: 'flex', gap: 6 }}>
-              {['#EF4444','#F59E0B','#10B981'].map(c => (
-                <div key={c} style={{ width: 10, height: 10, borderRadius: '50%', background: c, opacity: 0.7 }} />
-              ))}
+          {/* Texto principal */}
+          <div className="animate-fade-in" style={{ textAlign: 'center', maxWidth: 760, margin: '0 auto' }}>
+            <div style={{
+              display: 'inline-flex', alignItems: 'center', gap: 8,
+              background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.3)',
+              borderRadius: 20, padding: '6px 14px', marginBottom: 32,
+              fontSize: 13, color: 'var(--amber)', fontWeight: 500,
+            }}>
+              <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--amber)', display: 'inline-block' }} />
+              Sistema completo de gestão
             </div>
-            <div style={{ flex: 1, background: 'var(--bg-600)', borderRadius: 4, height: 22, maxWidth: 280, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <span style={{ fontSize: 11, color: 'var(--text-subtle)' }}>app.stockpro.com.br/dashboard</span>
+
+            <h1 style={{
+              fontFamily: 'Syne, sans-serif',
+              fontSize: 'clamp(40px, 6vw, 72px)',
+              fontWeight: 800,
+              lineHeight: 1.05,
+              color: 'var(--text)',
+              marginBottom: 24,
+              letterSpacing: '-0.03em',
+            }}>
+              Controle seu negócio{' '}
+              <span style={{ color: 'var(--amber)' }} className="glow-text">
+                com precisão
+              </span>
+            </h1>
+
+            <p style={{ fontSize: 18, color: 'var(--text-muted)', lineHeight: 1.7, maxWidth: 560, margin: '0 auto 40px' }}>
+              Gerencie estoque, clientes e vendas em um único lugar. Simples, rápido e integrado ao Supabase.
+            </p>
+
+            <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
+              <Link to="/register" className="btn-primary" style={{ textDecoration: 'none', padding: '13px 28px', fontSize: 15 }}>
+                Criar conta grátis
+                <ArrowRight size={16} />
+              </Link>
+              <Link to="/login" className="btn-secondary" style={{ textDecoration: 'none', padding: '13px 28px', fontSize: 15 }}>
+                Já tenho conta
+              </Link>
             </div>
           </div>
-          {/* Mock UI */}
-          <div style={{ display: 'flex', height: 320 }}>
-            {/* Sidebar mock */}
-            <div style={{ width: 180, background: 'var(--bg-800)', borderRight: '1px solid var(--bg-600)', padding: 16 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20 }}>
-                <div style={{ width: 26, height: 26, borderRadius: 6, background: 'var(--amber)' }} />
-                <div style={{ width: 70, height: 12, borderRadius: 4, background: 'var(--bg-500)' }} />
+
+          {/* Dashboard Preview */}
+          <div className="animate-fade-in" style={{
+            marginTop: 72,
+            background: 'var(--bg-800)',
+            border: '1px solid var(--bg-500)',
+            borderRadius: 16,
+            overflow: 'hidden',
+            boxShadow: '0 40px 80px rgba(0,0,0,0.6)',
+            animationDelay: '0.2s', opacity: 0,
+          }}>
+            {/* Mock browser bar */}
+            <div style={{ background: 'var(--bg-700)', padding: '12px 16px', borderBottom: '1px solid var(--bg-600)', display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div style={{ display: 'flex', gap: 6 }}>
+                {['#EF4444', '#F59E0B', '#10B981'].map(c => (
+                  <div key={c} style={{ width: 10, height: 10, borderRadius: '50%', background: c, opacity: 0.7 }} />
+                ))}
               </div>
-              {[100, 80, 90, 75].map((w, i) => (
-                <div key={i} style={{
-                  display: 'flex', alignItems: 'center', gap: 8, padding: '8px', borderRadius: 6, marginBottom: 4,
-                  background: i === 0 ? 'rgba(245,158,11,0.1)' : 'transparent'
-                }}>
-                  <div style={{ width: 14, height: 14, borderRadius: 3, background: i === 0 ? 'var(--amber)' : 'var(--bg-500)' }} />
-                  <div style={{ width: w * 0.8, height: 10, borderRadius: 3, background: i === 0 ? 'rgba(245,158,11,0.3)' : 'var(--bg-600)' }} />
-                </div>
-              ))}
+              <div style={{ flex: 1, background: 'var(--bg-600)', borderRadius: 4, height: 22, maxWidth: 280, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ fontSize: 11, color: 'var(--text-subtle)' }}>app.stockpro.com.br/dashboard</span>
+              </div>
             </div>
-            {/* Content mock */}
-            <div style={{ flex: 1, padding: 20 }}>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 20 }}>
-                {[
-                  { label: 'Produtos', val: '128', color: 'var(--amber)' },
-                  { label: 'Clientes', val: '47', color: 'var(--blue)' },
-                  { label: 'Vendas hoje', val: 'R$ 2.4k', color: 'var(--emerald)' },
-                  { label: 'Estoque baixo', val: '3', color: 'var(--red)' },
-                ].map((s, i) => (
-                  <div key={i} style={{ background: 'var(--bg-700)', borderRadius: 8, padding: 12, border: '1px solid var(--bg-500)' }}>
-                    <div style={{ fontSize: 10, color: 'var(--text-subtle)', marginBottom: 6 }}>{s.label}</div>
-                    <div style={{ fontSize: 18, fontWeight: 700, fontFamily: 'Syne', color: s.color }}>{s.val}</div>
+
+            {/* Mock UI */}
+            <div style={{ display: 'flex', height: 320 }}>
+              {/* Sidebar mock */}
+              <div style={{ width: 180, background: 'var(--bg-800)', borderRight: '1px solid var(--bg-600)', padding: 16 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20 }}>
+                  <div style={{ width: 26, height: 26, borderRadius: 6, background: 'var(--amber)' }} />
+                  <div style={{ width: 70, height: 12, borderRadius: 4, background: 'var(--bg-500)' }} />
+                </div>
+                {[100, 80, 90, 75].map((w, i) => (
+                  <div key={i} style={{
+                    display: 'flex', alignItems: 'center', gap: 8, padding: '8px', borderRadius: 6, marginBottom: 4,
+                    background: i === 0 ? 'rgba(245,158,11,0.1)' : 'transparent',
+                  }}>
+                    <div style={{ width: 14, height: 14, borderRadius: 3, background: i === 0 ? 'var(--amber)' : 'var(--bg-500)' }} />
+                    <div style={{ width: w * 0.8, height: 10, borderRadius: 3, background: i === 0 ? 'rgba(245,158,11,0.3)' : 'var(--bg-600)' }} />
                   </div>
                 ))}
               </div>
-              <div style={{ background: 'var(--bg-700)', borderRadius: 8, border: '1px solid var(--bg-500)', padding: 12, height: 160 }}>
-                <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 12 }}>Vendas dos últimos 7 dias</div>
-                <div style={{ display: 'flex', alignItems: 'flex-end', gap: 6, height: 100 }}>
-                  {[40, 65, 45, 80, 55, 70, 90].map((h, i) => (
-                    <div key={i} style={{ flex: 1, height: `${h}%`, background: i === 6 ? 'var(--amber)' : 'var(--bg-500)', borderRadius: '4px 4px 0 0', opacity: i === 6 ? 1 : 0.6 }} />
+
+              {/* Content mock */}
+              <div style={{ flex: 1, padding: 20 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 20 }}>
+                  {[
+                    { label: 'Produtos', val: '128', color: 'var(--amber)' },
+                    { label: 'Clientes', val: '47', color: 'var(--blue)' },
+                    { label: 'Vendas hoje', val: 'R$ 2.4k', color: 'var(--emerald)' },
+                    { label: 'Estoque baixo', val: '3', color: 'var(--red)' },
+                  ].map((s, i) => (
+                    <div key={i} style={{ background: 'var(--bg-700)', borderRadius: 8, padding: 12, border: '1px solid var(--bg-500)' }}>
+                      <div style={{ fontSize: 10, color: 'var(--text-subtle)', marginBottom: 6 }}>{s.label}</div>
+                      <div style={{ fontSize: 18, fontWeight: 700, fontFamily: 'Syne', color: s.color }}>{s.val}</div>
+                    </div>
                   ))}
+                </div>
+                <div style={{ background: 'var(--bg-700)', borderRadius: 8, border: '1px solid var(--bg-500)', padding: 12, height: 160 }}>
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 12 }}>Vendas dos últimos 7 dias</div>
+                  <div style={{ display: 'flex', alignItems: 'flex-end', gap: 6, height: 100 }}>
+                    {[40, 65, 45, 80, 55, 70, 90].map((h, i) => (
+                      <div key={i} style={{ flex: 1, height: `${h}%`, background: i === 6 ? 'var(--amber)' : 'var(--bg-500)', borderRadius: '4px 4px 0 0', opacity: i === 6 ? 1 : 0.6 }} />
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
           </div>
+
         </div>
       </section>
 
@@ -167,7 +192,7 @@ export default function Landing() {
             <div key={title} className="stat-card card-hover">
               <div style={{
                 width: 40, height: 40, borderRadius: 10, background: 'rgba(245,158,11,0.1)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 14
+                display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 14,
               }}>
                 <Icon size={20} color="var(--amber)" />
               </div>
@@ -206,6 +231,7 @@ export default function Landing() {
           © 2025 StockPro — Sistema de Controle de Estoque
         </p>
       </footer>
+
     </div>
   )
 }

@@ -45,14 +45,15 @@ export default function Dashboard() {
         supabase.from('produtos').select('*', { count: 'exact', head: true }),
         supabase.from('clientes').select('*', { count: 'exact', head: true }),
         supabase.from('vendas').select('total, created_at, clientes(nome)').order('created_at', { ascending: false }).limit(5),
-        supabase.from('produtos').select('*').filter('quantidade', 'lte', 'estoque_minimo'),
+        supabase.from('produtos').select('*'),
         supabase.from('vendas').select('total, created_at').gte('created_at', new Date(Date.now() - 30 * 86400000).toISOString()),
       ])
       const hoje = new Date().toDateString()
       const vendasHoje = (vendas || []).filter(v => new Date(v.created_at).toDateString() === hoje)
       const totalHoje = vendasHoje.reduce((s, v) => s + Number(v.total), 0)
       const totalMes = (vendasMes || []).reduce((s, v) => s + Number(v.total), 0)
-      setStats({ produtos: produtos || 0, clientes: clientes || 0, vendas_hoje: totalHoje, estoque_baixo: (estoqueBaixo || []).length, total_mes: totalMes })
+      const estoqueCritico = (estoqueBaixo || []).filter(p => p.quantidade <= p.estoque_minimo)
+      setStats({ produtos: produtos || 0, clientes: clientes || 0, vendas_hoje: totalHoje, estoque_baixo: estoqueCritico.length, total_mes: totalMes })
       setRecentSales(vendas || [])
       const days = []
       for (let i = 6; i >= 0; i--) {
@@ -90,7 +91,7 @@ export default function Dashboard() {
       <PageHeader title="Dashboard" subtitle={`${new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}`} />
 
       {/* Stat cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(210px,1fr))', gap: 16, marginBottom: 28 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 28 }}>
         {statCards.map(({ label, sublabel, value, icon: Icon, color, border, glow, mono }) => (
           <div key={label} style={{
             background: `linear-gradient(135deg, var(--bg-700) 0%, ${glow} 100%)`,
