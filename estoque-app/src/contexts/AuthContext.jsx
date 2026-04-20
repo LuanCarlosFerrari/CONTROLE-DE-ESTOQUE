@@ -15,7 +15,29 @@ export function AuthProvider({ children }) {
       .select('*')
       .eq('user_id', userId)
       .single()
-    setSubscription(data)
+
+    // Aplica business_type pendente do onboarding (caso email confirmation esteja ativo)
+    const pendingType = localStorage.getItem('pending_business_type')
+    if (pendingType && data) {
+      await supabase
+        .from('subscriptions')
+        .update({ business_type: pendingType })
+        .eq('user_id', userId)
+      localStorage.removeItem('pending_business_type')
+      setSubscription({ ...data, business_type: pendingType })
+    } else {
+      setSubscription(data)
+    }
+  }
+
+  const updateSubscription = async (fields) => {
+    if (!user?.id) return { error: 'Não autenticado' }
+    const { error } = await supabase
+      .from('subscriptions')
+      .update(fields)
+      .eq('user_id', user.id)
+    if (!error) setSubscription(prev => ({ ...prev, ...fields }))
+    return { error }
   }
 
   useEffect(() => {
@@ -42,25 +64,27 @@ export function AuthProvider({ children }) {
   const signIn = (email, password) =>
     supabase.auth.signInWithPassword({ email, password })
 
-  const signUp = (email, password) =>
-    supabase.auth.signUp({ email, password })
+  const signUp = (email, password, metadata = {}) =>
+    supabase.auth.signUp({ email, password, options: { data: metadata } })
 
   const signOut = () => supabase.auth.signOut()
 
-  // Dias restantes de trial
   const trialDaysLeft = subscription?.status === 'trial' && subscription?.trial_ends_at
     ? Math.max(0, Math.ceil((new Date(subscription.trial_ends_at) - new Date()) / 86400000))
     : null
 
-  const isBanned = subscription?.status === 'banned' || subscription?.status === 'expired'
-  const isActive = subscription?.status === 'active'
-  const isTrial = subscription?.status === 'trial'
+  const isBanned   = subscription?.status === 'banned' || subscription?.status === 'expired'
+  const isActive   = subscription?.status === 'active'
+  const isTrial    = subscription?.status === 'trial'
+  const businessType = subscription?.business_type ?? 'estoque'
+  const businessName = subscription?.business_name ?? ''
 
   return (
     <AuthContext.Provider value={{
       user, loading, subscription,
       trialDaysLeft, isBanned, isActive, isTrial,
-      signIn, signUp, signOut, loadSubscription
+      businessType, businessName,
+      signIn, signUp, signOut, loadSubscription, updateSubscription,
     }}>
       {children}
     </AuthContext.Provider>

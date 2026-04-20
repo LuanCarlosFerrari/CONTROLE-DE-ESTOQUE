@@ -1,3 +1,6 @@
+import { useAuth } from '../contexts/AuthContext'
+import DashboardOficina from './DashboardOficina'
+import DashboardHotel from './DashboardHotel'
 import { useEffect, useState } from 'react'
 import { Package, Users, ShoppingCart, AlertTriangle, TrendingUp, ArrowUpRight } from 'lucide-react'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
@@ -32,6 +35,10 @@ const PageHeader = ({ title, subtitle }) => (
 )
 
 export default function Dashboard() {
+  const { businessType } = useAuth()
+  if (businessType === 'oficina') return <DashboardOficina />
+  if (businessType === 'hotel') return <DashboardHotel />
+
   const [stats, setStats] = useState({ produtos: 0, clientes: 0, vendas_hoje: 0, estoque_baixo: 0, total_mes: 0 })
   const [salesChart, setSalesChart] = useState([])
   const [recentSales, setRecentSales] = useState([])

@@ -10,6 +10,11 @@ import Dashboard from './pages/Dashboard'
 import Estoque from './pages/Estoque'
 import Clientes from './pages/Clientes'
 import Vendas from './pages/Vendas'
+import Veiculos from './pages/Veiculos'
+import OrdensServico from './pages/OrdensServico'
+import Quartos from './pages/Quartos'
+import Reservas from './pages/Reservas'
+import Configuracoes from './pages/Configuracoes'
 
 export default function App() {
   return (
@@ -30,6 +35,11 @@ export default function App() {
             <Route path="estoque" element={<Estoque />} />
             <Route path="clientes" element={<Clientes />} />
             <Route path="vendas" element={<Vendas />} />
+            <Route path="veiculos" element={<Veiculos />} />
+            <Route path="ordens" element={<OrdensServico />} />
+            <Route path="quartos" element={<Quartos />} />
+            <Route path="reservas" element={<Reservas />} />
+            <Route path="configuracoes" element={<Configuracoes />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
