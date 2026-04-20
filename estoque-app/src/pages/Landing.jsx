@@ -92,7 +92,7 @@ export default function Landing() {
             </h1>
 
             <p style={{ fontSize: 18, color: 'var(--text-muted)', lineHeight: 1.7, maxWidth: 560, margin: '0 auto 40px' }}>
-              Gerencie estoque, clientes e vendas em um único lugar. Simples, rápido e integrado ao Supabase.
+              Gerencie estoque, clientes e vendas em um único lugar. Simples, rápido e integrado a um banco de dados online e robusto.
             </p>
 
             <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
