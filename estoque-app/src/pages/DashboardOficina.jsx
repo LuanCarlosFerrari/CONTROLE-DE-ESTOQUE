@@ -108,7 +108,7 @@ export default function DashboardOficina() {
   )
 
   return (
-    <div style={{ width: "100%" }} className="animate-fade-in page-content">
+    <div style={{ width: "100%", height: "100%" }} className="animate-fade-in page-content">
       {/* Header */}
       <div style={{ marginBottom: 32, paddingBottom: 24, borderBottom: '1px solid var(--bg-600)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 4 }}>
@@ -132,22 +132,22 @@ export default function DashboardOficina() {
           >
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
               <div>
-                <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--text-subtle)', display: 'block' }}>{label}</span>
-                <span style={{ fontSize: 11, color: 'var(--text-subtle)', letterSpacing: '0.04em' }}>{sublabel}</span>
+                <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--text-subtle)', display: 'block' }}>{label}</span>
+                <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: 'var(--text-subtle)', letterSpacing: '0.04em' }}>{sublabel}</span>
               </div>
               <div style={{ width: 36, height: 36, borderRadius: 9, background: `${color}18`, border: `1px solid ${color}30`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <Icon size={17} color={color} />
               </div>
             </div>
-            <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 32, fontWeight: 700, color, lineHeight: 1, letterSpacing: '-0.02em' }}>{value}</p>
+            <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 26, fontWeight: 700, color, lineHeight: 1, letterSpacing: '-0.02em' }}>{value}</p>
           </div>
         ))}
       </div>
 
       {/* Chart + OS recentes */}
-      <div className="chart-grid" style={{ marginBottom: 20 }}>
-        <div style={{ background: 'var(--bg-800)', border: '1px solid var(--bg-500)', borderRadius: 14, padding: '24px 24px 16px', overflow: 'hidden' }}>
-          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 24 }}>
+      <div className="chart-grid" style={{ flex: 1, minHeight: 0, marginBottom: 20 }}>
+        <div style={{ background: 'var(--bg-800)', border: '1px solid var(--bg-500)', borderRadius: 14, padding: '24px 24px 16px', overflow: 'hidden', display: 'flex', flexDirection: 'column', height: '100%' }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 24, flexShrink: 0 }}>
             <div>
               <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 15, fontWeight: 700, color: 'var(--text)', marginBottom: 3 }}>Receita — últimos 7 dias</p>
               <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>
@@ -161,7 +161,7 @@ export default function DashboardOficina() {
               <span style={{ fontSize: 11, color: 'var(--amber)', fontWeight: 600 }}>7d</span>
             </div>
           </div>
-          <ResponsiveContainer width="100%" height={190}>
+          <ResponsiveContainer width="100%" height="100%">
             <BarChart data={chartData} barSize={24} barCategoryGap="35%">
               <XAxis dataKey="name" tick={{ fill: 'var(--text-subtle)', fontSize: 10, fontFamily: 'DM Sans' }} axisLine={false} tickLine={false} />
               <YAxis hide />
@@ -172,7 +172,7 @@ export default function DashboardOficina() {
         </div>
 
         {/* OS recentes */}
-        <div style={{ background: 'var(--bg-800)', border: '1px solid var(--bg-500)', borderRadius: 14, padding: 24, display: 'flex', flexDirection: 'column' }}>
+        <div style={{ background: 'var(--bg-800)', border: '1px solid var(--bg-500)', borderRadius: 14, padding: 24, display: 'flex', flexDirection: 'column', height: '100%' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
             <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>OS recentes</p>
             <Wrench size={15} color="var(--text-subtle)" />
@@ -221,7 +221,7 @@ export default function DashboardOficina() {
         <div style={{ position: 'absolute', right: -20, top: -20, width: 140, height: 140, borderRadius: '50%', background: 'rgba(16,185,129,0.04)', pointerEvents: 'none' }} />
         <div>
           <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--amber)', marginBottom: 8 }}>Receita do mês (OS concluídas)</p>
-          <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 38, fontWeight: 700, color: 'var(--text)', letterSpacing: '-0.02em', lineHeight: 1 }}>
+          <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 34, fontWeight: 700, color: 'var(--text)', letterSpacing: '-0.02em', lineHeight: 1 }}>
             R$ {fmt(stats.receita_mes)}
           </p>
         </div>

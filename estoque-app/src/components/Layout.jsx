@@ -29,7 +29,7 @@ export default function Layout() {
         </header>
 
         <TrialBanner />
-        <main style={{ flex: 1, overflow: 'auto', minHeight: 0 }}>
+        <main style={{ flex: 1, overflow: 'auto', minHeight: 0, height: '100%' }}>
           <Outlet />
         </main>
       </div>

@@ -408,6 +408,7 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 100%;
+  box-sizing: border-box;
 }
 
 .stats-grid-4 {
@@ -426,12 +427,36 @@ body {
   display: grid;
   grid-template-columns: 3fr 2fr;
   gap: 16px;
+  min-height: 0;
 }
 
 .bottom-grid-hotel {
   display: grid;
   grid-template-columns: 1fr 2fr;
   gap: 16px;
+}
+
+/* ── QUARTOS GRID ──────────────────────────────────────────────── */
+.quartos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  grid-auto-rows: 1fr;
+  gap: 14px;
+  flex: 1;
+  min-height: 0;
+  align-content: stretch;
+}
+
+/* ── CONFIGURAÇÕES PAGE ────────────────────────────────────────── */
+.config-page {
+  max-width: 900px;
+  width: 100%;
+}
+
+.config-type-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
 }
 
 /* ── MEDIA QUERIES ─────────────────────────────────────────────── */
@@ -462,6 +487,13 @@ body {
   .chart-grid      { grid-template-columns: 1fr; }
   .bottom-grid-hotel { grid-template-columns: 1fr; }
 
+  /* Config page */
+  .config-page { max-width: 100%; }
+  .config-type-grid { grid-template-columns: 1fr; }
+
+  /* Quartos grid */
+  .quartos-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+
   /* Modais como bottom-sheet */
   .modal-backdrop { align-items: flex-end; padding: 0; }
   .modal-box {
@@ -483,6 +515,7 @@ body {
 @media (max-width: 480px) {
   .stats-grid-4 { gap: 8px; }
   .stats-grid-3 { gap: 8px; }
+  .quartos-grid { grid-template-columns: 1fr; gap: 8px; }
 }
 
 @media (min-width: 769px) {

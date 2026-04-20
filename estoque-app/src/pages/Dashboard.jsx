@@ -79,7 +79,7 @@ export default function Dashboard() {
   const statCards = [
     { label: 'Produtos', sublabel: 'cadastrados', value: stats.produtos,   icon: Package,       ...G },
     { label: 'Clientes', sublabel: 'ativos',       value: stats.clientes,   icon: Users,         ...G },
-    { label: 'Vendas',   sublabel: 'hoje',          value: `R$ ${stats.vendas_hoje.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, icon: ShoppingCart, ...G, mono: true },
+    { label: 'Vendas',   sublabel: 'hoje',          value: `R$ ${stats.vendas_hoje.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, icon: ShoppingCart, ...G },
     { label: 'Estoque',  sublabel: 'crítico',       value: stats.estoque_baixo, icon: AlertTriangle, ...(stats.estoque_baixo > 0 ? R : G) },
   ]
 
@@ -96,12 +96,12 @@ export default function Dashboard() {
   )
 
   return (
-    <div style={{ width: "100%" }} className="animate-fade-in page-content">
+    <div style={{ width: "100%", height: "100%" }} className="animate-fade-in page-content">
       <PageHeader title="Dashboard" subtitle={`${new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}`} />
 
       {/* Stat cards */}
       <div className="stats-grid-4" style={{ marginBottom: 28 }}>
-        {statCards.map(({ label, sublabel, value, icon: Icon, color, border, glow, mono }) => (
+        {statCards.map(({ label, sublabel, value, icon: Icon, color, border, glow }) => (
           <div key={label} style={{
             background: `linear-gradient(135deg, var(--bg-700) 0%, ${glow} 100%)`,
             border: `1px solid ${border}`,
@@ -114,14 +114,14 @@ export default function Dashboard() {
           >
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
               <div style={{ display: 'flex', flexDirection: 'column' }}>
-                <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--text-subtle)' }}>{label}</span>
-                <span style={{ fontSize: 11, color: 'var(--text-subtle)', letterSpacing: '0.04em' }}>{sublabel}</span>
+                <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--text-subtle)' }}>{label}</span>
+                <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: 'var(--text-subtle)', letterSpacing: '0.04em' }}>{sublabel}</span>
               </div>
               <div style={{ width: 36, height: 36, borderRadius: 9, background: `${color}18`, border: `1px solid ${color}30`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <Icon size={17} color={color} />
               </div>
             </div>
-            <p style={{ fontFamily: mono ? 'JetBrains Mono, monospace' : 'Syne, sans-serif', fontSize: mono ? 20 : 32, fontWeight: 700, color, lineHeight: 1, letterSpacing: mono ? 0 : '-0.02em' }}>
+            <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 26, fontWeight: 700, color, lineHeight: 1, letterSpacing: '-0.02em' }}>
               {value}
             </p>
           </div>
@@ -129,10 +129,10 @@ export default function Dashboard() {
       </div>
 
       {/* Charts */}
-      <div className="chart-grid" style={{ marginBottom: 20 }}>
+      <div className="chart-grid" style={{ flex: 1, minHeight: 0, marginBottom: 20 }}>
         {/* Bar chart */}
-        <div style={{ background: 'var(--bg-800)', border: '1px solid var(--bg-500)', borderRadius: 14, padding: '24px 24px 16px', overflow: 'hidden' }}>
-          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 24 }}>
+        <div style={{ background: 'var(--bg-800)', border: '1px solid var(--bg-500)', borderRadius: 14, padding: '24px 24px 16px', overflow: 'hidden', display: 'flex', flexDirection: 'column', height: '100%' }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 24, flexShrink: 0 }}>
             <div>
               <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 15, fontWeight: 700, color: 'var(--text)', marginBottom: 3 }}>Receita — últimos 7 dias</p>
               <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>
@@ -146,7 +146,7 @@ export default function Dashboard() {
               <span style={{ fontSize: 11, color: 'var(--amber)', fontWeight: 600 }}>7d</span>
             </div>
           </div>
-          <ResponsiveContainer width="100%" height={190}>
+          <ResponsiveContainer width="100%" height="100%">
             <BarChart data={salesChart} barSize={24} barCategoryGap="35%">
               <XAxis dataKey="name" tick={{ fill: 'var(--text-subtle)', fontSize: 10, fontFamily: 'DM Sans' }} axisLine={false} tickLine={false} />
               <YAxis hide />
@@ -157,7 +157,7 @@ export default function Dashboard() {
         </div>
 
         {/* Recent sales */}
-        <div style={{ background: 'var(--bg-800)', border: '1px solid var(--bg-500)', borderRadius: 14, padding: 24, display: 'flex', flexDirection: 'column' }}>
+        <div style={{ background: 'var(--bg-800)', border: '1px solid var(--bg-500)', borderRadius: 14, padding: 24, display: 'flex', flexDirection: 'column', height: '100%' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
             <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>Vendas recentes</p>
             <ShoppingCart size={15} color="var(--text-subtle)" />
@@ -203,7 +203,7 @@ export default function Dashboard() {
         <div style={{ position: 'absolute', right: -20, top: -20, width: 140, height: 140, borderRadius: '50%', background: 'rgba(16,185,129,0.04)', pointerEvents: 'none' }} />
         <div>
           <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--amber)', marginBottom: 8 }}>Faturamento do mês</p>
-          <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 38, fontWeight: 700, color: 'var(--text)', letterSpacing: '-0.02em', lineHeight: 1 }}>
+          <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 34, fontWeight: 700, color: 'var(--text)', letterSpacing: '-0.02em', lineHeight: 1 }}>
             R$ {stats.total_mes.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
           </p>
         </div>

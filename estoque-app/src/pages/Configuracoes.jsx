@@ -13,7 +13,7 @@ const BUSINESS_TYPES = [
 ]
 
 const Section = ({ title, subtitle, children }) => (
-  <div style={{ background: 'var(--bg-800)', border: '1px solid var(--bg-500)', borderRadius: 14, overflow: 'hidden', marginBottom: 20 }}>
+  <div style={{ background: 'var(--bg-800)', border: '1px solid var(--bg-500)', borderRadius: 14, overflow: 'hidden', marginBottom: 20, width: '100%' }}>
     <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--bg-600)' }}>
       <h2 style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 15, fontWeight: 700, color: 'var(--text)', marginBottom: subtitle ? 3 : 0 }}>{title}</h2>
       {subtitle && <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{subtitle}</p>}
@@ -96,7 +96,7 @@ export default function Configuracoes() {
   const nameChanged = name !== businessName
 
   return (
-    <div style={{ maxWidth: 760 }} className="animate-fade-in page-content">
+    <div className="animate-fade-in page-content config-page">
       {/* Header */}
       <div style={{ marginBottom: 32, paddingBottom: 24, borderBottom: '1px solid var(--bg-600)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 4 }}>
@@ -116,7 +116,7 @@ export default function Configuracoes() {
               placeholder="Ex: Oficina do João, Hotel Beira Mar..."
               value={name}
               onChange={e => setName(e.target.value)}
-              style={{ maxWidth: 420 }}
+              style={{ width: '100%' }}
             />
           </div>
 
@@ -127,7 +127,7 @@ export default function Configuracoes() {
                 ⚠️ Ao trocar o tipo, o menu lateral será atualizado. Os dados existentes não são apagados.
               </div>
             )}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12 }}>
+            <div className="config-type-grid">
               {BUSINESS_TYPES.map(({ value, icon: Icon, label, desc }) => {
                 const selected = selectedType === value
                 return (

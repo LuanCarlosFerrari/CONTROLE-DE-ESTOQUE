@@ -114,7 +114,7 @@ export default function Quartos() {
   }
 
   return (
-    <div style={{ width: "100%" }} className="animate-fade-in page-content">
+    <div style={{ width: "100%", height: "100%" }} className="animate-fade-in page-content">
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 28, paddingBottom: 24, borderBottom: '1px solid var(--bg-600)', flexWrap: 'wrap', gap: 16 }}>
         <div>
@@ -130,15 +130,25 @@ export default function Quartos() {
       </div>
 
       {/* Stats rápidas */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 20 }}>
+      <div className="stats-grid-3" style={{ marginBottom: 20 }}>
         {[
-          { key: 'disponivel', label: 'Disponíveis', color: '#34D399', bg: 'rgba(52,211,153,0.08)', border: 'rgba(52,211,153,0.2)' },
-          { key: 'ocupado',    label: 'Ocupados',    color: '#60A5FA', bg: 'rgba(96,165,250,0.08)', border: 'rgba(96,165,250,0.2)' },
-          { key: 'manutencao', label: 'Manutenção',  color: '#F59E0B', bg: 'rgba(245,158,11,0.08)', border: 'rgba(245,158,11,0.2)' },
-        ].map(({ key, label, color, bg, border }) => (
-          <div key={key} style={{ background: bg, border: `1px solid ${border}`, borderRadius: 12, padding: '14px 18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{label}</span>
-            <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 28, fontWeight: 700, color }}>{counts[key]}</span>
+          { key: 'disponivel', label: 'Disponíveis', sublabel: 'agora'  },
+          { key: 'ocupado',    label: 'Ocupados',    sublabel: 'agora'  },
+          { key: 'manutencao', label: 'Manutenção',  sublabel: 'status' },
+        ].map(({ key, label, sublabel }) => (
+          <div key={key} style={{
+            background: 'linear-gradient(135deg, var(--bg-700) 0%, rgba(16,185,129,0.06) 100%)',
+            border: '1px solid rgba(16,185,129,0.3)', borderRadius: 14, padding: '20px 22px',
+            transition: 'transform 0.2s, box-shadow 0.2s', cursor: 'default',
+          }}
+            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(16,185,129,0.06)' }}
+            onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'none' }}
+          >
+            <div style={{ marginBottom: 16 }}>
+              <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--text-subtle)', display: 'block' }}>{label}</span>
+              <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: 'var(--text-subtle)', letterSpacing: '0.04em' }}>{sublabel}</span>
+            </div>
+            <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 26, fontWeight: 700, color: 'var(--amber)', lineHeight: 1, letterSpacing: '-0.02em' }}>{counts[key]}</p>
           </div>
         ))}
       </div>
@@ -164,11 +174,11 @@ export default function Quartos() {
 
       {/* Grid de quartos */}
       {loading ? (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 14 }}>
-          {[...Array(6)].map((_, i) => <div key={i} className="skeleton" style={{ height: 160, borderRadius: 14 }} />)}
+        <div className="quartos-grid">
+          {[...Array(6)].map((_, i) => <div key={i} className="skeleton" style={{ borderRadius: 14 }} />)}
         </div>
       ) : filtered.length === 0 ? (
-        <div style={{ padding: '72px 32px', textAlign: 'center', background: 'var(--bg-800)', border: '1px solid var(--bg-500)', borderRadius: 14 }}>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-800)', border: '1px solid var(--bg-500)', borderRadius: 14 }}>
           <div style={{ width: 64, height: 64, borderRadius: 16, background: 'var(--bg-700)', border: '1px solid var(--bg-500)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
             <BedDouble size={28} color="var(--bg-400)" />
           </div>
@@ -180,26 +190,27 @@ export default function Quartos() {
           </p>
         </div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 14 }}>
+        <div className="quartos-grid">
           {filtered.map(q => {
             const statusColor = q.statusReal === 'disponivel' ? '#34D399' : q.statusReal === 'ocupado' ? '#60A5FA' : '#F59E0B'
             return (
               <div key={q.id} style={{
-                background: 'var(--bg-800)', border: '1px solid var(--bg-500)', borderRadius: 14, padding: 20,
+                background: 'linear-gradient(135deg, var(--bg-700) 0%, rgba(16,185,129,0.06) 100%)',
+                border: '1px solid rgba(16,185,129,0.3)', borderRadius: 14, padding: 20,
                 display: 'flex', flexDirection: 'column', gap: 12, position: 'relative', overflow: 'hidden',
-                transition: 'border-color 0.2s, transform 0.2s',
+                transition: 'transform 0.2s, box-shadow 0.2s', height: '100%', boxSizing: 'border-box',
               }}
-                onMouseEnter={e => { e.currentTarget.style.borderColor = statusColor + '50'; e.currentTarget.style.transform = 'translateY(-2px)' }}
-                onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--bg-500)'; e.currentTarget.style.transform = 'none' }}
+                onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(16,185,129,0.06)' }}
+                onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'none' }}
               >
                 <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: statusColor, borderRadius: '14px 14px 0 0', opacity: 0.8 }} />
 
                 <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
                   <div>
-                    <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 22, fontWeight: 800, color: 'var(--text)', lineHeight: 1 }}>
+                    <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 22, fontWeight: 700, color: 'var(--text)', lineHeight: 1 }}>
                       {q.numero}
                     </p>
-                    <p style={{ fontSize: 12, color: 'var(--text-subtle)', marginTop: 3 }}>{TIPOS[q.tipo] || q.tipo}</p>
+                    <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 12, color: 'var(--text-subtle)', marginTop: 3 }}>{TIPOS[q.tipo] || q.tipo}</p>
                   </div>
                   <StatusBadge status={q.statusReal} />
                 </div>

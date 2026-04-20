@@ -2,11 +2,12 @@ import { useEffect, useState, useCallback } from 'react'
 import {
   Plus, Search, ShoppingCart, X, ChevronDown, Receipt,
   Package, ArrowUpCircle, ArrowDownCircle, Lock, Unlock,
-  Wallet, TrendingUp, TrendingDown, DollarSign,
+  Wallet, TrendingUp, TrendingDown, DollarSign, Wrench, BedDouble,
 } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import Modal from '../components/Modal'
 import Toast from '../components/Toast'
+import { useAuth } from '../contexts/AuthContext'
 
 function fmt(val) { return Number(val || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 }) }
 
@@ -20,6 +21,7 @@ const FORMAS = ['dinheiro', 'pix', 'cartao', 'outros']
 const FORMA_LABEL = { dinheiro: 'Dinheiro', pix: 'PIX', cartao: 'Cartão', outros: 'Outros' }
 
 export default function Caixa() {
+  const { businessType } = useAuth()
   const today = new Date().toISOString().split('T')[0]
 
   // Caixa do dia
@@ -49,6 +51,19 @@ export default function Caixa() {
   const [extDescricao, setExtDescricao] = useState('')
   const [extValor, setExtValor]         = useState('')
   const [extForma, setExtForma]         = useState('dinheiro')
+
+  // Oficina — receber OS
+  const [ordensAbertas, setOrdensAbertas] = useState([])
+  const [osId, setOsId]                   = useState('')
+  const [osValor, setOsValor]             = useState('')
+  const [osForma, setOsForma]             = useState('dinheiro')
+  const [osObs, setOsObs]                 = useState('')
+
+  // Hotel — receber reserva
+  const [reservasPendentes, setReservasPendentes] = useState([])
+  const [reservaId, setReservaId]                 = useState('')
+  const [reservaValor, setReservaValor]           = useState('')
+  const [reservaForma, setReservaForma]           = useState('dinheiro')
 
   // Form — abrir caixa
   const [saldoInicial, setSaldoInicial] = useState('0')
@@ -91,12 +106,22 @@ export default function Caixa() {
   }, [today])
 
   const loadOptions = useCallback(async () => {
-    const [{ data: c }, { data: p }] = await Promise.all([
+    const [{ data: c }, { data: p }, { data: os }, { data: res }] = await Promise.all([
       supabase.from('clientes').select('id, nome').order('nome'),
       supabase.from('produtos').select('id, nome, preco_venda, quantidade').order('nome'),
+      supabase.from('ordens_servico')
+        .select('id, numero, descricao, valor_total, status, veiculos(placa, modelo)')
+        .in('status', ['aberta', 'em_andamento'])
+        .order('numero'),
+      supabase.from('reservas')
+        .select('id, nome_hospede, check_in, check_out, valor_total, valor_pago, status, quartos(numero)')
+        .in('status', ['confirmada', 'checkin'])
+        .order('check_in'),
     ])
     setClientes(c || [])
     setProdutos(p || [])
+    setOrdensAbertas(os || [])
+    setReservasPendentes(res || [])
   }, [])
 
   useEffect(() => {
@@ -178,6 +203,66 @@ export default function Caixa() {
     setClienteId(''); setObservacao(''); setFormaVenda('dinheiro')
     setItens([{ produto_id: '', quantidade: 1, preco_unitario: 0 }])
     setToast({ msg: 'Venda registrada!', type: 'success' })
+    loadMovimentacoes(); loadOptions()
+  }
+
+  /* ── Receber OS (oficina) ─────────────────────────────── */
+  const handleReceberOS = async (e) => {
+    e.preventDefault()
+    if (!osId) return setToast({ msg: 'Selecione uma OS.', type: 'error' })
+    const valor = Number(osValor)
+    if (!valor || valor <= 0) return setToast({ msg: 'Informe um valor válido.', type: 'error' })
+    const os = ordensAbertas.find(o => o.id === osId)
+    setSaving(true)
+    const [{ error: e1 }, { error: e2 }] = await Promise.all([
+      supabase.from('movimentacoes_extras').insert({
+        caixa_id: caixa?.id || null,
+        tipo: 'entrada',
+        descricao: `OS ${os?.numero || ''} — ${(os?.descricao || '').slice(0, 40)}${osObs ? ` (${osObs})` : ''}`,
+        valor,
+        forma_pagamento: osForma,
+      }),
+      supabase.from('ordens_servico').update({
+        status: 'concluida',
+        data_conclusao: new Date().toISOString(),
+        valor_total: valor,
+      }).eq('id', osId),
+    ])
+    setSaving(false)
+    if (e1 || e2) return setToast({ msg: (e1 || e2).message, type: 'error' })
+    setModal(null)
+    setOsId(''); setOsValor(''); setOsForma('dinheiro'); setOsObs('')
+    setToast({ msg: 'OS recebida e concluída!', type: 'success' })
+    loadMovimentacoes(); loadOptions()
+  }
+
+  /* ── Receber Reserva (hotel) ──────────────────────────── */
+  const handleReceberReserva = async (e) => {
+    e.preventDefault()
+    if (!reservaId) return setToast({ msg: 'Selecione uma reserva.', type: 'error' })
+    const valor = Number(reservaValor)
+    if (!valor || valor <= 0) return setToast({ msg: 'Informe um valor válido.', type: 'error' })
+    const res = reservasPendentes.find(r => r.id === reservaId)
+    setSaving(true)
+    const [{ error: e1 }, { error: e2 }] = await Promise.all([
+      supabase.from('movimentacoes_extras').insert({
+        caixa_id: caixa?.id || null,
+        tipo: 'entrada',
+        descricao: `Reserva — ${res?.nome_hospede || ''} (Qto ${res?.quartos?.numero || ''})`,
+        valor,
+        forma_pagamento: reservaForma,
+      }),
+      supabase.from('reservas').update({
+        valor_pago: Number(res?.valor_pago || 0) + valor,
+        status: 'checkout',
+        forma_pagamento: reservaForma,
+      }).eq('id', reservaId),
+    ])
+    setSaving(false)
+    if (e1 || e2) return setToast({ msg: (e1 || e2).message, type: 'error' })
+    setModal(null)
+    setReservaId(''); setReservaValor(''); setReservaForma('dinheiro')
+    setToast({ msg: 'Reserva recebida e check-out realizado!', type: 'success' })
     loadMovimentacoes(); loadOptions()
   }
 
@@ -286,9 +371,27 @@ export default function Caixa() {
       {/* Action buttons + search */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20, flexWrap: 'wrap' }}>
         {caixaAberto && (<>
-          <button className="btn-primary" onClick={() => { setClienteId(''); setObservacao(''); setFormaVenda('dinheiro'); setItens([{ produto_id: '', quantidade: 1, preco_unitario: 0 }]); setModal('venda') }}>
-            <ShoppingCart size={14} /> Nova venda
-          </button>
+          {businessType === 'oficina' ? (<>
+            <button className="btn-primary" onClick={() => { setOsId(''); setOsValor(''); setOsForma('dinheiro'); setOsObs(''); setModal('os') }}>
+              <Wrench size={14} /> Receber OS
+            </button>
+            <button className="btn-secondary" onClick={() => { setClienteId(''); setObservacao(''); setFormaVenda('dinheiro'); setItens([{ produto_id: '', quantidade: 1, preco_unitario: 0 }]); setModal('venda') }}
+              style={{ color: 'var(--amber)', borderColor: 'rgba(16,185,129,0.3)' }}>
+              <ShoppingCart size={14} /> Venda avulsa
+            </button>
+          </>) : businessType === 'hotel' ? (<>
+            <button className="btn-primary" onClick={() => { setReservaId(''); setReservaValor(''); setReservaForma('dinheiro'); setModal('reserva') }}>
+              <BedDouble size={14} /> Receber reserva
+            </button>
+            <button className="btn-secondary" onClick={() => { setClienteId(''); setObservacao(''); setFormaVenda('dinheiro'); setItens([{ produto_id: '', quantidade: 1, preco_unitario: 0 }]); setModal('venda') }}
+              style={{ color: 'var(--amber)', borderColor: 'rgba(16,185,129,0.3)' }}>
+              <ShoppingCart size={14} /> Consumo avulso
+            </button>
+          </>) : (
+            <button className="btn-primary" onClick={() => { setClienteId(''); setObservacao(''); setFormaVenda('dinheiro'); setItens([{ produto_id: '', quantidade: 1, preco_unitario: 0 }]); setModal('venda') }}>
+              <ShoppingCart size={14} /> Nova venda
+            </button>
+          )}
           <button className="btn-secondary" onClick={() => { setExtDescricao(''); setExtValor(''); setExtForma('dinheiro'); setModal('entrada') }}
             style={{ color: 'var(--amber)', borderColor: 'rgba(16,185,129,0.3)' }}>
             <ArrowUpCircle size={14} /> Entrada
@@ -595,6 +698,98 @@ export default function Caixa() {
                 style={modal === 'saida' ? { background: '#EF4444' } : {}}>
                 {saving ? 'Salvando...' : modal === 'entrada' ? 'Registrar entrada' : 'Registrar saída'}
               </button>
+            </div>
+          </form>
+        </Modal>
+      )}
+
+      {/* Modal — Receber OS */}
+      {modal === 'os' && (
+        <Modal title="Receber OS" onClose={() => setModal(null)}>
+          <form onSubmit={handleReceberOS}>
+            <div style={{ marginBottom: 16 }}>
+              <Label required>Ordem de serviço</Label>
+              <select className="input-field" value={osId} onChange={e => {
+                const sel = ordensAbertas.find(o => o.id === e.target.value)
+                setOsId(e.target.value)
+                setOsValor(sel ? String(sel.valor_total) : '')
+              }} required>
+                <option value="">Selecionar OS...</option>
+                {ordensAbertas.map(o => (
+                  <option key={o.id} value={o.id}>
+                    {o.numero} — {o.descricao?.slice(0, 35)} {o.veiculos ? `(${o.veiculos.placa})` : ''}
+                  </option>
+                ))}
+              </select>
+              {ordensAbertas.length === 0 && (
+                <p style={{ fontSize: 12, color: 'var(--text-subtle)', marginTop: 6 }}>Nenhuma OS aberta ou em andamento.</p>
+              )}
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
+              <div>
+                <Label required>Valor cobrado (R$)</Label>
+                <input className="input-field" type="number" min="0.01" step="0.01" required
+                  value={osValor} onChange={e => setOsValor(e.target.value)}
+                  style={{ fontFamily: 'JetBrains Mono, monospace' }} />
+              </div>
+              <div>
+                <Label>Forma de pagamento</Label>
+                <select className="input-field" value={osForma} onChange={e => setOsForma(e.target.value)}>
+                  {FORMAS.map(f => <option key={f} value={f}>{FORMA_LABEL[f]}</option>)}
+                </select>
+              </div>
+            </div>
+            <div style={{ marginBottom: 24 }}>
+              <Label>Observação</Label>
+              <input className="input-field" value={osObs} onChange={e => setOsObs(e.target.value)} placeholder="Nota opcional..." />
+            </div>
+            <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
+              <button type="button" className="btn-secondary" onClick={() => setModal(null)}>Cancelar</button>
+              <button type="submit" className="btn-primary" disabled={saving}>{saving ? 'Registrando...' : 'Receber e concluir OS'}</button>
+            </div>
+          </form>
+        </Modal>
+      )}
+
+      {/* Modal — Receber Reserva */}
+      {modal === 'reserva' && (
+        <Modal title="Receber reserva" onClose={() => setModal(null)}>
+          <form onSubmit={handleReceberReserva}>
+            <div style={{ marginBottom: 16 }}>
+              <Label required>Reserva</Label>
+              <select className="input-field" value={reservaId} onChange={e => {
+                const sel = reservasPendentes.find(r => r.id === e.target.value)
+                setReservaId(e.target.value)
+                setReservaValor(sel ? String(Number(sel.valor_total) - Number(sel.valor_pago)) : '')
+              }} required>
+                <option value="">Selecionar reserva...</option>
+                {reservasPendentes.map(r => (
+                  <option key={r.id} value={r.id}>
+                    {r.nome_hospede} — Qto {r.quartos?.numero} ({r.check_in} → {r.check_out})
+                  </option>
+                ))}
+              </select>
+              {reservasPendentes.length === 0 && (
+                <p style={{ fontSize: 12, color: 'var(--text-subtle)', marginTop: 6 }}>Nenhuma reserva confirmada ou em check-in.</p>
+              )}
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 24 }}>
+              <div>
+                <Label required>Valor recebido (R$)</Label>
+                <input className="input-field" type="number" min="0.01" step="0.01" required
+                  value={reservaValor} onChange={e => setReservaValor(e.target.value)}
+                  style={{ fontFamily: 'JetBrains Mono, monospace' }} />
+              </div>
+              <div>
+                <Label>Forma de pagamento</Label>
+                <select className="input-field" value={reservaForma} onChange={e => setReservaForma(e.target.value)}>
+                  {FORMAS.map(f => <option key={f} value={f}>{FORMA_LABEL[f]}</option>)}
+                </select>
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
+              <button type="button" className="btn-secondary" onClick={() => setModal(null)}>Cancelar</button>
+              <button type="submit" className="btn-primary" disabled={saving}>{saving ? 'Registrando...' : 'Receber e fazer check-out'}</button>
             </div>
           </form>
         </Modal>
