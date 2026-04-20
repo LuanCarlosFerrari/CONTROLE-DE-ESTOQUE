@@ -34,8 +34,8 @@ export default function TrialBanner() {
   const isUrgent = timeLeft.days <= 1
   const isWarning = timeLeft.days <= 3
 
-  const color      = isUrgent ? '#F87171' : isWarning ? '#FB923C' : '#FCD34D'
-  const bg         = isUrgent ? 'rgba(239,68,68,0.08)' : isWarning ? 'rgba(249,115,22,0.08)' : 'rgba(245,158,11,0.07)'
+  const color      = isUrgent ? 'var(--red)' : isWarning ? '#FB923C' : 'var(--warning)'
+  const bg         = isUrgent ? 'rgba(239,68,68,0.08)' : isWarning ? 'rgba(249,115,22,0.08)' : 'rgba(245,158,11,0.08)'
   const borderCol  = isUrgent ? 'rgba(239,68,68,0.25)' : isWarning ? 'rgba(249,115,22,0.25)' : 'rgba(245,158,11,0.2)'
 
   return (

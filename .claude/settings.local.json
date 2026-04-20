@@ -17,7 +17,12 @@
       "Bash(gh auth *)",
       "Bash(git remote *)",
       "Bash(git push *)",
-      "Bash(cat C:\\\\\\\\Users\\\\\\\\WINDOW~1\\\\\\\\AppData\\\\\\\\Local\\\\\\\\Temp\\\\\\\\claude\\\\\\\\D--backup-pc-CONTROLE-DE-ESTOQUE\\\\\\\\7e40514b-f85b-461b-9a14-901457914c2f\\\\\\\\tasks\\\\\\\\be88pq0t1.output)"
+      "Bash(cat C:\\\\\\\\Users\\\\\\\\WINDOW~1\\\\\\\\AppData\\\\\\\\Local\\\\\\\\Temp\\\\\\\\claude\\\\\\\\D--backup-pc-CONTROLE-DE-ESTOQUE\\\\\\\\7e40514b-f85b-461b-9a14-901457914c2f\\\\\\\\tasks\\\\\\\\be88pq0t1.output)",
+      "Skill(update-config)",
+      "mcp__supabase__list_projects",
+      "mcp__supabase__list_tables",
+      "mcp__supabase__execute_sql"
     ]
-  }
+  },
+  "enableAllProjectMcpServers": true
 }

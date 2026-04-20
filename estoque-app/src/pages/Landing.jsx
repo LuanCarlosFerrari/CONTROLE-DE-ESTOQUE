@@ -68,7 +68,7 @@ export default function Landing() {
           <div className="animate-fade-in" style={{ textAlign: 'center', maxWidth: 760, margin: '0 auto' }}>
             <div style={{
               display: 'inline-flex', alignItems: 'center', gap: 8,
-              background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.3)',
+              background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.3)',
               borderRadius: 20, padding: '6px 14px', marginBottom: 32,
               fontSize: 13, color: 'var(--amber)', fontWeight: 500,
             }}>
@@ -119,7 +119,7 @@ export default function Landing() {
             {/* Mock browser bar */}
             <div style={{ background: 'var(--bg-700)', padding: '12px 16px', borderBottom: '1px solid var(--bg-600)', display: 'flex', alignItems: 'center', gap: 8 }}>
               <div style={{ display: 'flex', gap: 6 }}>
-                {['#EF4444', '#F59E0B', '#10B981'].map(c => (
+                {['#EF4444', '#10B981', '#10B981'].map(c => (
                   <div key={c} style={{ width: 10, height: 10, borderRadius: '50%', background: c, opacity: 0.7 }} />
                 ))}
               </div>
@@ -139,10 +139,10 @@ export default function Landing() {
                 {[100, 80, 90, 75].map((w, i) => (
                   <div key={i} style={{
                     display: 'flex', alignItems: 'center', gap: 8, padding: '8px', borderRadius: 6, marginBottom: 4,
-                    background: i === 0 ? 'rgba(245,158,11,0.1)' : 'transparent',
+                    background: i === 0 ? 'rgba(16,185,129,0.1)' : 'transparent',
                   }}>
                     <div style={{ width: 14, height: 14, borderRadius: 3, background: i === 0 ? 'var(--amber)' : 'var(--bg-500)' }} />
-                    <div style={{ width: w * 0.8, height: 10, borderRadius: 3, background: i === 0 ? 'rgba(245,158,11,0.3)' : 'var(--bg-600)' }} />
+                    <div style={{ width: w * 0.8, height: 10, borderRadius: 3, background: i === 0 ? 'rgba(16,185,129,0.3)' : 'var(--bg-600)' }} />
                   </div>
                 ))}
               </div>
@@ -191,7 +191,7 @@ export default function Landing() {
           {features.map(({ icon: Icon, title, desc }) => (
             <div key={title} className="stat-card card-hover">
               <div style={{
-                width: 40, height: 40, borderRadius: 10, background: 'rgba(245,158,11,0.1)',
+                width: 40, height: 40, borderRadius: 10, background: 'rgba(16,185,129,0.1)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 14,
               }}>
                 <Icon size={20} color="var(--amber)" />
@@ -208,8 +208,8 @@ export default function Landing() {
       {/* CTA */}
       <section style={{ maxWidth: 1100, margin: '0 auto 80px', padding: '0 40px' }}>
         <div style={{
-          background: 'linear-gradient(135deg, rgba(245,158,11,0.1), rgba(245,158,11,0.05))',
-          border: '1px solid rgba(245,158,11,0.2)',
+          background: 'linear-gradient(135deg, rgba(16,185,129,0.1), rgba(16,185,129,0.05))',
+          border: '1px solid rgba(16,185,129,0.2)',
           borderRadius: 20, padding: '60px 40px', textAlign: 'center',
         }}>
           <h2 style={{ fontFamily: 'Syne, sans-serif', fontSize: 36, fontWeight: 700, color: 'var(--text)', marginBottom: 16 }}>

@@ -68,8 +68,8 @@ export default function Dashboard() {
   }
 
   const statCards = [
-    { label: 'Produtos', sublabel: 'cadastrados', value: stats.produtos, icon: Package, color: '#F59E0B', border: 'rgba(245,158,11,0.3)', glow: 'rgba(245,158,11,0.06)' },
-    { label: 'Clientes', sublabel: 'ativos', value: stats.clientes, icon: Users, color: '#3B82F6', border: 'rgba(59,130,246,0.3)', glow: 'rgba(59,130,246,0.06)' },
+    { label: 'Produtos', sublabel: 'cadastrados', value: stats.produtos, icon: Package, color: 'var(--amber)', border: 'rgba(16,185,129,0.3)', glow: 'rgba(16,185,129,0.06)' },
+    { label: 'Clientes', sublabel: 'ativos', value: stats.clientes, icon: Users, color: 'var(--amber)', border: 'rgba(16,185,129,0.3)', glow: 'rgba(16,185,129,0.06)' },
     { label: 'Vendas', sublabel: 'hoje', value: `R$ ${stats.vendas_hoje.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, icon: ShoppingCart, color: '#10B981', border: 'rgba(16,185,129,0.3)', glow: 'rgba(16,185,129,0.06)', mono: true },
     { label: 'Estoque', sublabel: 'crítico', value: stats.estoque_baixo, icon: AlertTriangle, color: stats.estoque_baixo > 0 ? '#EF4444' : '#10B981', border: stats.estoque_baixo > 0 ? 'rgba(239,68,68,0.3)' : 'rgba(16,185,129,0.3)', glow: stats.estoque_baixo > 0 ? 'rgba(239,68,68,0.06)' : 'rgba(16,185,129,0.06)' },
   ]
@@ -132,7 +132,7 @@ export default function Dashboard() {
                 </span>
               </p>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.2)', borderRadius: 6, padding: '4px 10px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.2)', borderRadius: 6, padding: '4px 10px' }}>
               <TrendingUp size={13} color="var(--amber)" />
               <span style={{ fontSize: 11, color: 'var(--amber)', fontWeight: 600 }}>7d</span>
             </div>
@@ -185,20 +185,20 @@ export default function Dashboard() {
 
       {/* Month total */}
       <div style={{
-        background: 'linear-gradient(135deg, rgba(245,158,11,0.08) 0%, rgba(245,158,11,0.03) 50%, transparent 100%)',
-        border: '1px solid rgba(245,158,11,0.18)',
+        background: 'linear-gradient(135deg, rgba(16,185,129,0.08) 0%, rgba(16,185,129,0.03) 50%, transparent 100%)',
+        border: '1px solid rgba(16,185,129,0.18)',
         borderRadius: 14, padding: '24px 28px',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         position: 'relative', overflow: 'hidden',
       }}>
-        <div style={{ position: 'absolute', right: -20, top: -20, width: 140, height: 140, borderRadius: '50%', background: 'rgba(245,158,11,0.04)', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', right: -20, top: -20, width: 140, height: 140, borderRadius: '50%', background: 'rgba(16,185,129,0.04)', pointerEvents: 'none' }} />
         <div>
           <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--amber)', marginBottom: 8 }}>Faturamento do mês</p>
           <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 38, fontWeight: 700, color: 'var(--text)', letterSpacing: '-0.02em', lineHeight: 1 }}>
             R$ {stats.total_mes.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
           </p>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.25)', borderRadius: 10, padding: '10px 16px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.25)', borderRadius: 10, padding: '10px 16px' }}>
           <ArrowUpRight size={20} color="var(--amber)" />
           <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--amber)' }}>30 dias</span>
         </div>

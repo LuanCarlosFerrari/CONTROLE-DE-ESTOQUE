@@ -20,7 +20,7 @@ export default function Sidebar() {
     navigate('/')
   }
 
-  const trialColor = trialDaysLeft <= 2 ? 'var(--red)' : trialDaysLeft <= 4 ? '#F97316' : 'var(--amber)'
+  const trialColor = trialDaysLeft <= 2 ? 'var(--red)' : trialDaysLeft <= 4 ? '#F97316' : 'var(--warning)'
   const trialBg = trialDaysLeft <= 2 ? 'rgba(239,68,68,0.1)' : trialDaysLeft <= 4 ? 'rgba(249,115,22,0.1)' : 'rgba(245,158,11,0.1)'
   const trialBorder = trialDaysLeft <= 2 ? 'rgba(239,68,68,0.25)' : trialDaysLeft <= 4 ? 'rgba(249,115,22,0.25)' : 'rgba(245,158,11,0.25)'
 
