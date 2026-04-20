@@ -4,7 +4,8 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
+:root,
+[data-theme="dark"] {
   --bg-900: #0C0C0C;
   --bg-800: #141414;
   --bg-700: #1C1C1C;
@@ -19,6 +20,25 @@
   --emerald: #10B981;
   --red: #EF4444;
   --blue: #3B82F6;
+  --row-border: rgba(255, 255, 255, 0.04);
+}
+
+[data-theme="light"] {
+  --bg-900: #F0F2F5;
+  --bg-800: #FFFFFF;
+  --bg-700: #F5F5F5;
+  --bg-600: #E5E7EB;
+  --bg-500: #D1D5DB;
+  --bg-400: #9CA3AF;
+  --amber: #D97706;
+  --amber-light: #F59E0B;
+  --text: #111827;
+  --text-muted: #4B5563;
+  --text-subtle: #6B7280;
+  --emerald: #059669;
+  --red: #DC2626;
+  --blue: #2563EB;
+  --row-border: rgba(0, 0, 0, 0.05);
 }
 
 * {
@@ -121,7 +141,7 @@ body {
 .data-table td {
   padding: 12px 16px;
   font-size: 14px;
-  border-bottom: 1px solid rgba(255,255,255,0.04);
+  border-bottom: 1px solid var(--row-border);
   color: var(--text);
 }
 .data-table tr:hover td {

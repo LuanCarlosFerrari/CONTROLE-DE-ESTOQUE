@@ -1,6 +1,7 @@
 import { NavLink, useNavigate } from 'react-router-dom'
-import { LayoutDashboard, Package, Users, ShoppingCart, LogOut, TrendingUp, Clock, CheckCircle } from 'lucide-react'
+import { LayoutDashboard, Package, Users, ShoppingCart, LogOut, TrendingUp, Clock, CheckCircle, Sun, Moon } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
+import { useTheme } from '../contexts/ThemeContext'
 
 const links = [
   { to: '/app/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
@@ -11,6 +12,7 @@ const links = [
 
 export default function Sidebar() {
   const { signOut, user, trialDaysLeft, isTrial, isActive } = useAuth()
+  const { theme, toggle } = useTheme()
   const navigate = useNavigate()
 
   const handleSignOut = async () => {
@@ -91,6 +93,14 @@ export default function Sidebar() {
             {user?.email}
           </p>
         </div>
+        <button
+          onClick={toggle}
+          className="sidebar-link"
+          style={{ width: '100%', border: 'none', background: 'none', marginBottom: 4 }}
+        >
+          {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+          {theme === 'dark' ? 'Tema claro' : 'Tema escuro'}
+        </button>
         <button className="sidebar-link" style={{ width: '100%', border: 'none', background: 'none' }} onClick={handleSignOut}>
           <LogOut size={16} /> Sair
         </button>
