@@ -213,7 +213,7 @@ export default function Configuracoes() {
           <div style={{ background: 'var(--bg-700)', border: '1px solid var(--bg-600)', borderRadius: 10, padding: '16px 18px' }}>
             <p style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--amber)', marginBottom: 12 }}>Plano mensal</p>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 12 }}>
-              <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 32, fontWeight: 800, color: 'var(--text)' }}>R$ 29</span>
+              <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 32, fontWeight: 800, color: 'var(--text)' }}>R$ 129</span>
               <span style={{ color: 'var(--text-muted)', fontSize: 14 }}>/mês</span>
             </div>
             <ul style={{ listStyle: 'none', padding: 0, marginBottom: 16 }}>
