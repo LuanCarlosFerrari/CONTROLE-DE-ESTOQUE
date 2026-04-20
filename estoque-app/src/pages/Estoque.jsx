@@ -67,7 +67,7 @@ export default function Estoque() {
   const criticos = produtos.filter(p => p.quantidade <= p.estoque_minimo).length
 
   return (
-    <div style={{ maxWidth: 1200 }} className="animate-fade-in page-content">
+    <div style={{ width: "100%" }} className="animate-fade-in page-content">
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 28, paddingBottom: 24, borderBottom: '1px solid var(--bg-600)', flexWrap: 'wrap', gap: 16 }}>
         <div>
@@ -101,7 +101,7 @@ export default function Estoque() {
       </div>
 
       {/* Table */}
-      <div style={{ background: 'var(--bg-800)', border: '1px solid var(--bg-500)', borderRadius: 14, overflow: 'hidden' }}>
+      <div style={{ background: 'var(--bg-800)', border: '1px solid var(--bg-500)', borderRadius: 14, overflow: 'hidden', flex: 1, minHeight: 0 }}>
         {loading ? (
           <div style={{ padding: '24px 20px' }}>
             {[...Array(5)].map((_, i) => <div key={i} className="skeleton" style={{ height: 40, borderRadius: 6, marginBottom: 10, opacity: 1 - i * 0.15 }} />)}

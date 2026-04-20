@@ -1,8 +1,24 @@
-import { Lock, Mail } from 'lucide-react'
+import { useState } from 'react'
+import { Lock, Zap } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
+import { createPaymentPreference } from '../lib/mercadopago'
 
 export default function TrialExpired() {
   const { user, signOut } = useAuth()
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
+
+  const handlePagar = async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const url = await createPaymentPreference()
+      window.location.href = url
+    } catch (err) {
+      setError('Não foi possível iniciar o pagamento. Tente novamente.')
+      setLoading(false)
+    }
+  }
 
   return (
     <div style={{
@@ -35,7 +51,7 @@ export default function TrialExpired() {
             Plano mensal
           </p>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 12 }}>
-            <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 36, fontWeight: 800, color: 'var(--text)' }}>R$ 29</span>
+            <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 36, fontWeight: 800, color: 'var(--text)' }}>R$ 129</span>
             <span style={{ color: 'var(--text-muted)', fontSize: 14 }}>/mês</span>
           </div>
           <ul style={{ listStyle: 'none', padding: 0 }}>
@@ -47,15 +63,20 @@ export default function TrialExpired() {
           </ul>
         </div>
 
-        <a
-          href={`mailto:contato@stocktag.com.br?subject=Quero assinar o StockTag&body=Email: ${user?.email}`}
+        <button
+          onClick={handlePagar}
+          disabled={loading}
           className="btn-primary"
-          style={{ textDecoration: 'none', display: 'inline-flex', padding: '13px 28px', fontSize: 15, marginBottom: 16 }}
+          style={{ display: 'inline-flex', padding: '13px 28px', fontSize: 15, marginBottom: 8, opacity: loading ? 0.7 : 1, cursor: loading ? 'not-allowed' : 'pointer', border: 'none' }}
         >
-          <Mail size={16} /> Entrar em contato para assinar
-        </a>
+          <Zap size={16} /> {loading ? 'Redirecionando...' : 'Pagar com MercadoPago'}
+        </button>
 
-        <div>
+        {error && (
+          <p style={{ color: 'var(--red)', fontSize: 13, marginBottom: 12 }}>{error}</p>
+        )}
+
+        <div style={{ marginTop: 8 }}>
           <button onClick={signOut} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', fontSize: 14, textDecoration: 'underline' }}>
             Sair da conta
           </button>

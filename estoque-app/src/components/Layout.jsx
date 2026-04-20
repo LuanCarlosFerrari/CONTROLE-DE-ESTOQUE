@@ -9,14 +9,14 @@ export default function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-900)' }}>
+    <div style={{ display: 'flex', height: '100vh', overflow: 'hidden', background: 'var(--bg-900)' }}>
       {sidebarOpen && (
         <div className="sidebar-overlay" onClick={() => setSidebarOpen(false)} />
       )}
 
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, height: '100%', overflow: 'hidden' }}>
         <header className="mobile-header">
           <button className="mobile-menu-btn" onClick={() => setSidebarOpen(true)} aria-label="Abrir menu">
             <Menu size={22} />
@@ -29,7 +29,7 @@ export default function Layout() {
         </header>
 
         <TrialBanner />
-        <main style={{ flex: 1, overflow: 'auto' }}>
+        <main style={{ flex: 1, overflow: 'auto', minHeight: 0 }}>
           <Outlet />
         </main>
       </div>

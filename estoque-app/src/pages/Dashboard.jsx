@@ -96,7 +96,7 @@ export default function Dashboard() {
   )
 
   return (
-    <div style={{ maxWidth: 1200 }} className="animate-fade-in page-content">
+    <div style={{ width: "100%" }} className="animate-fade-in page-content">
       <PageHeader title="Dashboard" subtitle={`${new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}`} />
 
       {/* Stat cards */}

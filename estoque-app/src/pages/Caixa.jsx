@@ -219,7 +219,7 @@ export default function Caixa() {
   const semCaixa     = !caixa
 
   return (
-    <div style={{ maxWidth: 1200 }} className="animate-fade-in page-content">
+    <div style={{ width: "100%" }} className="animate-fade-in page-content">
 
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 28, paddingBottom: 24, borderBottom: '1px solid var(--bg-600)', flexWrap: 'wrap', gap: 16 }}>
@@ -306,7 +306,7 @@ export default function Caixa() {
       </div>
 
       {/* Lista de movimentações */}
-      <div style={{ background: 'var(--bg-800)', border: '1px solid var(--bg-500)', borderRadius: 14, overflow: 'hidden' }}>
+      <div style={{ background: 'var(--bg-800)', border: '1px solid var(--bg-500)', borderRadius: 14, overflow: 'hidden', flex: 1, minHeight: 0 }}>
         {loading ? (
           <div style={{ padding: '24px 20px' }}>
             {[...Array(4)].map((_, i) => <div key={i} className="skeleton" style={{ height: 64, borderRadius: 8, marginBottom: 10, opacity: 1 - i * 0.15 }} />)}

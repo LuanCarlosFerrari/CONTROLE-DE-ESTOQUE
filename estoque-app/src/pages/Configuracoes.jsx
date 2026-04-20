@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
-import { Package, Wrench, BedDouble, Wine, Save, Mail, KeyRound, CheckCircle, Clock, ShieldAlert, User } from 'lucide-react'
+import { Package, Wrench, BedDouble, Wine, Save, Zap, KeyRound, CheckCircle, Clock, ShieldAlert, User } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabase'
 import Toast from '../components/Toast'
+import { createPaymentPreference } from '../lib/mercadopago'
 
 const BUSINESS_TYPES = [
   { value: 'estoque', icon: Package, label: 'Estoque Geral',    desc: 'Produtos, clientes e vendas' },
@@ -40,6 +41,20 @@ export default function Configuracoes() {
   const [resetSent, setResetSent] = useState(false)
 
   const [toast, setToast] = useState(null)
+  const [loadingPay, setLoadingPay] = useState(false)
+  const [payError, setPayError] = useState(null)
+
+  const handlePagar = async () => {
+    setLoadingPay(true)
+    setPayError(null)
+    try {
+      const url = await createPaymentPreference()
+      window.location.href = url
+    } catch (err) {
+      setPayError('Não foi possível iniciar o pagamento. Tente novamente.')
+      setLoadingPay(false)
+    }
+  }
 
   useEffect(() => {
     setSelectedType(businessType)
@@ -223,13 +238,17 @@ export default function Configuracoes() {
                 </li>
               ))}
             </ul>
-            <a
-              href={`mailto:contato@stocktag.com.br?subject=Quero assinar o StockTag&body=Email: ${user?.email}`}
+            <button
+              onClick={handlePagar}
+              disabled={loadingPay}
               className="btn-primary"
-              style={{ textDecoration: 'none', display: 'inline-flex', padding: '10px 20px', fontSize: 14 }}
+              style={{ display: 'inline-flex', padding: '10px 20px', fontSize: 14, opacity: loadingPay ? 0.7 : 1, cursor: loadingPay ? 'not-allowed' : 'pointer', border: 'none' }}
             >
-              <Mail size={15} /> Entrar em contato para assinar
-            </a>
+              <Zap size={15} /> {loadingPay ? 'Redirecionando...' : 'Pagar com MercadoPago'}
+            </button>
+            {payError && (
+              <p style={{ color: 'var(--red)', fontSize: 13, marginTop: 8 }}>{payError}</p>
+            )}
           </div>
         )}
       </Section>

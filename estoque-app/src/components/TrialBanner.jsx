@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Clock, X, Zap } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
+import { createPaymentPreference } from '../lib/mercadopago'
 
 function pad(n) {
   return String(n).padStart(2, '0')
@@ -10,6 +11,17 @@ export default function TrialBanner() {
   const { subscription, isTrial } = useAuth()
   const [dismissed, setDismissed] = useState(false)
   const [timeLeft, setTimeLeft] = useState(null)
+  const [loadingPay, setLoadingPay] = useState(false)
+
+  const handlePagar = async () => {
+    setLoadingPay(true)
+    try {
+      const url = await createPaymentPreference()
+      window.location.href = url
+    } catch {
+      setLoadingPay(false)
+    }
+  }
 
   useEffect(() => {
     if (!isTrial || !subscription?.trial_ends_at) return
@@ -94,21 +106,22 @@ export default function TrialBanner() {
 
       {/* Direita */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-        <a
-          href="mailto:contato@stocktag.com.br?subject=Quero assinar o StockTag"
+        <button
+          onClick={handlePagar}
+          disabled={loadingPay}
           style={{
             display: 'inline-flex', alignItems: 'center', gap: 6,
             background: color, color: '#000',
             fontWeight: 700, fontSize: 12,
             padding: '6px 14px', borderRadius: 6,
-            textDecoration: 'none', whiteSpace: 'nowrap',
+            border: 'none', whiteSpace: 'nowrap',
+            cursor: loadingPay ? 'not-allowed' : 'pointer',
+            opacity: loadingPay ? 0.7 : 1,
             transition: 'opacity 0.2s',
           }}
-          onMouseEnter={e => e.currentTarget.style.opacity = '0.85'}
-          onMouseLeave={e => e.currentTarget.style.opacity = '1'}
         >
-          <Zap size={12} /> Assinar agora
-        </a>
+          <Zap size={12} /> {loadingPay ? 'Aguarde...' : 'Assinar agora'}
+        </button>
         <button
           onClick={() => setDismissed(true)}
           style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-subtle)', display: 'flex', padding: 2 }}

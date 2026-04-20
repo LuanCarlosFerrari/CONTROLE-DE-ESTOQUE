@@ -73,7 +73,7 @@ export default function Clientes() {
   )
 
   return (
-    <div style={{ maxWidth: 1200 }} className="animate-fade-in page-content">
+    <div style={{ width: "100%" }} className="animate-fade-in page-content">
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 28, paddingBottom: 24, borderBottom: '1px solid var(--bg-600)', flexWrap: 'wrap', gap: 16 }}>
         <div>
@@ -96,7 +96,7 @@ export default function Clientes() {
       </div>
 
       {/* Table */}
-      <div style={{ background: 'var(--bg-800)', border: '1px solid var(--bg-500)', borderRadius: 14, overflow: 'hidden' }}>
+      <div style={{ background: 'var(--bg-800)', border: '1px solid var(--bg-500)', borderRadius: 14, overflow: 'hidden', flex: 1, minHeight: 0 }}>
         {loading ? (
           <div style={{ padding: '24px 20px' }}>
             {[...Array(5)].map((_, i) => <div key={i} className="skeleton" style={{ height: 44, borderRadius: 8, marginBottom: 10, opacity: 1 - i * 0.15 }} />)}

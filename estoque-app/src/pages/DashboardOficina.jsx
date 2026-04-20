@@ -108,7 +108,7 @@ export default function DashboardOficina() {
   )
 
   return (
-    <div style={{ maxWidth: 1200 }} className="animate-fade-in page-content">
+    <div style={{ width: "100%" }} className="animate-fade-in page-content">
       {/* Header */}
       <div style={{ marginBottom: 32, paddingBottom: 24, borderBottom: '1px solid var(--bg-600)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 4 }}>
