@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext'
 import { ThemeProvider } from './contexts/ThemeContext'
+import ErrorBoundary from './components/ui/ErrorBoundary'
 import PrivateRoute from './components/layout/PrivateRoute'
 import BusinessRoute from './components/layout/BusinessRoute'
 import Layout from './components/layout/Layout'
@@ -22,6 +23,7 @@ import Configuracoes from './pages/Configuracoes'
 
 export default function App() {
   return (
+    <ErrorBoundary>
     <ThemeProvider>
     <AuthProvider>
       <BrowserRouter>
@@ -85,5 +87,6 @@ export default function App() {
       </BrowserRouter>
     </AuthProvider>
     </ThemeProvider>
+    </ErrorBoundary>
   )
 }

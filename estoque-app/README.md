@@ -1,16 +1,57 @@
-# React + Vite
+# StockTag
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Sistema de gestão para pequenos negócios. Suporta 4 tipos de operação:
 
-Currently, two official plugins are available:
+| Tipo | Módulos |
+|------|---------|
+| **Estoque Geral** | Estoque, Clientes, Vendas, Fornecedores, Caixa |
+| **Oficina Mecânica** | Ordens de Serviço, Veículos, Peças/Estoque, Clientes, Caixa |
+| **Hotel / Pousada** | Quartos, Reservas, Fornecedores, Clientes, Caixa |
+| **Bar / Restaurante** | Mesas, Cardápio/Estoque, Fornecedores, Clientes, Caixa |
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Stack
 
-## React Compiler
+- **Frontend**: React 19 + Vite 5
+- **Backend/DB**: Supabase (PostgreSQL + Auth + RLS)
+- **Pagamentos**: MercadoPago
+- **Deploy**: Vercel
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Setup
 
-## Expanding the ESLint configuration
+```bash
+npm install
+cp .env.example .env   # preencher com credenciais Supabase
+npm run dev
+```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Rodar o arquivo `supabase_schema.sql` no SQL Editor do Supabase antes de usar.
+
+## Estrutura
+
+```
+src/
+├── assets/
+├── components/
+│   ├── layout/      Layout, Sidebar, PrivateRoute, BusinessRoute
+│   └── ui/          Modal, Toast, TrialBanner, ErrorBoundary
+├── contexts/        AuthContext, ThemeContext
+├── hooks/           useToast
+├── lib/             supabase.js, mercadopago.js
+├── pages/
+│   ├── auth/        Landing, Login, Register, TrialExpired
+│   ├── dashboard/   Dashboard, DashboardOficina, DashboardHotel
+│   ├── estoque/     Estoque, Clientes, Vendas, Caixa, Fornecedores
+│   │   └── caixa/   CaixaStats, MovimentacaoLista, ModalVenda, ModalExtra
+│   ├── oficina/     Veiculos, OrdensServico
+│   ├── hotel/       Quartos, Reservas
+│   └── bar/         Mesas
+└── utils/           format.js
+```
+
+## Variáveis de ambiente
+
+```env
+VITE_SUPABASE_URL=https://SEU_PROJETO.supabase.co
+VITE_SUPABASE_ANON_KEY=sua_anon_key_aqui
+VITE_APP_URL=https://SEU_DOMINIO.vercel.app
+```
