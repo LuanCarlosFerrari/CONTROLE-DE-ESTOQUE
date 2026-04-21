@@ -48,6 +48,43 @@ create table if not exists venda_itens (
   created_at timestamptz default now()
 );
 
+-- Tabela: mesas (Bar / Restaurante)
+create table if not exists mesas (
+  id uuid default gen_random_uuid() primary key,
+  numero text not null,
+  tipo text default 'salao' check (tipo in ('salao', 'varanda', 'reservado', 'bar')),
+  capacidade integer default 4,
+  status text default 'disponivel' check (status in ('disponivel', 'ocupada', 'reservada')),
+  descricao text,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+
+-- Tabela: comanda_itens (itens lançados nas mesas)
+create table if not exists comanda_itens (
+  id uuid default gen_random_uuid() primary key,
+  mesa_id uuid references mesas(id) on delete cascade,
+  descricao text not null,
+  quantidade integer default 1,
+  preco_unitario numeric(10,2) not null,
+  created_at timestamptz default now()
+);
+
+-- Tabela: fornecedores
+create table if not exists fornecedores (
+  id uuid default gen_random_uuid() primary key,
+  nome text not null,
+  cnpj text,
+  telefone text,
+  email text,
+  categoria text,
+  cidade text,
+  observacoes text,
+  ativo boolean default true,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+
 -- ============================================================
 -- Row Level Security (RLS) — Protege dados por usuário autenticado
 -- ============================================================
@@ -56,21 +93,40 @@ alter table produtos enable row level security;
 alter table clientes enable row level security;
 alter table vendas enable row level security;
 alter table venda_itens enable row level security;
+alter table mesas enable row level security;
+alter table comanda_itens enable row level security;
+alter table fornecedores enable row level security;
 
 -- Políticas: qualquer usuário autenticado pode ler e escrever
 -- (ajuste conforme necessário para multi-tenant)
 
+drop policy if exists "Authenticated users can do everything on produtos" on produtos;
 create policy "Authenticated users can do everything on produtos"
   on produtos for all to authenticated using (true) with check (true);
 
+drop policy if exists "Authenticated users can do everything on clientes" on clientes;
 create policy "Authenticated users can do everything on clientes"
   on clientes for all to authenticated using (true) with check (true);
 
+drop policy if exists "Authenticated users can do everything on vendas" on vendas;
 create policy "Authenticated users can do everything on vendas"
   on vendas for all to authenticated using (true) with check (true);
 
+drop policy if exists "Authenticated users can do everything on venda_itens" on venda_itens;
 create policy "Authenticated users can do everything on venda_itens"
   on venda_itens for all to authenticated using (true) with check (true);
+
+drop policy if exists "Authenticated users can do everything on mesas" on mesas;
+create policy "Authenticated users can do everything on mesas"
+  on mesas for all to authenticated using (true) with check (true);
+
+drop policy if exists "Authenticated users can do everything on comanda_itens" on comanda_itens;
+create policy "Authenticated users can do everything on comanda_itens"
+  on comanda_itens for all to authenticated using (true) with check (true);
+
+drop policy if exists "Authenticated users can do everything on fornecedores" on fornecedores;
+create policy "Authenticated users can do everything on fornecedores"
+  on fornecedores for all to authenticated using (true) with check (true);
 
 -- ============================================================
 -- Trigger: updated_at automático
@@ -84,12 +140,24 @@ begin
 end;
 $$;
 
+drop trigger if exists set_updated_at_produtos on produtos;
 create trigger set_updated_at_produtos
   before update on produtos
   for each row execute function update_updated_at();
 
+drop trigger if exists set_updated_at_clientes on clientes;
 create trigger set_updated_at_clientes
   before update on clientes
+  for each row execute function update_updated_at();
+
+drop trigger if exists set_updated_at_mesas on mesas;
+create trigger set_updated_at_mesas
+  before update on mesas
+  for each row execute function update_updated_at();
+
+drop trigger if exists set_updated_at_fornecedores on fornecedores;
+create trigger set_updated_at_fornecedores
+  before update on fornecedores
   for each row execute function update_updated_at();
 
 -- ============================================================

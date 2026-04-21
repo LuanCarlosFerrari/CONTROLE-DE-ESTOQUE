@@ -271,7 +271,15 @@ export default function Reservas() {
                       <td>
                         <div>
                           <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)', marginBottom: 1 }}>{r.nome_hospede}</p>
-                          {r.telefone_hospede && <p style={{ fontSize: 11, color: 'var(--text-subtle)' }}>{r.telefone_hospede}</p>}
+                          {r.telefone_hospede && (
+                            <a
+                              href={`https://wa.me/55${r.telefone_hospede.replace(/\D/g, '')}`}
+                              target="_blank" rel="noreferrer"
+                              style={{ fontSize: 11, color: 'var(--text-subtle)', textDecoration: 'none', display: 'block' }}
+                              onMouseEnter={e => e.currentTarget.style.color = '#25D366'}
+                              onMouseLeave={e => e.currentTarget.style.color = 'var(--text-subtle)'}
+                            >{r.telefone_hospede}</a>
+                          )}
                         </div>
                       </td>
                       <td>

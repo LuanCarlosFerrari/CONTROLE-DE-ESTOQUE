@@ -2,7 +2,7 @@ import { NavLink, useNavigate } from 'react-router-dom'
 import {
   LayoutDashboard, Package, Users, ShoppingCart, LogOut,
   Clock, CheckCircle, Sun, Moon,
-  Wrench, BedDouble, Wine, Truck, Car, Calendar, Settings, Wallet,
+  Wrench, BedDouble, UtensilsCrossed, Truck, Car, Calendar, Settings, Wallet, LayoutGrid,
 } from 'lucide-react'
 import stockTagImg from '../assets/Stock_Tag.png'
 import { useAuth } from '../contexts/AuthContext'
@@ -10,32 +10,36 @@ import { useTheme } from '../contexts/ThemeContext'
 
 const MENUS = {
   estoque: [
-    { to: '/app/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-    { to: '/app/estoque',   icon: Package,         label: 'Estoque' },
-    { to: '/app/clientes',  icon: Users,           label: 'Clientes' },
-    { to: '/app/caixa',     icon: Wallet,          label: 'Caixa' },
+    { to: '/app/dashboard',    icon: LayoutDashboard, label: 'Dashboard' },
+    { to: '/app/estoque',      icon: Package,         label: 'Estoque' },
+    { to: '/app/fornecedores', icon: Truck,           label: 'Fornecedores' },
+    { to: '/app/clientes',     icon: Users,           label: 'Clientes' },
+    { to: '/app/caixa',        icon: Wallet,          label: 'Caixa' },
   ],
   oficina: [
-    { to: '/app/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-    { to: '/app/ordens',    icon: Wrench,          label: 'Ordens de Serviço' },
-    { to: '/app/veiculos',  icon: Car,             label: 'Veículos' },
-    { to: '/app/estoque',   icon: Package,         label: 'Peças / Estoque' },
-    { to: '/app/clientes',  icon: Users,           label: 'Clientes' },
-    { to: '/app/caixa',     icon: Wallet,          label: 'Caixa' },
+    { to: '/app/dashboard',    icon: LayoutDashboard, label: 'Dashboard' },
+    { to: '/app/ordens',       icon: Wrench,          label: 'Ordens de Serviço' },
+    { to: '/app/veiculos',     icon: Car,             label: 'Veículos' },
+    { to: '/app/estoque',      icon: Package,         label: 'Peças / Estoque' },
+    { to: '/app/fornecedores', icon: Truck,           label: 'Fornecedores' },
+    { to: '/app/clientes',     icon: Users,           label: 'Clientes' },
+    { to: '/app/caixa',        icon: Wallet,          label: 'Caixa' },
   ],
   hotel: [
-    { to: '/app/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-    { to: '/app/quartos',   icon: BedDouble,       label: 'Quartos' },
-    { to: '/app/reservas',  icon: Calendar,        label: 'Reservas' },
-    { to: '/app/clientes',  icon: Users,           label: 'Clientes' },
-    { to: '/app/caixa',     icon: Wallet,          label: 'Caixa' },
+    { to: '/app/dashboard',    icon: LayoutDashboard, label: 'Dashboard' },
+    { to: '/app/quartos',      icon: BedDouble,       label: 'Quartos' },
+    { to: '/app/reservas',     icon: Calendar,        label: 'Reservas' },
+    { to: '/app/fornecedores', icon: Truck,           label: 'Fornecedores' },
+    { to: '/app/clientes',     icon: Users,           label: 'Clientes' },
+    { to: '/app/caixa',        icon: Wallet,          label: 'Caixa' },
   ],
-  adega: [
-    { to: '/app/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-    { to: '/app/vinhos', icon: Wine, label: 'Vinhos / Lotes', soon: true },
-    { to: '/app/fornecedores', icon: Truck, label: 'Fornecedores', soon: true },
-    { to: '/app/clientes', icon: Users, label: 'Clientes' },
-    { to: '/app/caixa', icon: Wallet, label: 'Caixa' },
+  bar: [
+    { to: '/app/dashboard',    icon: LayoutDashboard,  label: 'Dashboard' },
+    { to: '/app/mesas',        icon: LayoutGrid,       label: 'Mesas' },
+    { to: '/app/estoque',      icon: Package,          label: 'Cardápio / Estoque' },
+    { to: '/app/fornecedores', icon: Truck,            label: 'Fornecedores' },
+    { to: '/app/clientes',     icon: Users,            label: 'Clientes' },
+    { to: '/app/caixa',        icon: Wallet,           label: 'Caixa' },
   ],
 }
 
@@ -43,7 +47,7 @@ const LABELS = {
   estoque: 'Estoque Geral',
   oficina: 'Oficina Mecânica',
   hotel: 'Hotel / Pousada',
-  adega: 'Adega / Vinhos',
+  bar: 'Bar / Restaurante',
 }
 
 export default function Sidebar({ isOpen, onClose }) {

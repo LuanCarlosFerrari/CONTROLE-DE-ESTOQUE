@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Eye, EyeOff, ArrowLeft, CheckCircle, Package, Wrench, BedDouble, Wine, ArrowRight } from 'lucide-react'
+import { Eye, EyeOff, ArrowLeft, CheckCircle, Package, Wrench, BedDouble, UtensilsCrossed, ArrowRight } from 'lucide-react'
 import stockTagImg from '../assets/Stock_Tag.png'
 import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabase'
@@ -25,10 +25,10 @@ const BUSINESS_TYPES = [
     desc: 'Quartos e reservas',
   },
   {
-    value: 'adega',
-    icon: Wine,
-    label: 'Adega / Vinhos',
-    desc: 'Safras, lotes e fornecedores',
+    value: 'bar',
+    icon: UtensilsCrossed,
+    label: 'Bar / Restaurante',
+    desc: 'Mesas, comandas e cardápio',
   },
 ]
 

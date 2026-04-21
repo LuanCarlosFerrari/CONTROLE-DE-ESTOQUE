@@ -16,6 +16,8 @@ import Veiculos from './pages/Veiculos'
 import OrdensServico from './pages/OrdensServico'
 import Quartos from './pages/Quartos'
 import Reservas from './pages/Reservas'
+import Fornecedores from './pages/Fornecedores'
+import Mesas from './pages/Mesas'
 import Configuracoes from './pages/Configuracoes'
 
 export default function App() {
@@ -35,13 +37,13 @@ export default function App() {
             <Route index element={<Navigate to="dashboard" replace />} />
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="estoque" element={
-              <BusinessRoute allow={['estoque', 'oficina', 'adega']}>
+              <BusinessRoute allow={['estoque', 'oficina', 'bar']}>
                 <Estoque />
               </BusinessRoute>
             } />
             <Route path="clientes" element={<Clientes />} />
             <Route path="vendas" element={
-              <BusinessRoute allow={['estoque', 'oficina', 'adega']}>
+              <BusinessRoute allow={['estoque', 'oficina', 'bar']}>
                 <Vendas />
               </BusinessRoute>
             } />
@@ -64,6 +66,16 @@ export default function App() {
             <Route path="reservas" element={
               <BusinessRoute allow={['hotel']}>
                 <Reservas />
+              </BusinessRoute>
+            } />
+            <Route path="mesas" element={
+              <BusinessRoute allow={['bar']}>
+                <Mesas />
+              </BusinessRoute>
+            } />
+            <Route path="fornecedores" element={
+              <BusinessRoute allow={['estoque', 'oficina', 'hotel', 'bar']}>
+                <Fornecedores />
               </BusinessRoute>
             } />
             <Route path="configuracoes" element={<Configuracoes />} />

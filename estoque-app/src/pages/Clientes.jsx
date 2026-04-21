@@ -145,9 +145,15 @@ export default function Clientes() {
                           </a>
                         )}
                         {c.telefone && (
-                          <span style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--text-subtle)', fontSize: 13 }}>
+                          <a
+                            href={`https://wa.me/55${c.telefone.replace(/\D/g, '')}`}
+                            target="_blank" rel="noreferrer"
+                            style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--text-subtle)', fontSize: 13, textDecoration: 'none' }}
+                            onMouseEnter={e => e.currentTarget.style.color = '#25D366'}
+                            onMouseLeave={e => e.currentTarget.style.color = 'var(--text-subtle)'}
+                          >
                             <Phone size={12} />{c.telefone}
-                          </span>
+                          </a>
                         )}
                         {!c.email && !c.telefone && <span style={{ fontSize: 13, color: 'var(--text-subtle)' }}>—</span>}
                       </div>

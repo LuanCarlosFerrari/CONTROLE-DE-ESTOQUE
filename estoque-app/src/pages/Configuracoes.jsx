@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Package, Wrench, BedDouble, Wine, Save, Zap, KeyRound, CheckCircle, Clock, ShieldAlert, User } from 'lucide-react'
+import { Package, Wrench, BedDouble, UtensilsCrossed, Save, Zap, KeyRound, CheckCircle, Clock, ShieldAlert, User } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabase'
 import Toast from '../components/Toast'
@@ -9,7 +9,7 @@ const BUSINESS_TYPES = [
   { value: 'estoque', icon: Package, label: 'Estoque Geral',    desc: 'Produtos, clientes e vendas' },
   { value: 'oficina', icon: Wrench,  label: 'Oficina Mecânica', desc: 'OS, veículos e peças' },
   { value: 'hotel',   icon: BedDouble, label: 'Hotel / Pousada', desc: 'Quartos e reservas' },
-  { value: 'adega',   icon: Wine,    label: 'Adega / Vinhos',   desc: 'Safras, lotes e fornecedores' },
+  { value: 'bar',     icon: UtensilsCrossed, label: 'Bar / Restaurante', desc: 'Mesas, comandas e cardápio' },
 ]
 
 const Section = ({ title, subtitle, children }) => (
