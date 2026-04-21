@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { Package, Wrench, BedDouble, UtensilsCrossed, Save, Zap, KeyRound, CheckCircle, Clock, ShieldAlert, User } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabase'
-import Toast from '../components/Toast'
+import Toast from '../components/ui/Toast'
 import { createPaymentPreference } from '../lib/mercadopago'
 
 const BUSINESS_TYPES = [
