@@ -5,6 +5,8 @@ import { useEffect, useState } from 'react'
 import { Package, Users, ShoppingCart, AlertTriangle, TrendingUp, ArrowUpRight } from 'lucide-react'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 import { supabase } from '../../lib/supabase'
+import StatCard from '../../components/ui/StatCard'
+import PageHeader from '../../components/ui/PageHeader'
 
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload?.length) {
@@ -24,15 +26,6 @@ const CustomTooltip = ({ active, payload, label }) => {
   return null
 }
 
-const PageHeader = ({ title, subtitle }) => (
-  <div style={{ marginBottom: 32, paddingBottom: 24, borderBottom: '1px solid var(--bg-600)' }}>
-    <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 4 }}>
-      <div style={{ width: 3, height: 22, background: 'var(--amber)', borderRadius: 2 }} />
-      <h1 style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 26, fontWeight: 700, color: 'var(--text)', letterSpacing: '-0.01em' }}>{title}</h1>
-    </div>
-    <p style={{ fontSize: 14, color: 'var(--text-muted)', paddingLeft: 15 }}>{subtitle}</p>
-  </div>
-)
 
 export default function Dashboard() {
   const { businessType } = useAuth()
@@ -101,31 +94,7 @@ export default function Dashboard() {
 
       {/* Stat cards */}
       <div className="stats-grid-4" style={{ marginBottom: 28 }}>
-        {statCards.map(({ label, sublabel, value, icon: Icon, color, border, glow }) => (
-          <div key={label} style={{
-            background: `linear-gradient(135deg, var(--bg-700) 0%, ${glow} 100%)`,
-            border: `1px solid ${border}`,
-            borderRadius: 14, padding: '20px 22px',
-            transition: 'transform 0.2s, box-shadow 0.2s',
-            cursor: 'default',
-          }}
-            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = `0 8px 32px ${glow}` }}
-            onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'none' }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-              <div style={{ display: 'flex', flexDirection: 'column' }}>
-                <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--text-subtle)' }}>{label}</span>
-                <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: 'var(--text-subtle)', letterSpacing: '0.04em' }}>{sublabel}</span>
-              </div>
-              <div style={{ width: 36, height: 36, borderRadius: 9, background: `${color}18`, border: `1px solid ${color}30`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Icon size={17} color={color} />
-              </div>
-            </div>
-            <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 26, fontWeight: 700, color, lineHeight: 1, letterSpacing: '-0.02em' }}>
-              {value}
-            </p>
-          </div>
-        ))}
+        {statCards.map(card => <StatCard key={card.label} {...card} />)}
       </div>
 
       {/* Charts */}

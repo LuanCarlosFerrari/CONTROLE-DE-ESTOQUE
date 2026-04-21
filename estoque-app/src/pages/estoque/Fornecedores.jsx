@@ -1,9 +1,16 @@
 import { useEffect, useState, useCallback } from 'react'
+import { useToast } from '../../hooks/useToast'
 import { Plus, Search, Pencil, Trash2, Truck, Mail, Phone, MapPin, Building2, CheckCircle, XCircle } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../contexts/AuthContext'
 import Modal from '../../components/ui/Modal'
 import Toast from '../../components/ui/Toast'
+import Label from '../../components/ui/FormLabel'
+import PageHeader from '../../components/ui/PageHeader'
+import SearchBar from '../../components/ui/SearchBar'
+import EmptyState from '../../components/ui/EmptyState'
+import ConfirmModal from '../../components/ui/ConfirmModal'
+import StatCard from '../../components/ui/StatCard'
 
 const CATEGORIAS = {
   estoque: ['Alimentação', 'Bebidas', 'Higiene', 'Limpeza', 'Eletrônicos', 'Vestuário', 'Outro'],
@@ -14,11 +21,6 @@ const CATEGORIAS = {
 
 const EMPTY = { nome: '', cnpj: '', telefone: '', email: '', categoria: '', cidade: '', observacoes: '', ativo: true }
 
-const Label = ({ children, required }) => (
-  <label style={{ display: 'block', fontSize: 12, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--text-subtle)', marginBottom: 7 }}>
-    {children}{required && <span style={{ color: 'var(--amber)', marginLeft: 3 }}>*</span>}
-  </label>
-)
 
 function Avatar({ nome }) {
   const initials = nome ? nome.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase() : '?'
@@ -32,7 +34,7 @@ function Avatar({ nome }) {
 }
 
 export default function Fornecedores() {
-  const { businessType } = useAuth()
+  const { businessType, user } = useAuth()
   const categorias = CATEGORIAS[businessType] || CATEGORIAS.estoque
 
   const [fornecedores, setFornecedores] = useState([])
@@ -44,7 +46,7 @@ export default function Fornecedores() {
   const [form, setForm] = useState({ ...EMPTY, categoria: categorias[0] })
   const [editing, setEditing] = useState(null)
   const [saving, setSaving] = useState(false)
-  const [toast, setToast] = useState(null)
+  const { toast, showToast, clearToast } = useToast()
   const [deleteId, setDeleteId] = useState(null)
 
   const load = useCallback(async () => {
@@ -67,10 +69,10 @@ export default function Fornecedores() {
     setSaving(true)
     const { error } = editing
       ? await supabase.from('fornecedores').update(form).eq('id', editing)
-      : await supabase.from('fornecedores').insert(form)
+      : await supabase.from('fornecedores').insert({ ...form, user_id: user.id })
     setSaving(false)
-    if (error) return setToast({ msg: error.message, type: 'error' })
-    setToast({ msg: editing ? 'Fornecedor atualizado!' : 'Fornecedor cadastrado!', type: 'success' })
+    if (error) return showToast(error.message, 'error')
+    showToast(editing ? 'Fornecedor atualizado!' : 'Fornecedor cadastrado!')
     setModal(false)
     load()
   }
@@ -78,8 +80,8 @@ export default function Fornecedores() {
   const handleDelete = async () => {
     const { error } = await supabase.from('fornecedores').delete().eq('id', deleteId)
     setDeleteId(null)
-    if (error) return setToast({ msg: error.message, type: 'error' })
-    setToast({ msg: 'Fornecedor removido.', type: 'success' })
+    if (error) return showToast(error.message, 'error')
+    showToast('Fornecedor removido.')
     load()
   }
 
@@ -98,19 +100,11 @@ export default function Fornecedores() {
   return (
     <div style={{ width: '100%' }} className="animate-fade-in page-content">
 
-      {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 28, paddingBottom: 24, borderBottom: '1px solid var(--bg-600)', flexWrap: 'wrap', gap: 16 }}>
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 4 }}>
-            <div style={{ width: 3, height: 22, background: 'var(--amber)', borderRadius: 2 }} />
-            <h1 style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 26, fontWeight: 700, color: 'var(--text)', letterSpacing: '-0.01em' }}>Fornecedores</h1>
-          </div>
-          <p style={{ fontSize: 13, color: 'var(--text-muted)', paddingLeft: 15 }}>
-            {total} fornecedor{total !== 1 ? 'es' : ''} cadastrado{total !== 1 ? 's' : ''}
-          </p>
-        </div>
-        <button className="btn-primary" onClick={openCreate}><Plus size={15} /> Novo fornecedor</button>
-      </div>
+      <PageHeader
+        title="Fornecedores"
+        subtitle={`${total} fornecedor${total !== 1 ? 'es' : ''} cadastrado${total !== 1 ? 's' : ''}`}
+        actions={<button className="btn-primary" onClick={openCreate}><Plus size={15} /> Novo fornecedor</button>}
+      />
 
       {/* Stats */}
       <div className="stats-grid-3" style={{ marginBottom: 20 }}>
@@ -119,20 +113,8 @@ export default function Fornecedores() {
           { label: 'Ativos',   sublabel: 'habilitados',   value: ativos },
           { label: 'Inativos', sublabel: 'desabilitados', value: inativos },
         ].map(({ label, sublabel, value }) => (
-          <div key={label} style={{
-            background: 'linear-gradient(135deg, var(--bg-700) 0%, rgba(16,185,129,0.06) 100%)',
-            border: '1px solid rgba(16,185,129,0.3)', borderRadius: 14, padding: '20px 22px',
-            transition: 'transform 0.2s, box-shadow 0.2s', cursor: 'default',
-          }}
-            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(16,185,129,0.06)' }}
-            onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'none' }}
-          >
-            <div style={{ marginBottom: 16 }}>
-              <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--text-subtle)', display: 'block' }}>{label}</span>
-              <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: 'var(--text-subtle)', letterSpacing: '0.04em' }}>{sublabel}</span>
-            </div>
-            <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 26, fontWeight: 700, color: 'var(--amber)', lineHeight: 1, letterSpacing: '-0.02em' }}>{value}</p>
-          </div>
+          <StatCard key={label} label={label} sublabel={sublabel} value={value}
+            color="var(--amber)" border="rgba(16,185,129,0.3)" glow="rgba(16,185,129,0.06)" />
         ))}
       </div>
 
@@ -173,17 +155,7 @@ export default function Fornecedores() {
             {[...Array(5)].map((_, i) => <div key={i} className="skeleton" style={{ height: 44, borderRadius: 8, marginBottom: 10, opacity: 1 - i * 0.15 }} />)}
           </div>
         ) : filtered.length === 0 ? (
-          <div style={{ padding: '72px 32px', textAlign: 'center' }}>
-            <div style={{ width: 64, height: 64, borderRadius: 16, background: 'var(--bg-700)', border: '1px solid var(--bg-500)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
-              <Truck size={28} color="var(--bg-400)" />
-            </div>
-            <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 16, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 6 }}>
-              {search || filterCat !== 'todas' ? 'Nenhum fornecedor encontrado' : 'Nenhum fornecedor cadastrado'}
-            </p>
-            <p style={{ fontSize: 13, color: 'var(--text-subtle)' }}>
-              {search || filterCat !== 'todas' ? 'Tente outros filtros' : 'Adicione o primeiro fornecedor'}
-            </p>
-          </div>
+          <EmptyState icon={Truck} title={search || filterCat !== 'todas' ? 'Nenhum fornecedor encontrado' : 'Nenhum fornecedor cadastrado'} subtitle={search || filterCat !== 'todas' ? 'Tente outros filtros' : 'Adicione o primeiro fornecedor'} />
         ) : (
           <div style={{ overflowX: 'auto' }}>
             <table className="data-table">
@@ -345,22 +317,10 @@ export default function Fornecedores() {
       )}
 
       {deleteId && (
-        <Modal title="Excluir fornecedor" onClose={() => setDeleteId(null)}>
-          <div style={{ textAlign: 'center', padding: '8px 0 16px' }}>
-            <div style={{ width: 52, height: 52, borderRadius: '50%', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
-              <Trash2 size={22} color="#F87171" />
-            </div>
-            <p style={{ fontSize: 15, color: 'var(--text)', fontWeight: 500, marginBottom: 8 }}>Tem certeza?</p>
-            <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>Esta ação não pode ser desfeita.</p>
-          </div>
-          <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
-            <button className="btn-secondary" onClick={() => setDeleteId(null)} style={{ flex: 1 }}>Cancelar</button>
-            <button className="btn-danger" onClick={handleDelete} style={{ flex: 1, padding: '10px 20px', justifyContent: 'center' }}>Excluir</button>
-          </div>
-        </Modal>
+        <ConfirmModal title="Excluir fornecedor" message="Esta ação não pode ser desfeita." onConfirm={handleDelete} onClose={() => setDeleteId(null)} />
       )}
 
-      {toast && <Toast message={toast.msg} type={toast.type} onClose={() => setToast(null)} />}
+      {toast && <Toast message={toast.message} type={toast.type} onClose={clearToast} />}
     </div>
   )
 }

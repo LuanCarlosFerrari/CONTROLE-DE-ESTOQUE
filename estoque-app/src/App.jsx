@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext'
 import { ThemeProvider } from './contexts/ThemeContext'
@@ -8,18 +9,25 @@ import Layout from './components/layout/Layout'
 import Landing from './pages/auth/Landing'
 import Login from './pages/auth/Login'
 import Register from './pages/auth/Register'
-import Dashboard from './pages/dashboard/Dashboard'
-import Estoque from './pages/estoque/Estoque'
-import Clientes from './pages/estoque/Clientes'
-import Vendas from './pages/estoque/Vendas'
-import Caixa from './pages/estoque/Caixa'
-import Veiculos from './pages/oficina/Veiculos'
-import OrdensServico from './pages/oficina/OrdensServico'
-import Quartos from './pages/hotel/Quartos'
-import Reservas from './pages/hotel/Reservas'
-import Fornecedores from './pages/estoque/Fornecedores'
-import Mesas from './pages/bar/Mesas'
-import Configuracoes from './pages/Configuracoes'
+
+const Dashboard      = lazy(() => import('./pages/dashboard/Dashboard'))
+const Estoque        = lazy(() => import('./pages/estoque/Estoque'))
+const Clientes       = lazy(() => import('./pages/estoque/Clientes'))
+const Vendas         = lazy(() => import('./pages/estoque/Vendas'))
+const Caixa          = lazy(() => import('./pages/estoque/Caixa'))
+const Veiculos       = lazy(() => import('./pages/oficina/Veiculos'))
+const OrdensServico  = lazy(() => import('./pages/oficina/OrdensServico'))
+const Quartos        = lazy(() => import('./pages/hotel/Quartos'))
+const Reservas       = lazy(() => import('./pages/hotel/Reservas'))
+const Fornecedores   = lazy(() => import('./pages/estoque/Fornecedores'))
+const Mesas          = lazy(() => import('./pages/bar/Mesas'))
+const Configuracoes  = lazy(() => import('./pages/Configuracoes'))
+
+const PageLoader = () => (
+  <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-subtle)', fontSize: 14 }}>
+    Carregando...
+  </div>
+)
 
 export default function App() {
   return (
@@ -37,50 +45,58 @@ export default function App() {
             </PrivateRoute>
           }>
             <Route index element={<Navigate to="dashboard" replace />} />
-            <Route path="dashboard" element={<Dashboard />} />
+            <Route path="dashboard" element={
+              <Suspense fallback={<PageLoader />}><Dashboard /></Suspense>
+            } />
             <Route path="estoque" element={
               <BusinessRoute allow={['estoque', 'oficina', 'bar']}>
-                <Estoque />
+                <Suspense fallback={<PageLoader />}><Estoque /></Suspense>
               </BusinessRoute>
             } />
-            <Route path="clientes" element={<Clientes />} />
+            <Route path="clientes" element={
+              <Suspense fallback={<PageLoader />}><Clientes /></Suspense>
+            } />
             <Route path="vendas" element={
               <BusinessRoute allow={['estoque', 'oficina', 'bar']}>
-                <Vendas />
+                <Suspense fallback={<PageLoader />}><Vendas /></Suspense>
               </BusinessRoute>
             } />
-            <Route path="caixa" element={<Caixa />} />
+            <Route path="caixa" element={
+              <Suspense fallback={<PageLoader />}><Caixa /></Suspense>
+            } />
             <Route path="veiculos" element={
               <BusinessRoute allow={['oficina']}>
-                <Veiculos />
+                <Suspense fallback={<PageLoader />}><Veiculos /></Suspense>
               </BusinessRoute>
             } />
             <Route path="ordens" element={
               <BusinessRoute allow={['oficina']}>
-                <OrdensServico />
+                <Suspense fallback={<PageLoader />}><OrdensServico /></Suspense>
               </BusinessRoute>
             } />
             <Route path="quartos" element={
               <BusinessRoute allow={['hotel']}>
-                <Quartos />
+                <Suspense fallback={<PageLoader />}><Quartos /></Suspense>
               </BusinessRoute>
             } />
             <Route path="reservas" element={
               <BusinessRoute allow={['hotel']}>
-                <Reservas />
+                <Suspense fallback={<PageLoader />}><Reservas /></Suspense>
               </BusinessRoute>
             } />
             <Route path="mesas" element={
               <BusinessRoute allow={['bar']}>
-                <Mesas />
+                <Suspense fallback={<PageLoader />}><Mesas /></Suspense>
               </BusinessRoute>
             } />
             <Route path="fornecedores" element={
               <BusinessRoute allow={['estoque', 'oficina', 'hotel', 'bar']}>
-                <Fornecedores />
+                <Suspense fallback={<PageLoader />}><Fornecedores /></Suspense>
               </BusinessRoute>
             } />
-            <Route path="configuracoes" element={<Configuracoes />} />
+            <Route path="configuracoes" element={
+              <Suspense fallback={<PageLoader />}><Configuracoes /></Suspense>
+            } />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

@@ -1,15 +1,11 @@
 import { useState } from 'react'
 import { supabase } from '../../../lib/supabase'
 import Modal from '../../../components/ui/Modal'
+import Label from '../../../components/ui/FormLabel'
 
 const FORMAS = ['dinheiro', 'pix', 'cartao', 'outros']
 const FORMA_LABEL = { dinheiro: 'Dinheiro', pix: 'PIX', cartao: 'Cartão', outros: 'Outros' }
 
-const Label = ({ children, required }) => (
-  <label style={{ display: 'block', fontSize: 12, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--text-subtle)', marginBottom: 7 }}>
-    {children}{required && <span style={{ color: 'var(--amber)', marginLeft: 3 }}>*</span>}
-  </label>
-)
 
 export default function ModalExtra({ tipo, caixaId, onClose, onSaved, onError }) {
   const [descricao, setDescricao] = useState('')

@@ -1,16 +1,16 @@
 import { useEffect, useState, useCallback } from 'react'
-import { Plus, Search, ShoppingCart, X, ChevronDown, Receipt, Package } from 'lucide-react'
+import { useToast } from '../../hooks/useToast'
+import { formatCurrency as fmt } from '../../utils/format'
+import { Plus, ShoppingCart, X, ChevronDown, Receipt, Package } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import Modal from '../../components/ui/Modal'
 import Toast from '../../components/ui/Toast'
+import Label from '../../components/ui/FormLabel'
+import PageHeader from '../../components/ui/PageHeader'
+import SearchBar from '../../components/ui/SearchBar'
+import EmptyState from '../../components/ui/EmptyState'
 
-function fmt(val) { return Number(val || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 }) }
 
-const Label = ({ children, required }) => (
-  <label style={{ display: 'block', fontSize: 12, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--text-subtle)', marginBottom: 7 }}>
-    {children}{required && <span style={{ color: 'var(--amber)', marginLeft: 3 }}>*</span>}
-  </label>
-)
 
 const statusMap = {
   pago:      { label: 'Pago',      cls: 'badge-green', dot: '#34D399' },
@@ -29,7 +29,7 @@ export default function Vendas() {
   const [observacao, setObservacao] = useState('')
   const [itens, setItens] = useState([{ produto_id: '', quantidade: 1, preco_unitario: 0 }])
   const [saving, setSaving] = useState(false)
-  const [toast, setToast] = useState(null)
+  const { toast, showToast, clearToast } = useToast()
   const [expanded, setExpanded] = useState(null)
 
   const loadVendas = useCallback(async () => {
@@ -77,22 +77,22 @@ export default function Vendas() {
 
   const handleSave = async (e) => {
     e.preventDefault()
-    if (!clienteId) return setToast({ msg: 'Selecione um cliente.', type: 'error' })
+    if (!clienteId) return showToast('Selecione um cliente.', 'error')
     const validItens = itens.filter(i => i.produto_id && Number(i.quantidade) > 0)
-    if (validItens.length === 0) return setToast({ msg: 'Adicione pelo menos um produto.', type: 'error' })
+    if (validItens.length === 0) return showToast('Adicione pelo menos um produto.', 'error')
     setSaving(true)
     const { data: venda, error: errVenda } = await supabase.from('vendas').insert({ cliente_id: clienteId, total, observacao }).select().single()
-    if (errVenda) { setSaving(false); return setToast({ msg: errVenda.message, type: 'error' }) }
+    if (errVenda) { setSaving(false); return showToast(errVenda.message, 'error') }
     const { error: errItens } = await supabase.from('venda_itens').insert(
       validItens.map(i => ({ venda_id: venda.id, produto_id: i.produto_id, quantidade: Number(i.quantidade), preco_unitario: Number(i.preco_unitario) }))
     )
-    if (errItens) { setSaving(false); return setToast({ msg: errItens.message, type: 'error' }) }
+    if (errItens) { setSaving(false); return showToast(errItens.message, 'error') }
     for (const item of validItens) {
       const prod = produtos.find(p => p.id === item.produto_id)
       if (prod) await supabase.from('produtos').update({ quantidade: Math.max(0, prod.quantidade - Number(item.quantidade)) }).eq('id', item.produto_id)
     }
     setSaving(false)
-    setToast({ msg: 'Venda registrada com sucesso!', type: 'success' })
+    showToast('Venda registrada com sucesso!')
     setModal(false)
     loadVendas(); loadOptions()
   }
@@ -104,31 +104,22 @@ export default function Vendas() {
 
   return (
     <div style={{ width: "100%" }} className="animate-fade-in page-content">
-      {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 28, paddingBottom: 24, borderBottom: '1px solid var(--bg-600)', flexWrap: 'wrap', gap: 16 }}>
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 4 }}>
-            <div style={{ width: 3, height: 22, background: '#10B981', borderRadius: 2 }} />
-            <h1 style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 26, fontWeight: 700, color: 'var(--text)', letterSpacing: '-0.01em' }}>Vendas</h1>
-          </div>
-          <p style={{ fontSize: 13, color: 'var(--text-muted)', paddingLeft: 15 }}>
+      <PageHeader
+        title="Vendas"
+        accent="#10B981"
+        subtitle={
+          <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>
             {vendas.length} venda{vendas.length !== 1 ? 's' : ''} · Total:{' '}
             <span style={{ fontFamily: 'JetBrains Mono, monospace', color: '#34D399', fontWeight: 600 }}>
               R$ {fmt(vendas.reduce((s, v) => s + Number(v.total), 0))}
             </span>
           </p>
-        </div>
-        <button className="btn-primary" onClick={openModal}><Plus size={15} /> Nova venda</button>
-      </div>
+        }
+        actions={<button className="btn-primary" onClick={openModal}><Plus size={15} /> Nova venda</button>}
+      />
 
       {/* Search */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
-        <div style={{ position: 'relative', flex: 1, maxWidth: 380 }}>
-          <Search size={14} style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-subtle)' }} />
-          <input className="input-field" placeholder="Buscar por cliente ou número..." value={search} onChange={e => setSearch(e.target.value)} style={{ paddingLeft: 38, fontSize: 13 }} />
-        </div>
-        {search && <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{filtered.length} resultado{filtered.length !== 1 ? 's' : ''}</span>}
-      </div>
+      <SearchBar value={search} onChange={setSearch} placeholder="Buscar por cliente ou número..." resultCount={filtered.length} style={{ marginBottom: 20 }} />
 
       {/* List */}
       <div style={{ background: 'var(--bg-800)', border: '1px solid var(--bg-500)', borderRadius: 14, overflow: 'hidden', flex: 1, minHeight: 0 }}>
@@ -137,17 +128,7 @@ export default function Vendas() {
             {[...Array(4)].map((_, i) => <div key={i} className="skeleton" style={{ height: 64, borderRadius: 8, marginBottom: 10, opacity: 1 - i * 0.15 }} />)}
           </div>
         ) : filtered.length === 0 ? (
-          <div style={{ padding: '72px 32px', textAlign: 'center' }}>
-            <div style={{ width: 64, height: 64, borderRadius: 16, background: 'var(--bg-700)', border: '1px solid var(--bg-500)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
-              <Receipt size={28} color="var(--bg-400)" />
-            </div>
-            <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 16, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 6 }}>
-              {search ? 'Nenhuma venda encontrada' : 'Nenhuma venda registrada'}
-            </p>
-            <p style={{ fontSize: 13, color: 'var(--text-subtle)' }}>
-              {search ? `Sem resultados para "${search}"` : 'Registre sua primeira venda'}
-            </p>
-          </div>
+          <EmptyState icon={Receipt} title={search ? 'Nenhuma venda encontrada' : 'Nenhuma venda registrada'} subtitle={search ? `Sem resultados para "${search}"` : 'Registre sua primeira venda'} />
         ) : (
           filtered.map((v, idx) => {
             const st = statusMap[v.status] || statusMap.pago
@@ -297,7 +278,7 @@ export default function Vendas() {
         </Modal>
       )}
 
-      {toast && <Toast message={toast.msg} type={toast.type} onClose={() => setToast(null)} />}
+      {toast && <Toast message={toast.message} type={toast.type} onClose={clearToast} />}
     </div>
   )
 }

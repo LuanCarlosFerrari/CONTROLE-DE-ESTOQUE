@@ -1,9 +1,12 @@
 import { useState, useEffect } from 'react'
+import { useToast } from '../hooks/useToast'
 import { Package, Wrench, BedDouble, UtensilsCrossed, Save, Zap, KeyRound, CheckCircle, Clock, ShieldAlert, User } from 'lucide-react'
+import PageHeader from '../components/ui/PageHeader'
 import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabase'
 import Toast from '../components/ui/Toast'
 import { createPaymentPreference } from '../lib/mercadopago'
+import Label from '../components/ui/FormLabel'
 
 const BUSINESS_TYPES = [
   { value: 'estoque', icon: Package, label: 'Estoque Geral',    desc: 'Produtos, clientes e vendas' },
@@ -24,11 +27,6 @@ const Section = ({ title, subtitle, children }) => (
   </div>
 )
 
-const Label = ({ children }) => (
-  <label style={{ display: 'block', fontSize: 12, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--text-subtle)', marginBottom: 8 }}>
-    {children}
-  </label>
-)
 
 export default function Configuracoes() {
   const { user, subscription, businessType, businessName, updateSubscription } = useAuth()
@@ -40,7 +38,7 @@ export default function Configuracoes() {
   const [resetLoading, setResetLoading] = useState(false)
   const [resetSent, setResetSent] = useState(false)
 
-  const [toast, setToast] = useState(null)
+  const { toast, showToast, clearToast } = useToast()
   const [loadingPay, setLoadingPay] = useState(false)
   const [payError, setPayError] = useState(null)
 
@@ -69,8 +67,8 @@ export default function Configuracoes() {
       business_type: selectedType,
     })
     setSavingProfile(false)
-    if (error) return setToast({ msg: typeof error === 'string' ? error : error.message, type: 'error' })
-    setToast({ msg: 'Configurações salvas!', type: 'success' })
+    if (error) return showToast(typeof error === 'string' ? error : error.message, 'error')
+    showToast('Configurações salvas!')
   }
 
   const handleResetPassword = async () => {
@@ -78,9 +76,9 @@ export default function Configuracoes() {
     setResetLoading(true)
     const { error } = await supabase.auth.resetPasswordForEmail(user.email)
     setResetLoading(false)
-    if (error) return setToast({ msg: error.message, type: 'error' })
+    if (error) return showToast(error.message, 'error')
     setResetSent(true)
-    setToast({ msg: 'Link enviado para o seu email!', type: 'success' })
+    showToast('Link enviado para o seu email!')
   }
 
   const statusInfo = {
@@ -97,14 +95,7 @@ export default function Configuracoes() {
 
   return (
     <div className="animate-fade-in page-content config-page">
-      {/* Header */}
-      <div style={{ marginBottom: 32, paddingBottom: 24, borderBottom: '1px solid var(--bg-600)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 4 }}>
-          <div style={{ width: 3, height: 22, background: 'var(--amber)', borderRadius: 2 }} />
-          <h1 style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 26, fontWeight: 700, color: 'var(--text)', letterSpacing: '-0.01em' }}>Configurações</h1>
-        </div>
-        <p style={{ fontSize: 14, color: 'var(--text-muted)', paddingLeft: 15 }}>Gerencie os dados do seu negócio e conta</p>
-      </div>
+      <PageHeader title="Configurações" subtitle="Gerencie os dados do seu negócio e conta" />
 
       {/* Seção: Dados do negócio */}
       <Section title="Dados do negócio" subtitle="Nome exibido na plataforma e tipo de operação">
@@ -253,7 +244,7 @@ export default function Configuracoes() {
         )}
       </Section>
 
-      {toast && <Toast message={toast.msg} type={toast.type} onClose={() => setToast(null)} />}
+      {toast && <Toast message={toast.message} type={toast.type} onClose={clearToast} />}
     </div>
   )
 }

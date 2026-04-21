@@ -1,24 +1,18 @@
 import { useEffect, useState, useCallback } from 'react'
-import {
-  Search, ShoppingCart, ArrowUpCircle, ArrowDownCircle,
-  Lock, Unlock, Wallet, Wrench, BedDouble,
-} from 'lucide-react'
+import { useToast } from '../../hooks/useToast'
+import { formatCurrency as fmt } from '../../utils/format'
+import { Search, ShoppingCart, ArrowUpCircle, ArrowDownCircle, Lock, Unlock, Wallet, Wrench, BedDouble } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import Modal from '../../components/ui/Modal'
 import Toast from '../../components/ui/Toast'
+import Label from '../../components/ui/FormLabel'
 import { useAuth } from '../../contexts/AuthContext'
 import CaixaStats from './caixa/CaixaStats'
 import MovimentacaoLista from './caixa/MovimentacaoLista'
 import ModalVenda from './caixa/ModalVenda'
 import ModalExtra from './caixa/ModalExtra'
 
-function fmt(val) { return Number(val || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 }) }
 
-const Label = ({ children, required }) => (
-  <label style={{ display: 'block', fontSize: 12, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--text-subtle)', marginBottom: 7 }}>
-    {children}{required && <span style={{ color: 'var(--amber)', marginLeft: 3 }}>*</span>}
-  </label>
-)
 
 const FORMAS = ['dinheiro', 'pix', 'cartao', 'outros']
 const FORMA_LABEL = { dinheiro: 'Dinheiro', pix: 'PIX', cartao: 'Cartão', outros: 'Outros' }
@@ -38,7 +32,7 @@ export default function Caixa() {
   const [reservasPendentes, setReservasPendentes] = useState([])
   const [search, setSearch]         = useState('')
   const [modal, setModal]           = useState(null)
-  const [toast, setToast]           = useState(null)
+  const { toast, showToast, clearToast } = useToast()
   const [saving, setSaving]         = useState(false)
 
   // Fechar caixa
@@ -115,10 +109,10 @@ export default function Caixa() {
       .insert({ data: today, saldo_inicial: Number(saldoInicial), status: 'aberto' })
       .select().single()
     setSaving(false)
-    if (error) return setToast({ msg: error.message, type: 'error' })
+    if (error) return showToast(error.message, 'error')
     setCaixa(data)
     setModal(null)
-    setToast({ msg: 'Caixa aberto!', type: 'success' })
+    showToast('Caixa aberto!')
   }
 
   const handleFecharCaixa = async (e) => {
@@ -128,17 +122,17 @@ export default function Caixa() {
       .update({ status: 'fechado', saldo_final: Number(saldoContado), observacoes: obsFechar, fechado_at: new Date().toISOString() })
       .eq('id', caixa.id)
     setSaving(false)
-    if (error) return setToast({ msg: error.message, type: 'error' })
+    if (error) return showToast(error.message, 'error')
     loadCaixa()
     setModal(null)
-    setToast({ msg: 'Caixa fechado com sucesso!', type: 'success' })
+    showToast('Caixa fechado com sucesso!')
   }
 
   const handleReceberOS = async (e) => {
     e.preventDefault()
-    if (!osId) return setToast({ msg: 'Selecione uma OS.', type: 'error' })
+    if (!osId) return showToast('Selecione uma OS.', 'error')
     const valor = Number(osValor)
-    if (!valor || valor <= 0) return setToast({ msg: 'Informe um valor válido.', type: 'error' })
+    if (!valor || valor <= 0) return showToast('Informe um valor válido.', 'error')
     const os = ordensAbertas.find(o => o.id === osId)
     setSaving(true)
     const [{ error: e1 }, { error: e2 }] = await Promise.all([
@@ -146,18 +140,18 @@ export default function Caixa() {
       supabase.from('ordens_servico').update({ status: 'concluida', data_conclusao: new Date().toISOString(), valor_total: valor }).eq('id', osId),
     ])
     setSaving(false)
-    if (e1 || e2) return setToast({ msg: (e1 || e2).message, type: 'error' })
+    if (e1 || e2) return showToast((e1 || e2).message, 'error')
     setModal(null)
     setOsId(''); setOsValor(''); setOsForma('dinheiro'); setOsObs('')
-    setToast({ msg: 'OS recebida e concluída!', type: 'success' })
+    showToast('OS recebida e concluída!')
     loadMovimentacoes(); loadOptions()
   }
 
   const handleReceberReserva = async (e) => {
     e.preventDefault()
-    if (!reservaId) return setToast({ msg: 'Selecione uma reserva.', type: 'error' })
+    if (!reservaId) return showToast('Selecione uma reserva.', 'error')
     const valor = Number(reservaValor)
-    if (!valor || valor <= 0) return setToast({ msg: 'Informe um valor válido.', type: 'error' })
+    if (!valor || valor <= 0) return showToast('Informe um valor válido.', 'error')
     const res = reservasPendentes.find(r => r.id === reservaId)
     setSaving(true)
     const [{ error: e1 }, { error: e2 }] = await Promise.all([
@@ -165,10 +159,10 @@ export default function Caixa() {
       supabase.from('reservas').update({ valor_pago: Number(res?.valor_pago || 0) + valor, status: 'checkout', forma_pagamento: reservaForma }).eq('id', reservaId),
     ])
     setSaving(false)
-    if (e1 || e2) return setToast({ msg: (e1 || e2).message, type: 'error' })
+    if (e1 || e2) return showToast((e1 || e2).message, 'error')
     setModal(null)
     setReservaId(''); setReservaValor(''); setReservaForma('dinheiro')
-    setToast({ msg: 'Reserva recebida e check-out realizado!', type: 'success' })
+    showToast('Reserva recebida e check-out realizado!')
     loadMovimentacoes(); loadOptions()
   }
 
@@ -339,8 +333,8 @@ export default function Caixa() {
           clientes={clientes} produtos={produtos}
           title={businessType === 'hotel' ? 'Consumo avulso' : businessType === 'oficina' ? 'Venda avulsa' : 'Registrar venda'}
           onClose={() => setModal(null)}
-          onSaved={(msg) => { setModal(null); setToast({ msg, type: 'success' }); loadMovimentacoes(); loadOptions() }}
-          onError={(msg) => setToast({ msg, type: 'error' })}
+          onSaved={(msg) => { setModal(null); showToast(msg); loadMovimentacoes(); loadOptions() }}
+          onError={(msg) => showToast(msg, 'error')}
         />
       )}
 
@@ -349,8 +343,8 @@ export default function Caixa() {
         <ModalExtra
           tipo={modal} caixaId={caixa?.id}
           onClose={() => setModal(null)}
-          onSaved={(msg) => { setModal(null); setToast({ msg, type: 'success' }); loadMovimentacoes() }}
-          onError={(msg) => setToast({ msg, type: 'error' })}
+          onSaved={(msg) => { setModal(null); showToast(msg); loadMovimentacoes() }}
+          onError={(msg) => showToast(msg, 'error')}
         />
       )}
 
@@ -434,7 +428,7 @@ export default function Caixa() {
         </Modal>
       )}
 
-      {toast && <Toast message={toast.msg} type={toast.type} onClose={() => setToast(null)} />}
+      {toast && <Toast message={toast.message} type={toast.type} onClose={clearToast} />}
     </div>
   )
 }

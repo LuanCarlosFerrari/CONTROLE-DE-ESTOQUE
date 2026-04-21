@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react'
+import { formatCurrency as fmt } from '../../utils/format'
 import { BedDouble, Calendar, LogIn, LogOut, TrendingUp, ArrowUpRight } from 'lucide-react'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 import { supabase } from '../../lib/supabase'
+import StatCard from '../../components/ui/StatCard'
+import PageHeader from '../../components/ui/PageHeader'
 
-function fmt(v) { return Number(v || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 }) }
 
 const STATUS_CFG = {
   confirmada: { label: 'Confirmada', color: '#60A5FA' },
@@ -109,36 +111,11 @@ export default function DashboardHotel() {
 
   return (
     <div style={{ width: "100%", height: "100%" }} className="animate-fade-in page-content">
-      {/* Header */}
-      <div style={{ marginBottom: 32, paddingBottom: 24, borderBottom: '1px solid var(--bg-600)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 4 }}>
-          <div style={{ width: 3, height: 22, background: 'var(--amber)', borderRadius: 2 }} />
-          <h1 style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 26, fontWeight: 700, color: 'var(--text)', letterSpacing: '-0.01em' }}>Dashboard</h1>
-        </div>
-        <p style={{ fontSize: 14, color: 'var(--text-muted)', paddingLeft: 15 }}>
-          {new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}
-        </p>
-      </div>
+      <PageHeader title="Dashboard" subtitle={new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })} />
 
       {/* Stat cards */}
       <div className="stats-grid-4" style={{ marginBottom: 28 }}>
-        {statCards.map(({ label, sublabel, value, icon: Icon, color, border, glow }) => (
-          <div key={label} style={{ background: `linear-gradient(135deg, var(--bg-700) 0%, ${glow} 100%)`, border: `1px solid ${border}`, borderRadius: 14, padding: '20px 22px', transition: 'transform 0.2s, box-shadow 0.2s', cursor: 'default' }}
-            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = `0 8px 32px ${glow}` }}
-            onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'none' }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-              <div>
-                <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--text-subtle)', display: 'block' }}>{label}</span>
-                <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: 'var(--text-subtle)', letterSpacing: '0.04em' }}>{sublabel}</span>
-              </div>
-              <div style={{ width: 36, height: 36, borderRadius: 9, background: `${color}18`, border: `1px solid ${color}30`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Icon size={17} color={color} />
-              </div>
-            </div>
-            <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 26, fontWeight: 700, color, lineHeight: 1, letterSpacing: '-0.02em' }}>{value}</p>
-          </div>
-        ))}
+        {statCards.map(card => <StatCard key={card.label} {...card} />)}
       </div>
 
       {/* Chart + Reservas recentes */}

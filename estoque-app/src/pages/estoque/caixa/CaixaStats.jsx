@@ -1,6 +1,6 @@
 import { Wallet, ShoppingCart, TrendingUp, TrendingDown } from 'lucide-react'
+import { formatCurrency as fmt } from '../../../utils/format'
 
-function fmt(val) { return Number(val || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 }) }
 
 export default function CaixaStats({ saldoEsperado, totalVendas, totalEntradas, totalSaidas, vendas, extras, caixa }) {
   const stats = [

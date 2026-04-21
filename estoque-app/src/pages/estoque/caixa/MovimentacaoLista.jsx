@@ -1,7 +1,7 @@
 import { useState } from 'react'
+import { formatCurrency as fmt } from '../../../utils/format'
 import { Receipt, ArrowUpCircle, ArrowDownCircle, ChevronDown, Package, DollarSign } from 'lucide-react'
 
-function fmt(val) { return Number(val || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 }) }
 
 const FORMA_LABEL = { dinheiro: 'Dinheiro', pix: 'PIX', cartao: 'Cartão', outros: 'Outros' }
 

@@ -1,18 +1,14 @@
 import { useState } from 'react'
+import { formatCurrency as fmt } from '../../../utils/format'
 import { Plus, X } from 'lucide-react'
 import { supabase } from '../../../lib/supabase'
 import Modal from '../../../components/ui/Modal'
+import Label from '../../../components/ui/FormLabel'
 
-function fmt(val) { return Number(val || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 }) }
 
 const FORMAS = ['dinheiro', 'pix', 'cartao', 'outros']
 const FORMA_LABEL = { dinheiro: 'Dinheiro', pix: 'PIX', cartao: 'Cartão', outros: 'Outros' }
 
-const Label = ({ children, required }) => (
-  <label style={{ display: 'block', fontSize: 12, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--text-subtle)', marginBottom: 7 }}>
-    {children}{required && <span style={{ color: 'var(--amber)', marginLeft: 3 }}>*</span>}
-  </label>
-)
 
 export default function ModalVenda({ clientes, produtos, title = 'Registrar venda', onClose, onSaved, onError }) {
   const [clienteId, setClienteId]   = useState('')

@@ -1,8 +1,16 @@
 import { useEffect, useState, useCallback } from 'react'
-import { Plus, Pencil, Trash2, BedDouble, Users, Search, ShoppingBag, X, Receipt, Calendar, Clock, Minus, Printer } from 'lucide-react'
+import { useToast } from '../../hooks/useToast'
+import { formatCurrency as fmt } from '../../utils/format'
+import { Plus, Search, Pencil, Trash2, BedDouble, Users, ShoppingBag, X, Receipt, Calendar, Clock, Minus, Printer } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import Modal from '../../components/ui/Modal'
 import Toast from '../../components/ui/Toast'
+import Label from '../../components/ui/FormLabel'
+import PageHeader from '../../components/ui/PageHeader'
+import SearchBar from '../../components/ui/SearchBar'
+import EmptyState from '../../components/ui/EmptyState'
+import ConfirmModal from '../../components/ui/ConfirmModal'
+import StatCard from '../../components/ui/StatCard'
 
 const EMPTY = { numero: '', tipo: 'casal', capacidade: 2, preco_diaria: 0, descricao: '', status: 'disponivel' }
 
@@ -14,11 +22,6 @@ const TIPOS = {
   familia: 'Família',
 }
 
-const Label = ({ children, required }) => (
-  <label style={{ display: 'block', fontSize: 12, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--text-subtle)', marginBottom: 7 }}>
-    {children}{required && <span style={{ color: 'var(--amber)', marginLeft: 3 }}>*</span>}
-  </label>
-)
 
 function StatusBadge({ status }) {
   const cfg = {
@@ -34,7 +37,6 @@ function StatusBadge({ status }) {
   )
 }
 
-function fmt(v) { return Number(v || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 }) }
 
 export default function Quartos() {
   const [quartos, setQuartos] = useState([])
@@ -46,7 +48,7 @@ export default function Quartos() {
   const [form, setForm] = useState(EMPTY)
   const [editing, setEditing] = useState(null)
   const [saving, setSaving] = useState(false)
-  const [toast, setToast] = useState(null)
+  const { toast, showToast, clearToast } = useToast()
   const [deleteId, setDeleteId] = useState(null)
 
   // Comanda do quarto
@@ -94,8 +96,8 @@ export default function Quartos() {
       ? await supabase.from('quartos').update(payload).eq('id', editing)
       : await supabase.from('quartos').insert(payload)
     setSaving(false)
-    if (error) return setToast({ msg: error.message, type: 'error' })
-    setToast({ msg: editing ? 'Quarto atualizado!' : 'Quarto cadastrado!', type: 'success' })
+    if (error) return showToast(error.message, 'error')
+    showToast(editing ? 'Quarto atualizado!' : 'Quarto cadastrado!')
     setModal(null)
     load()
   }
@@ -103,8 +105,8 @@ export default function Quartos() {
   const handleDelete = async () => {
     const { error } = await supabase.from('quartos').delete().eq('id', deleteId)
     setDeleteId(null)
-    if (error) return setToast({ msg: error.message, type: 'error' })
-    setToast({ msg: 'Quarto removido.', type: 'success' })
+    if (error) return showToast(error.message, 'error')
+    showToast('Quarto removido.')
     load()
   }
 
@@ -141,12 +143,12 @@ export default function Quartos() {
       preco_unitario: preco,
     })
     setSavingConsumo(false)
-    if (error) return setToast({ msg: error.message, type: 'error' })
+    if (error) return showToast(error.message, 'error')
     setConsumoDesc(''); setConsumoQtd(1); setConsumoPreco(''); setConsumoProdId('')
     const { data: cons } = await supabase.from('reserva_consumos')
       .select('*').eq('reserva_id', reservaAtiva.id).order('created_at', { ascending: false })
     setConsumos(cons || [])
-    setToast({ msg: 'Consumo adicionado à comanda!', type: 'success' })
+    showToast('Consumo adicionado à comanda!')
   }
 
   const handleDeleteConsumo = async (id) => {
@@ -172,19 +174,11 @@ export default function Quartos() {
 
   return (
     <div style={{ width: "100%", height: "100%" }} className="animate-fade-in page-content">
-      {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 28, paddingBottom: 24, borderBottom: '1px solid var(--bg-600)', flexWrap: 'wrap', gap: 16 }}>
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 4 }}>
-            <div style={{ width: 3, height: 22, background: 'var(--amber)', borderRadius: 2 }} />
-            <h1 style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 26, fontWeight: 700, color: 'var(--text)', letterSpacing: '-0.01em' }}>Quartos</h1>
-          </div>
-          <p style={{ fontSize: 13, color: 'var(--text-muted)', paddingLeft: 15 }}>
-            {quartos.length} quarto{quartos.length !== 1 ? 's' : ''} cadastrado{quartos.length !== 1 ? 's' : ''}
-          </p>
-        </div>
-        <button className="btn-primary" onClick={openCreate}><Plus size={15} /> Novo quarto</button>
-      </div>
+      <PageHeader
+        title="Quartos"
+        subtitle={`${quartos.length} quarto${quartos.length !== 1 ? 's' : ''} cadastrado${quartos.length !== 1 ? 's' : ''}`}
+        actions={<button className="btn-primary" onClick={openCreate}><Plus size={15} /> Novo quarto</button>}
+      />
 
       {/* Stats rápidas */}
       <div className="stats-grid-3" style={{ marginBottom: 20 }}>
@@ -193,20 +187,8 @@ export default function Quartos() {
           { key: 'ocupado',    label: 'Ocupados',    sublabel: 'agora'  },
           { key: 'manutencao', label: 'Manutenção',  sublabel: 'status' },
         ].map(({ key, label, sublabel }) => (
-          <div key={key} style={{
-            background: 'linear-gradient(135deg, var(--bg-700) 0%, rgba(16,185,129,0.06) 100%)',
-            border: '1px solid rgba(16,185,129,0.3)', borderRadius: 14, padding: '20px 22px',
-            transition: 'transform 0.2s, box-shadow 0.2s', cursor: 'default',
-          }}
-            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(16,185,129,0.06)' }}
-            onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'none' }}
-          >
-            <div style={{ marginBottom: 16 }}>
-              <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--text-subtle)', display: 'block' }}>{label}</span>
-              <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: 'var(--text-subtle)', letterSpacing: '0.04em' }}>{sublabel}</span>
-            </div>
-            <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 26, fontWeight: 700, color: 'var(--amber)', lineHeight: 1, letterSpacing: '-0.02em' }}>{counts[key]}</p>
-          </div>
+          <StatCard key={key} label={label} sublabel={sublabel} value={counts[key]}
+            color="var(--amber)" border="rgba(16,185,129,0.3)" glow="rgba(16,185,129,0.06)" />
         ))}
       </div>
 
@@ -235,17 +217,7 @@ export default function Quartos() {
           {[...Array(6)].map((_, i) => <div key={i} className="skeleton" style={{ borderRadius: 14 }} />)}
         </div>
       ) : filtered.length === 0 ? (
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-800)', border: '1px solid var(--bg-500)', borderRadius: 14 }}>
-          <div style={{ width: 64, height: 64, borderRadius: 16, background: 'var(--bg-700)', border: '1px solid var(--bg-500)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
-            <BedDouble size={28} color="var(--bg-400)" />
-          </div>
-          <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 16, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 6 }}>
-            {search || filterStatus !== 'todos' ? 'Nenhum quarto encontrado' : 'Nenhum quarto cadastrado'}
-          </p>
-          <p style={{ fontSize: 13, color: 'var(--text-subtle)' }}>
-            {search || filterStatus !== 'todos' ? 'Tente outros filtros' : 'Cadastre o primeiro quarto'}
-          </p>
-        </div>
+        <EmptyState icon={BedDouble} title={search || filterStatus !== 'todos' ? 'Nenhum quarto encontrado' : 'Nenhum quarto cadastrado'} subtitle={search || filterStatus !== 'todos' ? 'Tente outros filtros' : 'Cadastre o primeiro quarto'} card />
       ) : (
         <div className="quartos-grid">
           {filtered.map(q => {
@@ -363,19 +335,7 @@ export default function Quartos() {
       )}
 
       {deleteId && (
-        <Modal title="Excluir quarto" onClose={() => setDeleteId(null)}>
-          <div style={{ textAlign: 'center', padding: '8px 0 16px' }}>
-            <div style={{ width: 52, height: 52, borderRadius: '50%', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
-              <Trash2 size={22} color="#F87171" />
-            </div>
-            <p style={{ fontSize: 15, color: 'var(--text)', fontWeight: 500, marginBottom: 8 }}>Tem certeza?</p>
-            <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>Esta ação não pode ser desfeita.</p>
-          </div>
-          <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
-            <button className="btn-secondary" onClick={() => setDeleteId(null)} style={{ flex: 1 }}>Cancelar</button>
-            <button className="btn-danger" onClick={handleDelete} style={{ flex: 1, padding: '10px 20px', justifyContent: 'center' }}>Excluir</button>
-          </div>
-        </Modal>
+        <ConfirmModal title="Excluir quarto" message="Esta ação não pode ser desfeita." onConfirm={handleDelete} onClose={() => setDeleteId(null)} />
       )}
 
       {/* Painel Comanda */}
@@ -564,7 +524,7 @@ export default function Quartos() {
         </div>
       )}
 
-      {toast && <Toast message={toast.msg} type={toast.type} onClose={() => setToast(null)} />}
+      {toast && <Toast message={toast.message} type={toast.type} onClose={clearToast} />}
     </div>
   )
 }
