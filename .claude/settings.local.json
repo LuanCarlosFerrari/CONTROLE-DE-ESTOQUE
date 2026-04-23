@@ -24,7 +24,17 @@
       "mcp__supabase__execute_sql",
       "mcp__supabase__apply_migration",
       "Bash(xargs sed *)",
-      "Bash(git pull *)"
+      "Bash(git pull *)",
+      "Bash(git mv *)",
+      "PowerShell(Remove-Item -Recurse -Force \"d:\\\\backup pc\\\\CONTROLE DE ESTOQUE\\\\estoque-app\" -ErrorAction SilentlyContinue; if \\(!\\(Test-Path \"d:\\\\backup pc\\\\CONTROLE DE ESTOQUE\\\\estoque-app\"\\)\\) { \"Removed\" } else { \"Still exists\" })",
+      "Bash(cmd /c \"rd /s /q \\\\\"d:/backup pc/CONTROLE DE ESTOQUE/estoque-app\\\\\"\")",
+      "PowerShell(& cmd /c \"rd /s /q `\"d:\\\\backup pc\\\\CONTROLE DE ESTOQUE\\\\estoque-app`\"\")",
+      "PowerShell(if \\($LASTEXITCODE -eq 0\\) { \"Removed\" } else { \"Failed - check manually\" })",
+      "Bash(git commit -m ' *)",
+      "Bash(vercel --version)",
+      "Bash(npx vercel *)",
+      "Bash(vercel whoami *)",
+      "PowerShell(vercel whoami 2>&1)"
     ]
   },
   "enableAllProjectMcpServers": true
