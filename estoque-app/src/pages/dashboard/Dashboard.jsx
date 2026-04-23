@@ -162,21 +162,20 @@ export default function Dashboard() {
       </div>
 
       {/* Month total */}
-      <div style={{
+      <div className="billing-card" style={{
         background: 'linear-gradient(135deg, rgba(16,185,129,0.08) 0%, rgba(16,185,129,0.03) 50%, transparent 100%)',
         border: '1px solid rgba(16,185,129,0.18)',
         borderRadius: 14, padding: '24px 28px',
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         position: 'relative', overflow: 'hidden',
       }}>
         <div style={{ position: 'absolute', right: -20, top: -20, width: 140, height: 140, borderRadius: '50%', background: 'rgba(16,185,129,0.04)', pointerEvents: 'none' }} />
-        <div>
+        <div style={{ minWidth: 0 }}>
           <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--amber)', marginBottom: 8 }}>Faturamento do mês</p>
-          <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 34, fontWeight: 700, color: 'var(--text)', letterSpacing: '-0.02em', lineHeight: 1 }}>
+          <p className="billing-value">
             R$ {stats.total_mes.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
           </p>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.25)', borderRadius: 10, padding: '10px 16px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.25)', borderRadius: 10, padding: '10px 16px', flexShrink: 0 }}>
           <ArrowUpRight size={20} color="var(--amber)" />
           <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--amber)' }}>30 dias</span>
         </div>

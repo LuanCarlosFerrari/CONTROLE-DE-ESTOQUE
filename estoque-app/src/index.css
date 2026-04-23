@@ -479,13 +479,22 @@ body {
   /* Page padding */
   .page-content { padding: 16px; }
 
+  /* page-content: auto-height so content scrolls instead of overlapping */
+  .page-content { height: auto !important; }
+
   /* Grids → 2 cols */
   .stats-grid-4 { grid-template-columns: repeat(2, 1fr); gap: 10px; }
   .stats-grid-3 { grid-template-columns: repeat(2, 1fr); gap: 10px; }
 
   /* Charts / side panels → stacked */
-  .chart-grid      { grid-template-columns: 1fr; }
+  .chart-grid      { grid-template-columns: 1fr; flex: none !important; }
   .bottom-grid-hotel { grid-template-columns: 1fr; }
+
+  /* Chart items: fixed height so ResponsiveContainer renders correctly */
+  .chart-grid > div {
+    height: auto !important;
+    min-height: 280px;
+  }
 
   /* Config page */
   .config-page { max-width: 100%; }
@@ -516,6 +525,46 @@ body {
   .stats-grid-4 { gap: 8px; }
   .stats-grid-3 { gap: 8px; }
   .quartos-grid { grid-template-columns: 1fr; gap: 8px; }
+}
+
+/* ── BILLING CARD ───────────────────────────────────────────────── */
+.billing-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: nowrap;
+  gap: 16px;
+}
+
+.billing-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 34px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.02em;
+  line-height: 1;
+  word-break: break-all;
+}
+
+@media (max-width: 768px) {
+  .billing-card {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .billing-value {
+    font-size: 26px;
+  }
+}
+
+@media (max-width: 480px) {
+  .billing-value {
+    font-size: 22px;
+  }
+
+  .billing-card {
+    padding: 16px !important;
+  }
 }
 
 @media (min-width: 769px) {
