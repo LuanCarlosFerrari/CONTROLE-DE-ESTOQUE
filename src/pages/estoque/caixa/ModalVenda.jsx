@@ -1,14 +1,18 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { formatCurrency as fmt } from '../../../utils/format'
-import { Plus, X } from 'lucide-react'
+import { Plus, X, CreditCard } from 'lucide-react'
 import { supabase } from '../../../lib/supabase'
 import Modal from '../../../components/ui/Modal'
 import Label from '../../../components/ui/FormLabel'
 
+const FORMAS = ['dinheiro', 'pix', 'cartao', 'crediario', 'outros']
+const FORMA_LABEL = { dinheiro: 'Dinheiro', pix: 'PIX', cartao: 'Cartão', crediario: 'Crediário', outros: 'Outros' }
 
-const FORMAS = ['dinheiro', 'pix', 'cartao', 'outros']
-const FORMA_LABEL = { dinheiro: 'Dinheiro', pix: 'PIX', cartao: 'Cartão', outros: 'Outros' }
-
+function nextMonthDate(base, addMonths) {
+  const d = new Date(base + 'T12:00:00')
+  d.setMonth(d.getMonth() + addMonths)
+  return d.toISOString().split('T')[0]
+}
 
 export default function ModalVenda({ clientes, produtos, title = 'Registrar venda', onClose, onSaved, onError }) {
   const [clienteId, setClienteId]   = useState('')
@@ -16,6 +20,12 @@ export default function ModalVenda({ clientes, produtos, title = 'Registrar vend
   const [formaVenda, setFormaVenda] = useState('dinheiro')
   const [itens, setItens]           = useState([{ produto_id: '', quantidade: 1, preco_unitario: 0 }])
   const [saving, setSaving]         = useState(false)
+
+  // Crediário
+  const hoje = new Date().toISOString().split('T')[0]
+  const [numParcelas, setNumParcelas]           = useState(3)
+  const [entrada, setEntrada]                   = useState(0)
+  const [dataFirstParcela, setDataFirstParcela] = useState(() => nextMonthDate(hoje, 1))
 
   const addItem    = () => setItens(i => [...i, { produto_id: '', quantidade: 1, preco_unitario: 0 }])
   const removeItem = (idx) => setItens(i => i.filter((_, j) => j !== idx))
@@ -31,26 +41,56 @@ export default function ModalVenda({ clientes, produtos, title = 'Registrar vend
     }))
   }
 
-  const totalVenda = itens.reduce((s, i) => s + Number(i.quantidade) * Number(i.preco_unitario), 0)
+  const totalVenda    = itens.reduce((s, i) => s + Number(i.quantidade) * Number(i.preco_unitario), 0)
+  const valorRestante = Math.max(0, totalVenda - Number(entrada || 0))
+  const valorParcela  = numParcelas > 0 ? valorRestante / Number(numParcelas) : 0
+
+  const previewParcelas = Array.from({ length: Number(numParcelas) }, (_, i) => ({
+    num: i + 1,
+    valor: valorParcela,
+    data: nextMonthDate(dataFirstParcela, i),
+  }))
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (!clienteId) return onError('Selecione um cliente.')
     const validItens = itens.filter(i => i.produto_id && Number(i.quantidade) > 0)
     if (validItens.length === 0) return onError('Adicione pelo menos um produto.')
+    if (formaVenda === 'crediario' && !dataFirstParcela) return onError('Informe a data da 1ª parcela.')
+
     setSaving(true)
     const { data: venda, error: errV } = await supabase.from('vendas')
       .insert({ cliente_id: clienteId, total: totalVenda, observacao, forma_pagamento: formaVenda })
       .select().single()
     if (errV) { setSaving(false); return onError(errV.message) }
+
     const { error: errI } = await supabase.from('venda_itens').insert(
       validItens.map(i => ({ venda_id: venda.id, produto_id: i.produto_id, quantidade: Number(i.quantidade), preco_unitario: Number(i.preco_unitario) }))
     )
     if (errI) { setSaving(false); return onError(errI.message) }
+
     for (const item of validItens) {
       const prod = produtos.find(p => p.id === item.produto_id)
       if (prod) await supabase.from('produtos').update({ quantidade: Math.max(0, prod.quantidade - Number(item.quantidade)) }).eq('id', item.produto_id)
     }
+
+    if (formaVenda === 'crediario') {
+      const clienteNome = clientes.find(c => c.id === clienteId)?.nome || ''
+      const { error: errC } = await supabase.from('parcelas_crediario').insert(
+        previewParcelas.map(p => ({
+          venda_id: venda.id,
+          cliente_id: clienteId,
+          cliente_nome: clienteNome,
+          numero: p.num,
+          total_parcelas: Number(numParcelas),
+          valor: p.valor,
+          data_vencimento: p.data,
+          status: 'pendente',
+        }))
+      )
+      if (errC) { setSaving(false); return onError(errC.message) }
+    }
+
     setSaving(false)
     onSaved('Venda registrada!')
   }
@@ -73,6 +113,65 @@ export default function ModalVenda({ clientes, produtos, title = 'Registrar vend
             </select>
           </div>
         </div>
+
+        {/* ── Seção Crediário ── */}
+        {formaVenda === 'crediario' && (
+          <div style={{ background: 'rgba(96,165,250,0.06)', border: '1px solid rgba(96,165,250,0.2)', borderRadius: 10, padding: 16, marginBottom: 16 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 14 }}>
+              <CreditCard size={14} color="#60A5FA" />
+              <p style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#60A5FA', margin: 0 }}>
+                Configurar crediário
+              </p>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 14 }}>
+              <div>
+                <Label>Entrada (R$)</Label>
+                <input className="input-field" type="number" min="0" step="0.01"
+                  value={entrada} onChange={e => setEntrada(e.target.value)}
+                  style={{ fontFamily: 'JetBrains Mono, monospace' }} />
+              </div>
+              <div>
+                <Label>Nº de parcelas</Label>
+                <select className="input-field" value={numParcelas} onChange={e => setNumParcelas(Number(e.target.value))}>
+                  {[1,2,3,4,5,6,7,8,9,10,11,12].map(n => <option key={n} value={n}>{n}x</option>)}
+                </select>
+              </div>
+              <div>
+                <Label>1ª parcela em</Label>
+                <input className="input-field" type="date" value={dataFirstParcela}
+                  onChange={e => setDataFirstParcela(e.target.value)} />
+              </div>
+            </div>
+
+            {/* Preview parcelas */}
+            {totalVenda > 0 && (
+              <div>
+                <p style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-subtle)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 8 }}>
+                  Preview das parcelas
+                  {Number(entrada) > 0 && <span style={{ marginLeft: 8, color: '#60A5FA', textTransform: 'none', letterSpacing: 0 }}>
+                    (entrada R$ {fmt(entrada)} + {numParcelas}x R$ {fmt(valorParcela)})
+                  </span>}
+                </p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 4, maxHeight: 160, overflowY: 'auto' }}>
+                  {previewParcelas.map(p => (
+                    <div key={p.num} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 10px', background: 'var(--bg-700)', borderRadius: 6 }}>
+                      <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+                        Parcela <strong style={{ color: 'var(--text)', fontFamily: 'JetBrains Mono, monospace' }}>{p.num}/{numParcelas}</strong>
+                      </span>
+                      <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+                        {new Date(p.data + 'T12:00:00').toLocaleDateString('pt-BR')}
+                      </span>
+                      <span style={{ fontSize: 13, fontWeight: 700, fontFamily: 'JetBrains Mono, monospace', color: '#60A5FA' }}>
+                        R$ {fmt(p.valor)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
         <div style={{ marginBottom: 16 }}>
           <Label>Observação</Label>
           <input className="input-field" value={observacao} onChange={e => setObservacao(e.target.value)} placeholder="Nota opcional..." />
@@ -110,7 +209,12 @@ export default function ModalVenda({ clientes, produtos, title = 'Registrar vend
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(16,185,129,0.06)', border: '1px solid rgba(16,185,129,0.2)', borderRadius: 10, padding: '14px 20px', marginBottom: 20 }}>
           <div>
             <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--amber)', marginBottom: 2 }}>Total da venda</p>
-            <p style={{ fontSize: 12, color: 'var(--text-subtle)' }}>{itens.filter(i => i.produto_id).length} produto(s)</p>
+            <p style={{ fontSize: 12, color: 'var(--text-subtle)' }}>
+              {itens.filter(i => i.produto_id).length} produto(s)
+              {formaVenda === 'crediario' && numParcelas > 0 && totalVenda > 0 &&
+                <> · <span style={{ color: '#60A5FA' }}>{numParcelas}x R$ {fmt(valorParcela)}</span></>
+              }
+            </p>
           </div>
           <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 26, fontWeight: 800, color: 'var(--amber)', letterSpacing: '-0.02em' }}>R$ {fmt(totalVenda)}</span>
         </div>

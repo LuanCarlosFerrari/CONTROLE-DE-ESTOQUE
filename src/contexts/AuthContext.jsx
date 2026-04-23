@@ -41,7 +41,7 @@ export function AuthProvider({ children }) {
   }
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session }, error }) => {
+    supabase.auth.getSession().then(async ({ data: { session }, error }) => {
       if (error) {
         supabase.auth.signOut()
         setUser(null)
@@ -49,7 +49,7 @@ export function AuthProvider({ children }) {
         return
       }
       setUser(session?.user ?? null)
-      loadSubscription(session?.user?.id)
+      await loadSubscription(session?.user?.id)
       setLoading(false)
     })
 
