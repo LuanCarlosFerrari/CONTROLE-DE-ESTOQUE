@@ -2,7 +2,7 @@ import { NavLink, useNavigate } from 'react-router-dom'
 import {
   LayoutDashboard, Package, Users, ShoppingCart, LogOut,
   Clock, CheckCircle, Sun, Moon,
-  Wrench, BedDouble, UtensilsCrossed, Truck, Car, Calendar, Settings, Wallet, LayoutGrid,
+  Wrench, BedDouble, UtensilsCrossed, Truck, Car, Calendar, CalendarDays, Settings, Wallet, LayoutGrid,
 } from 'lucide-react'
 import stockTagImg from '../../assets/Stock_Tag.png'
 import { useAuth } from '../../contexts/AuthContext'
@@ -15,6 +15,7 @@ const MENUS = {
     { to: '/app/fornecedores', icon: Truck,           label: 'Fornecedores' },
     { to: '/app/clientes',     icon: Users,           label: 'Clientes' },
     { to: '/app/caixa',        icon: Wallet,          label: 'Caixa' },
+    { to: '/app/calendario',   icon: CalendarDays,    label: 'Calendário' },
   ],
   oficina: [
     { to: '/app/dashboard',    icon: LayoutDashboard, label: 'Dashboard' },
@@ -24,6 +25,7 @@ const MENUS = {
     { to: '/app/fornecedores', icon: Truck,           label: 'Fornecedores' },
     { to: '/app/clientes',     icon: Users,           label: 'Clientes' },
     { to: '/app/caixa',        icon: Wallet,          label: 'Caixa' },
+    { to: '/app/calendario',   icon: CalendarDays,    label: 'Calendário' },
   ],
   hotel: [
     { to: '/app/dashboard',    icon: LayoutDashboard, label: 'Dashboard' },
@@ -32,6 +34,7 @@ const MENUS = {
     { to: '/app/fornecedores', icon: Truck,           label: 'Fornecedores' },
     { to: '/app/clientes',     icon: Users,           label: 'Clientes' },
     { to: '/app/caixa',        icon: Wallet,          label: 'Caixa' },
+    { to: '/app/calendario',   icon: CalendarDays,    label: 'Calendário' },
   ],
   bar: [
     { to: '/app/dashboard',    icon: LayoutDashboard,  label: 'Dashboard' },
@@ -40,6 +43,7 @@ const MENUS = {
     { to: '/app/fornecedores', icon: Truck,            label: 'Fornecedores' },
     { to: '/app/clientes',     icon: Users,            label: 'Clientes' },
     { to: '/app/caixa',        icon: Wallet,           label: 'Caixa' },
+    { to: '/app/calendario',   icon: CalendarDays,     label: 'Calendário' },
   ],
 }
 

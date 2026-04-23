@@ -22,6 +22,7 @@ const Reservas       = lazy(() => import('./pages/hotel/Reservas'))
 const Fornecedores   = lazy(() => import('./pages/estoque/Fornecedores'))
 const Mesas          = lazy(() => import('./pages/bar/Mesas'))
 const Configuracoes  = lazy(() => import('./pages/Configuracoes'))
+const Calendario     = lazy(() => import('./pages/Calendario'))
 
 const PageLoader = () => (
   <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-subtle)', fontSize: 14 }}>
@@ -93,6 +94,9 @@ export default function App() {
               <BusinessRoute allow={['estoque', 'oficina', 'hotel', 'bar']}>
                 <Suspense fallback={<PageLoader />}><Fornecedores /></Suspense>
               </BusinessRoute>
+            } />
+            <Route path="calendario" element={
+              <Suspense fallback={<PageLoader />}><Calendario /></Suspense>
             } />
             <Route path="configuracoes" element={
               <Suspense fallback={<PageLoader />}><Configuracoes /></Suspense>
