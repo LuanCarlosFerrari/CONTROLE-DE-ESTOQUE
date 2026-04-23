@@ -75,14 +75,23 @@ export default function Sidebar({ isOpen, onClose }) {
       overflow: 'hidden',
     }}>
       {/* Logo */}
-      <div style={{ padding: '16px 20px 12px', borderBottom: '1px solid var(--bg-600)', flexShrink: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
-          <img src={stockTagImg} alt="StockTag" style={{ width: 44, height: 44, objectFit: 'contain', borderRadius: 10, flexShrink: 0 }} />
-          <span style={{ fontFamily: 'DM Sans, sans-serif', fontWeight: 700, fontSize: 16, color: 'var(--text)' }}>StockTag</span>
+      <div style={{ padding: '24px 20px 20px', borderBottom: '1px solid var(--bg-600)', flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
+        <div style={{
+          width: 72, height: 72, borderRadius: 18,
+          background: 'linear-gradient(135deg, rgba(16,185,129,0.15) 0%, rgba(16,185,129,0.05) 100%)',
+          border: '1.5px solid rgba(16,185,129,0.35)',
+          boxShadow: '0 0 24px rgba(16,185,129,0.15), 0 4px 12px rgba(0,0,0,0.3)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          flexShrink: 0,
+        }}>
+          <img src={stockTagImg} alt="StockTag" style={{ width: 52, height: 52, objectFit: 'contain' }} />
         </div>
-        <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--text-subtle)', paddingLeft: 2 }}>
-          {businessName || LABELS[businessType] || 'Estoque Geral'}
-        </span>
+        <div style={{ textAlign: 'center' }}>
+          <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 17, color: 'var(--text)', letterSpacing: '-0.01em', marginBottom: 3 }}>StockTag</p>
+          <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--amber)' }}>
+            {businessName || LABELS[businessType] || 'Estoque Geral'}
+          </span>
+        </div>
       </div>
 
       {/* Nav */}
