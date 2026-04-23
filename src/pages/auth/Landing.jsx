@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { Package, Users, ShoppingCart, ArrowRight, BarChart2, Shield, Zap } from 'lucide-react'
-import stockTagImg from '../../assets/Stock_Tag.png'
+import stockTagImg from '../../assets/App-Logo.png'
 
 const features = [
   { icon: Package, title: 'Controle de Estoque', desc: 'Gerencie produtos, categorias, quantidades e alertas de estoque mínimo em tempo real.' },
@@ -65,6 +65,8 @@ export default function Landing() {
 
           {/* Texto principal */}
           <div className="animate-fade-in" style={{ textAlign: 'center', maxWidth: 760, margin: '0 auto' }}>
+            <img src={stockTagImg} alt="StockTag" style={{ width: 220, height: 220, objectFit: 'contain', display: 'block', margin: '0 auto 32px' }} />
+
             <div style={{
               display: 'inline-flex', alignItems: 'center', gap: 8,
               background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.3)',

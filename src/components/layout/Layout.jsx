@@ -3,7 +3,7 @@ import { useState } from 'react'
 import Sidebar from './Sidebar'
 import TrialBanner from '../ui/TrialBanner'
 import { Menu } from 'lucide-react'
-import stockTagImg from '../../assets/Stock_Tag.png'
+import stockTagImg from '../../assets/App-Logo.png'
 
 export default function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false)

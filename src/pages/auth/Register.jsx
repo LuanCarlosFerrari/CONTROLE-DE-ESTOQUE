@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Eye, EyeOff, ArrowLeft, CheckCircle, Package, Wrench, BedDouble, UtensilsCrossed, ArrowRight } from 'lucide-react'
-import stockTagImg from '../../assets/Stock_Tag.png'
+import stockTagImg from '../../assets/App-Logo.png'
 import { useAuth } from '../../contexts/AuthContext'
 import { supabase } from '../../lib/supabase'
 

@@ -23,6 +23,7 @@ const Fornecedores   = lazy(() => import('./pages/estoque/Fornecedores'))
 const Mesas          = lazy(() => import('./pages/bar/Mesas'))
 const Configuracoes  = lazy(() => import('./pages/Configuracoes'))
 const Calendario     = lazy(() => import('./pages/Calendario'))
+const Seed           = lazy(() => import('./pages/Seed'))
 
 const PageLoader = () => (
   <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-subtle)', fontSize: 14 }}>
@@ -100,6 +101,9 @@ export default function App() {
             } />
             <Route path="configuracoes" element={
               <Suspense fallback={<PageLoader />}><Configuracoes /></Suspense>
+            } />
+            <Route path="seed" element={
+              <Suspense fallback={<PageLoader />}><Seed /></Suspense>
             } />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
