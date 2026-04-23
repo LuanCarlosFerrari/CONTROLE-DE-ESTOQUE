@@ -84,7 +84,7 @@ export default function Sidebar({ isOpen, onClose }) {
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           flexShrink: 0,
         }}>
-          <img src={stockTagImg} alt="StockTag" style={{ width: 52, height: 52, objectFit: 'contain' }} />
+          <img src={stockTagImg} alt="StockTag" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 18 }} />
         </div>
         <div style={{ textAlign: 'center' }}>
           <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 17, color: 'var(--text)', letterSpacing: '-0.01em', marginBottom: 3 }}>StockTag</p>
