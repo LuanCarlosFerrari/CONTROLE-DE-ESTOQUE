@@ -72,11 +72,12 @@ export default function Sidebar({ isOpen, onClose }) {
       background: 'var(--bg-800)',
       borderRight: '1px solid var(--bg-600)',
       display: 'flex', flexDirection: 'column',
+      overflow: 'hidden',
     }}>
       {/* Logo */}
-      <div style={{ padding: '24px 20px 16px', borderBottom: '1px solid var(--bg-600)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-          <img src={stockTagImg} alt="StockTag" style={{ width: 96, height: 96, objectFit: 'contain', borderRadius: 14 }} />
+      <div style={{ padding: '16px 20px 12px', borderBottom: '1px solid var(--bg-600)', flexShrink: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
+          <img src={stockTagImg} alt="StockTag" style={{ width: 44, height: 44, objectFit: 'contain', borderRadius: 10, flexShrink: 0 }} />
           <span style={{ fontFamily: 'DM Sans, sans-serif', fontWeight: 700, fontSize: 16, color: 'var(--text)' }}>StockTag</span>
         </div>
         <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--text-subtle)', paddingLeft: 2 }}>
@@ -85,7 +86,7 @@ export default function Sidebar({ isOpen, onClose }) {
       </div>
 
       {/* Nav */}
-      <nav style={{ flex: 1, padding: '16px 12px' }}>
+      <nav style={{ flex: 1, padding: '12px 12px', overflowY: 'auto', minHeight: 0 }}>
         <p style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-subtle)', padding: '0 8px', marginBottom: 8 }}>
           Menu
         </p>
@@ -115,14 +116,14 @@ export default function Sidebar({ isOpen, onClose }) {
       </nav>
 
       {/* Configurações — fixo no fundo da nav */}
-      <div style={{ padding: '0 12px 8px', borderTop: '1px solid var(--bg-600)', paddingTop: 8 }}>
+      <div style={{ padding: '8px 12px', borderTop: '1px solid var(--bg-600)', flexShrink: 0 }}>
         <NavLink to="/app/configuracoes" onClick={onClose} className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}>
           <Settings size={16} /> Configurações
         </NavLink>
       </div>
 
       {/* Trial / Status banner */}
-      <div style={{ padding: '0 12px 12px' }}>
+      <div style={{ padding: '0 12px 12px', flexShrink: 0 }}>
         {isTrial && trialDaysLeft !== null && (
           <div style={{ background: trialBg, border: `1px solid ${trialBorder}`, borderRadius: 10, padding: '10px 12px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
@@ -148,7 +149,7 @@ export default function Sidebar({ isOpen, onClose }) {
       </div>
 
       {/* User / Logout */}
-      <div style={{ padding: '12px 12px 16px', borderTop: '1px solid var(--bg-600)' }}>
+      <div style={{ padding: '12px 12px 16px', borderTop: '1px solid var(--bg-600)', flexShrink: 0 }}>
         <div style={{ padding: '0 8px', marginBottom: 10 }}>
           <p style={{ fontSize: 12, color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {user?.email}
