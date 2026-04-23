@@ -110,7 +110,7 @@ export default function DashboardHotel() {
   )
 
   return (
-    <div style={{ width: "100%", height: "100%" }} className="animate-fade-in page-content">
+    <div style={{ width: "100%" }} className="animate-fade-in page-content">
       <PageHeader title="Dashboard" subtitle={new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })} />
 
       {/* Stat cards */}
@@ -119,8 +119,8 @@ export default function DashboardHotel() {
       </div>
 
       {/* Chart + Reservas recentes */}
-      <div className="chart-grid" style={{ flex: 1, minHeight: 0, marginBottom: 20 }}>
-        <div style={{ background: 'var(--bg-800)', border: '1px solid var(--bg-500)', borderRadius: 14, padding: '24px 24px 16px', overflow: 'hidden', display: 'flex', flexDirection: 'column', height: '100%' }}>
+      <div className="chart-grid" style={{ marginBottom: 20 }}>
+        <div style={{ background: 'var(--bg-800)', border: '1px solid var(--bg-500)', borderRadius: 14, padding: '24px 24px 16px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 24, flexShrink: 0 }}>
             <div>
               <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 15, fontWeight: 700, color: 'var(--text)', marginBottom: 3 }}>Receita — últimos 7 dias</p>
@@ -146,7 +146,7 @@ export default function DashboardHotel() {
         </div>
 
         {/* Próximos check-ins */}
-        <div style={{ background: 'var(--bg-800)', border: '1px solid var(--bg-500)', borderRadius: 14, padding: 24, display: 'flex', flexDirection: 'column', height: '100%' }}>
+        <div style={{ background: 'var(--bg-800)', border: '1px solid var(--bg-500)', borderRadius: 14, padding: 24, display: 'flex', flexDirection: 'column' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
             <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>Próximos check-ins</p>
             <Calendar size={15} color="var(--text-subtle)" />

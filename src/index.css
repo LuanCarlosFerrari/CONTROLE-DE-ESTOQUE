@@ -426,8 +426,10 @@ body {
 .chart-grid {
   display: grid;
   grid-template-columns: 3fr 2fr;
+  grid-template-rows: 1fr;
   gap: 16px;
   min-height: 0;
+  flex: 1;
 }
 
 .bottom-grid-hotel {
@@ -487,7 +489,7 @@ body {
   .stats-grid-3 { grid-template-columns: repeat(2, 1fr); gap: 10px; }
 
   /* Charts / side panels → stacked */
-  .chart-grid      { grid-template-columns: 1fr; flex: none !important; }
+  .chart-grid      { grid-template-columns: 1fr; grid-template-rows: auto; flex: none !important; }
   .bottom-grid-hotel { grid-template-columns: 1fr; }
 
   /* Chart items: fixed height so ResponsiveContainer renders correctly */
