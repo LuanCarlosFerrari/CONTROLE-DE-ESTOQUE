@@ -1,7 +1,9 @@
 import { X } from 'lucide-react'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 
 export default function Modal({ title, onClose, children, size = 'md' }) {
+  const mouseDownTarget = useRef(null)
+
   useEffect(() => {
     const handler = (e) => e.key === 'Escape' && onClose()
     window.addEventListener('keydown', handler)
@@ -11,7 +13,15 @@ export default function Modal({ title, onClose, children, size = 'md' }) {
   const maxW = size === 'lg' ? 720 : size === 'xl' ? 900 : 520
 
   return (
-    <div className="modal-backdrop" onClick={(e) => e.target === e.currentTarget && onClose()}>
+    <div
+      className="modal-backdrop"
+      onMouseDown={(e) => { mouseDownTarget.current = e.target }}
+      onClick={(e) => {
+        if (e.target === e.currentTarget && mouseDownTarget.current === e.currentTarget) {
+          onClose()
+        }
+      }}
+    >
       <div className="modal-box" style={{ maxWidth: maxW }}>
         <div style={{
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',

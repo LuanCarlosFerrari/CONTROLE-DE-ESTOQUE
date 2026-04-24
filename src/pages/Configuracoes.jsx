@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useToast } from '../hooks/useToast'
-import { Package, Wrench, BedDouble, UtensilsCrossed, Save, Zap, KeyRound, CheckCircle, Clock, ShieldAlert, User } from 'lucide-react'
+import { Package, Wrench, BedDouble, UtensilsCrossed, Save, Zap, KeyRound, CheckCircle, Clock, ShieldAlert, User, Sun, Moon } from 'lucide-react'
+import { useTheme } from '../contexts/ThemeContext'
 import PageHeader from '../components/ui/PageHeader'
 import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabase'
@@ -39,6 +40,7 @@ export default function Configuracoes() {
   const [resetSent, setResetSent] = useState(false)
 
   const { toast, showToast, clearToast } = useToast()
+  const { theme, toggle } = useTheme()
   const [loadingPay, setLoadingPay] = useState(false)
   const [payError, setPayError] = useState(null)
 

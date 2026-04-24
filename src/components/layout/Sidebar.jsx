@@ -1,8 +1,8 @@
 import { NavLink, useNavigate } from 'react-router-dom'
 import {
   LayoutDashboard, Package, Users, LogOut,
-  Sun, Moon,
   Wrench, BedDouble, Truck, Car, Calendar, CalendarDays, Settings, Wallet, LayoutGrid,
+  Sun, Moon,
 } from 'lucide-react'
 import stockTagImg from '../../assets/App-Logo.png'
 import { useAuth } from '../../contexts/AuthContext'
@@ -69,6 +69,7 @@ const LABELS = {
 export default function Sidebar({ isOpen, onClose }) {
   const { signOut, user, businessType, businessName } = useAuth()
   const { theme, toggle } = useTheme()
+
   const navigate = useNavigate()
 
   const handleSignOut = async () => {
@@ -87,8 +88,24 @@ export default function Sidebar({ isOpen, onClose }) {
       overflow: 'hidden',
     }}>
       {/* Logo */}
-      <div style={{ padding: '20px 20px 16px', borderBottom: '1px solid var(--bg-600)', flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
-        <img src={stockTagImg} alt="StockTag" style={{ width: 160, height: 160, objectFit: 'contain' }} />
+      <div style={{ padding: '0 20px 8px', borderBottom: '1px solid var(--bg-600)', flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+        <img src={stockTagImg} alt="StockTag" style={{ width: 160, height: 160, objectFit: 'contain', marginTop: -24, marginBottom: -20 }} />
+        <button
+          onClick={toggle}
+          title={theme === 'dark' ? 'Mudar para tema claro' : 'Mudar para tema escuro'}
+          style={{
+            display: 'inline-flex', alignItems: 'center', gap: 6,
+            padding: '5px 12px', borderRadius: 20, cursor: 'pointer',
+            background: 'var(--bg-700)', border: '1px solid var(--bg-500)',
+            color: 'var(--text-muted)', fontSize: 11, fontWeight: 500,
+            transition: 'all 0.18s',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--amber)'; e.currentTarget.style.color = 'var(--amber)' }}
+          onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--bg-500)'; e.currentTarget.style.color = 'var(--text-muted)' }}
+        >
+          {theme === 'dark' ? <Sun size={12} /> : <Moon size={12} />}
+          {theme === 'dark' ? 'Claro' : 'Escuro'}
+        </button>
         <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--amber)' }}>
           {businessName || LABELS[businessType] || 'Estoque Geral'}
         </span>
@@ -142,10 +159,6 @@ export default function Sidebar({ isOpen, onClose }) {
             {user?.email}
           </p>
         </div>
-        <button onClick={toggle} className="sidebar-link" style={{ width: '100%', border: 'none', background: 'none', marginBottom: 4 }}>
-          {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
-          {theme === 'dark' ? 'Tema claro' : 'Tema escuro'}
-        </button>
         <button className="sidebar-link" style={{ width: '100%', border: 'none', background: 'none' }} onClick={handleSignOut}>
           <LogOut size={16} /> Sair
         </button>
