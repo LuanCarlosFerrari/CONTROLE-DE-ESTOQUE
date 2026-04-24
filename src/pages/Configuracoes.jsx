@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useToast } from '../hooks/useToast'
-import { Package, Wrench, BedDouble, UtensilsCrossed, Save, Zap, KeyRound, CheckCircle, Clock, ShieldAlert, User, Sun, Moon } from 'lucide-react'
+import { Package, Wrench, BedDouble, UtensilsCrossed, Save, Zap, KeyRound, CheckCircle, Clock, ShieldAlert, User, Sun, Moon, Send, Link2, LinkIcon, Link2Off } from 'lucide-react'
 import { useTheme } from '../contexts/ThemeContext'
 import PageHeader from '../components/ui/PageHeader'
 import { useAuth } from '../contexts/AuthContext'
@@ -44,6 +44,10 @@ export default function Configuracoes() {
   const [loadingPay, setLoadingPay] = useState(false)
   const [payError, setPayError] = useState(null)
 
+  const [telegramSession, setTelegramSession] = useState(null)
+  const [telegramLoading, setTelegramLoading] = useState(true)
+  const [unlinking, setUnlinking] = useState(false)
+
   const handlePagar = async () => {
     setLoadingPay(true)
     setPayError(null)
@@ -60,6 +64,30 @@ export default function Configuracoes() {
     setSelectedType(businessType)
     setName(businessName)
   }, [businessType, businessName])
+
+  useEffect(() => {
+    if (!user?.id) return
+    supabase
+      .from('bot_sessions')
+      .select('chat_id, state, updated_at')
+      .eq('user_id', user.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        setTelegramSession(data)
+        setTelegramLoading(false)
+      })
+  }, [user?.id])
+
+  const handleUnlinkTelegram = async () => {
+    setUnlinking(true)
+    await supabase
+      .from('bot_sessions')
+      .update({ user_id: null, state: 'UNLINKED' })
+      .eq('user_id', user.id)
+    setTelegramSession(null)
+    setUnlinking(false)
+    showToast('Conta Telegram desvinculada.')
+  }
 
   const handleSaveProfile = async (e) => {
     e.preventDefault()
@@ -196,6 +224,65 @@ export default function Configuracoes() {
             }
           </button>
         </div>
+      </Section>
+
+      {/* Seção: Bot Telegram */}
+      <Section title="Bot Telegram" subtitle="Consulte dados do sistema diretamente pelo Telegram">
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16, marginBottom: 20, padding: '14px 16px', background: 'var(--bg-700)', borderRadius: 10, border: '1px solid var(--bg-600)' }}>
+          <div style={{ width: 40, height: 40, borderRadius: 10, background: 'rgba(51,144,236,0.12)', border: '1px solid rgba(51,144,236,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <Send size={18} color="#3390EC" />
+          </div>
+          <div style={{ flex: 1 }}>
+            <p style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)', marginBottom: 4 }}>StockTag Bot</p>
+            <p style={{ fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.5 }}>
+              Receba resumos do caixa, alertas de estoque baixo, parcelas vencidas, OS em aberto e check-outs do dia diretamente no Telegram.
+            </p>
+          </div>
+        </div>
+
+        {telegramLoading ? (
+          <p style={{ fontSize: 13, color: 'var(--text-subtle)' }}>Verificando vinculação...</p>
+        ) : telegramSession ? (
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 14px', background: 'rgba(52,211,153,0.06)', border: '1px solid rgba(52,211,153,0.2)', borderRadius: 10, marginBottom: 16 }}>
+              <CheckCircle size={16} color="#34D399" />
+              <div>
+                <p style={{ fontSize: 13, fontWeight: 600, color: '#34D399', marginBottom: 1 }}>Conta vinculada</p>
+                <p style={{ fontSize: 12, color: 'var(--text-subtle)' }}>
+                  Chat ID: {telegramSession.chat_id} · Vinculado em {new Date(telegramSession.updated_at).toLocaleDateString('pt-BR')}
+                </p>
+              </div>
+            </div>
+            <button
+              className="btn-secondary"
+              onClick={handleUnlinkTelegram}
+              disabled={unlinking}
+              style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13 }}
+            >
+              <Link2Off size={14} />
+              {unlinking ? 'Desvinculando...' : 'Desvincular conta Telegram'}
+            </button>
+          </div>
+        ) : (
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 14px', background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.2)', borderRadius: 10, marginBottom: 20 }}>
+              <Link2Off size={16} color="#F59E0B" />
+              <p style={{ fontSize: 13, color: '#F59E0B', fontWeight: 600 }}>Conta não vinculada</p>
+            </div>
+
+            <Label>Como vincular</Label>
+            <ol style={{ paddingLeft: 18, margin: 0, display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {[
+                <>Abra o Telegram e pesquise por <strong style={{ color: 'var(--text)' }}>@StockTagBot</strong></>,
+                <>Envie qualquer mensagem para iniciar</>,
+                <>O bot solicitará o seu e-mail de cadastro: <strong style={{ color: 'var(--text)' }}>{user?.email}</strong></>,
+                <>Após enviar o e-mail, a conta será vinculada automaticamente</>,
+              ].map((step, i) => (
+                <li key={i} style={{ fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.5 }}>{step}</li>
+              ))}
+            </ol>
+          </div>
+        )}
       </Section>
 
       {/* Seção: Assinatura */}
