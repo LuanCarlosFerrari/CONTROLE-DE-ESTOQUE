@@ -22,8 +22,8 @@ export default function Layout() {
           <button className="mobile-menu-btn" onClick={() => setSidebarOpen(true)} aria-label="Abrir menu">
             <Menu size={22} />
           </button>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <img src={stockTagImg} alt="StockTag" style={{ width: 80, height: 80, objectFit: 'contain' }} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <img src={stockTagImg} alt="StockTag" style={{ width: 36, height: 36, objectFit: 'contain' }} />
             <span style={{ fontFamily: 'DM Sans, sans-serif', fontWeight: 700, fontSize: 16, color: 'var(--text)' }}>StockTag</span>
           </div>
           <div style={{ width: 40 }} />
