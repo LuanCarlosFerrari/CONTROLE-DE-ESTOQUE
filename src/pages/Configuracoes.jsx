@@ -47,6 +47,7 @@ export default function Configuracoes() {
   const [telegramSession, setTelegramSession] = useState(null)
   const [telegramLoading, setTelegramLoading] = useState(true)
   const [unlinking, setUnlinking] = useState(false)
+  const [linking, setLinking] = useState(false)
 
   const handlePagar = async () => {
     setLoadingPay(true)
@@ -88,6 +89,35 @@ export default function Configuracoes() {
     setUnlinking(false)
     showToast('Conta Telegram desvinculada.')
   }
+
+  const handleConnectTelegram = async () => {
+    setLinking(true)
+    const { data: token, error } = await supabase.rpc('create_telegram_link_token', { p_user_id: user.id })
+    if (error || !token) {
+      setLinking(false)
+      showToast('Erro ao gerar link. Tente novamente.')
+      return
+    }
+    window.open(`https://t.me/App_massage_bot?start=${token}`, '_blank')
+  }
+
+  useEffect(() => {
+    if (!linking || !user?.id) return
+    const interval = setInterval(async () => {
+      const { data } = await supabase
+        .from('bot_sessions')
+        .select('chat_id, state, updated_at')
+        .eq('user_id', user.id)
+        .maybeSingle()
+      if (data) {
+        setTelegramSession(data)
+        setLinking(false)
+        showToast('Telegram vinculado com sucesso! 🎉')
+      }
+    }, 3000)
+    const timeout = setTimeout(() => setLinking(false), 5 * 60 * 1000)
+    return () => { clearInterval(interval); clearTimeout(timeout) }
+  }, [linking, user?.id])
 
   const handleSaveProfile = async (e) => {
     e.preventDefault()
@@ -263,24 +293,31 @@ export default function Configuracoes() {
               {unlinking ? 'Desvinculando...' : 'Desvincular conta Telegram'}
             </button>
           </div>
+        ) : linking ? (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', background: 'rgba(51,144,236,0.06)', border: '1px solid rgba(51,144,236,0.2)', borderRadius: 10 }}>
+            <Clock size={16} color="#3390EC" />
+            <div>
+              <p style={{ fontSize: 13, fontWeight: 600, color: '#3390EC', marginBottom: 2 }}>Aguardando vinculação...</p>
+              <p style={{ fontSize: 12, color: 'var(--text-subtle)' }}>Conclua o processo no Telegram. Esta janela atualiza automaticamente.</p>
+            </div>
+          </div>
         ) : (
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 14px', background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.2)', borderRadius: 10, marginBottom: 20 }}>
               <Link2Off size={16} color="#F59E0B" />
               <p style={{ fontSize: 13, color: '#F59E0B', fontWeight: 600 }}>Conta não vinculada</p>
             </div>
-
-            <Label>Como vincular</Label>
-            <ol style={{ paddingLeft: 18, margin: 0, display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {[
-                <>Abra o Telegram e pesquise por <strong style={{ color: 'var(--text)' }}>@StockTagBot</strong></>,
-                <>Envie qualquer mensagem para iniciar</>,
-                <>O bot solicitará o seu e-mail de cadastro: <strong style={{ color: 'var(--text)' }}>{user?.email}</strong></>,
-                <>Após enviar o e-mail, a conta será vinculada automaticamente</>,
-              ].map((step, i) => (
-                <li key={i} style={{ fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.5 }}>{step}</li>
-              ))}
-            </ol>
+            <button
+              className="btn-primary"
+              onClick={handleConnectTelegram}
+              style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13 }}
+            >
+              <Send size={14} />
+              Conectar no Telegram
+            </button>
+            <p style={{ fontSize: 12, color: 'var(--text-subtle)', marginTop: 10 }}>
+              Você será redirecionado ao Telegram. A vinculação é automática.
+            </p>
           </div>
         )}
       </Section>

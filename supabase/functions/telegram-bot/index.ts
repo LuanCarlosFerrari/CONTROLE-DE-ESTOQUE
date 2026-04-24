@@ -195,35 +195,52 @@ async function queryCheckout(): Promise<string> {
 
 // ── Flow handlers ──────────────────────────────────────────────────
 
-async function handleUnlinked(chatId: number) {
-  await updateSession(chatId, { state: 'AWAITING_EMAIL' })
-  await send(chatId,
-    '👋 Olá! Sou o assistente do *StockTag*.\n\n' +
-    'Para continuar, informe o *e-mail* cadastrado na sua conta:'
-  )
-}
+async function handleTokenLink(chatId: number, token: string) {
+  const { data, error } = await db
+    .from('telegram_link_tokens')
+    .select('user_id, expires_at, used_at')
+    .eq('token', token)
+    .maybeSingle()
 
-async function handleLinkEmail(chatId: number, email: string) {
-  const { data: userId, error } = await db.rpc('get_user_id_by_email', {
-    p_email: email.trim().toLowerCase(),
-  })
-
-  if (error || !userId) {
-    await send(chatId, '❌ E-mail não encontrado. Verifique e tente novamente.')
+  if (error || !data) {
+    await send(chatId, '❌ Link inválido. Gere um novo link nas Configurações do StockTag.')
     return
   }
+
+  if (data.used_at) {
+    await send(chatId, '❌ Este link já foi utilizado. Gere um novo nas Configurações.')
+    return
+  }
+
+  if (new Date(data.expires_at) < new Date()) {
+    await send(chatId, '❌ Link expirado. Gere um novo nas Configurações.')
+    return
+  }
+
+  await db
+    .from('telegram_link_tokens')
+    .update({ used_at: new Date().toISOString() })
+    .eq('token', token)
+
+  await getSession(chatId)
+  await updateSession(chatId, { user_id: data.user_id, state: 'MAIN_MENU' })
 
   const { data: sub } = await db
     .from('subscriptions')
     .select('business_name')
-    .eq('user_id', userId)
+    .eq('user_id', data.user_id)
     .maybeSingle()
 
   const nome = sub?.business_name || 'gestor'
 
-  await updateSession(chatId, { user_id: userId, state: 'MAIN_MENU' })
   await send(chatId, `✅ *Conta vinculada com sucesso!*\n\nBem-vindo, *${nome}*! 🎉`)
   await sendMainMenu(chatId)
+}
+
+async function handleNotLinked(chatId: number) {
+  await send(chatId,
+    '👋 Olá! Para usar este bot, acesse as *Configurações* no StockTag e clique em *"Conectar no Telegram"*.'
+  )
 }
 
 async function handleAction(chatId: number, action: string, userId: string) {
@@ -256,7 +273,7 @@ serve(async (req) => {
 
       const session = await getSession(chatId)
       if (!session?.user_id) {
-        await handleUnlinked(chatId)
+        await handleNotLinked(chatId)
         return new Response('OK')
       }
 
@@ -268,15 +285,18 @@ serve(async (req) => {
     if (update.message?.text) {
       const chatId = Number(update.message.chat.id)
       const text   = update.message.text.trim()
+
+      // /start com token de vinculação
+      if (text.startsWith('/start ')) {
+        const token = text.slice(7).trim()
+        await handleTokenLink(chatId, token)
+        return new Response('OK')
+      }
+
       const session = await getSession(chatId)
 
-      // Não vinculado ainda
       if (!session?.user_id) {
-        if (session?.state === 'AWAITING_EMAIL') {
-          await handleLinkEmail(chatId, text)
-        } else {
-          await handleUnlinked(chatId)
-        }
+        await handleNotLinked(chatId)
         return new Response('OK')
       }
 
