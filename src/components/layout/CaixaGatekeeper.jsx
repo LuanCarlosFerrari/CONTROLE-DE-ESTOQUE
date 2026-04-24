@@ -190,7 +190,7 @@ export default function CaixaGatekeeper({ children }) {
               value={saldoContado}
               onChange={e => setSaldoContado(e.target.value)}
               placeholder="0,00"
-              className="input"
+              className="input-field"
               autoFocus
             />
           </div>
@@ -201,7 +201,7 @@ export default function CaixaGatekeeper({ children }) {
               value={obs}
               onChange={e => setObs(e.target.value)}
               placeholder="Opcional"
-              className="input"
+              className="input-field"
             />
           </div>
           {error && <p style={{ color: 'var(--red)', fontSize: 13, marginBottom: 12 }}>{error}</p>}
@@ -250,7 +250,7 @@ export default function CaixaGatekeeper({ children }) {
               value={saldoInicial}
               onChange={e => setSaldoInicial(e.target.value)}
               placeholder="0,00"
-              className="input"
+              className="input-field"
               autoFocus
             />
           </div>
