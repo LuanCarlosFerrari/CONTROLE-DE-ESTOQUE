@@ -342,7 +342,7 @@ export default function Landing() {
       <section style={{ maxWidth: 1160, margin: '0 auto', padding: '80px 32px 100px' }}>
 
         {/* Section header */}
-        <div style={{ marginBottom: 64 }}>
+        <div style={{ marginBottom: 64, textAlign: 'center' }}>
           <div style={{
             display: 'inline-flex', alignItems: 'center', gap: 8,
             background: 'rgba(16,185,129,0.06)', border: '1px solid rgba(16,185,129,0.15)',
@@ -351,18 +351,18 @@ export default function Landing() {
           }}>
             FUNCIONALIDADES
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: 20 }}>
+          <div style={{ textAlign: 'center' }}>
             <h2 style={{
               fontFamily: 'DM Sans, sans-serif',
               fontSize: 'clamp(28px, 3.5vw, 42px)',
               fontWeight: 700, color: 'var(--text)',
               letterSpacing: '-0.02em', lineHeight: 1.2,
-              margin: 0,
+              margin: '0 0 12px',
             }}>
-              Tudo que você precisa<br />
-              <span style={{ color: 'var(--text-muted)', fontWeight: 500, fontSize: '0.8em' }}>em um só lugar.</span>
+              Tudo que você precisa{' '}
+              <span style={{ color: 'var(--text-muted)', fontWeight: 500 }}>em um só lugar.</span>
             </h2>
-            <p style={{ color: 'var(--text-muted)', fontSize: 15, maxWidth: 320, lineHeight: 1.6, margin: 0 }}>
+            <p style={{ color: 'var(--text-muted)', fontSize: 15, maxWidth: 480, lineHeight: 1.6, margin: '0 auto' }}>
               Uma plataforma completa para gestão do seu negócio, do estoque às finanças.
             </p>
           </div>
