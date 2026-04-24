@@ -18,7 +18,7 @@ const FORMAS = ['dinheiro', 'pix', 'cartao', 'outros']
 const FORMA_LABEL = { dinheiro: 'Dinheiro', pix: 'PIX', cartao: 'Cartão', outros: 'Outros' }
 
 export default function Caixa() {
-  const { businessType } = useAuth()
+  const { businessType, user } = useAuth()
   const today = new Date().toISOString().split('T')[0]
 
   const [caixa, setCaixa]           = useState(null)
@@ -54,7 +54,7 @@ export default function Caixa() {
   /* ── Carregamento ─────────────────────────────────────── */
   const loadCaixa = useCallback(async () => {
     setLoadingCaixa(true)
-    const { data } = await supabase.from('caixas').select('*').eq('data', today).maybeSingle()
+    const { data } = await supabase.from('caixas').select('*').eq('data', today).eq('user_id', user.id).maybeSingle()
     setCaixa(data || null)
     setLoadingCaixa(false)
   }, [today])
@@ -106,7 +106,7 @@ export default function Caixa() {
     e.preventDefault()
     setSaving(true)
     const { data, error } = await supabase.from('caixas')
-      .insert({ data: today, saldo_inicial: Number(saldoInicial), status: 'aberto' })
+      .insert({ data: today, saldo_inicial: Number(saldoInicial), status: 'aberto', user_id: user.id })
       .select().single()
     setSaving(false)
     if (error) return showToast(error.message, 'error')

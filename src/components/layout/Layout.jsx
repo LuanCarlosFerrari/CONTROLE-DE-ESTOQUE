@@ -2,6 +2,7 @@ import { Outlet } from 'react-router-dom'
 import { useState } from 'react'
 import Sidebar from './Sidebar'
 import TrialBanner from '../ui/TrialBanner'
+import CaixaGatekeeper from './CaixaGatekeeper'
 import { Menu } from 'lucide-react'
 import stockTagImg from '../../assets/App-Logo.png'
 
@@ -30,7 +31,9 @@ export default function Layout() {
 
         <TrialBanner />
         <main style={{ flex: 1, overflow: 'auto', minHeight: 0, height: '100%' }}>
-          <Outlet />
+          <CaixaGatekeeper>
+            <Outlet />
+          </CaixaGatekeeper>
         </main>
       </div>
     </div>
