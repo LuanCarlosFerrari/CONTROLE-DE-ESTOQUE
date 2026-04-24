@@ -111,6 +111,26 @@ body {
   background-size: 60px 60px;
 }
 
+/* Landing header */
+.landing-header-inner {
+  width: 100%;
+  padding: 0 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+  box-sizing: border-box;
+  position: relative;
+}
+.landing-nav { display: flex; gap: 2px; align-items: center; position: absolute; left: 50%; transform: translateX(-50%); }
+.landing-btn-entrar { display: inline-flex; }
+
+@media (max-width: 768px) {
+  .landing-header-inner { padding: 0 20px; }
+  .landing-nav { display: none; }
+  .landing-btn-entrar { display: none; }
+}
+
 /* Glow effects */
 .glow-amber {
   box-shadow: 0 0 30px rgba(16, 185, 129, 0.15), 0 0 60px rgba(16, 185, 129, 0.05);

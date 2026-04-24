@@ -37,7 +37,7 @@ export default function Landing() {
           pointerEvents: 'none',
         }} />
 
-        <div style={{ width: '100%', padding: '0 48px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 64, boxSizing: 'border-box', position: 'relative' }}>
+        <div className="landing-header-inner">
 
           {/* Logo */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
@@ -59,7 +59,7 @@ export default function Landing() {
           </div>
 
           {/* Nav central */}
-          <nav style={{ display: 'flex', gap: 2, alignItems: 'center', position: 'absolute', left: '50%', transform: 'translateX(-50%)' }}>
+          <nav className="landing-nav">
             {[
               { label: 'Início', href: '#hero' },
               { label: 'Funcionalidades', href: '#funcionalidades' },
@@ -83,6 +83,7 @@ export default function Landing() {
           {/* Ações */}
           <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexShrink: 0 }}>
             <Link to="/login"
+              className="landing-btn-entrar"
               style={{
                 color: 'var(--text-muted)', textDecoration: 'none', fontSize: 14,
                 fontWeight: 500, padding: '7px 16px', borderRadius: 8,
