@@ -546,9 +546,18 @@ body {
   /* Toast full-width */
   .toast { left: 16px; right: 16px; bottom: 16px; max-width: none; }
 
-  /* Trial banner: hide center counter, wrap */
-  .trial-banner-center { display: none; }
-  .trial-banner-wrap   { flex-wrap: wrap; padding: 10px 16px; gap: 10px; }
+  /* Trial banner: mobile layout */
+  .trial-banner-wrap {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 10px 16px;
+    gap: 8px;
+  }
+  .trial-banner-left  { justify-content: space-between; }
+  .trial-banner-bottom { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .trial-banner-center { position: static; transform: none; left: auto; }
+  .trial-banner-dismiss-desktop { display: none; }
+  .trial-banner-dismiss-mobile  { display: flex; }
 }
 
 @media (max-width: 480px) {
