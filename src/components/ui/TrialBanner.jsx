@@ -59,6 +59,7 @@ export default function TrialBanner() {
       alignItems: 'center',
       justifyContent: 'space-between',
       gap: 16,
+      position: 'relative',
     }}>
       {/* Esquerda */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -76,7 +77,7 @@ export default function TrialBanner() {
       </div>
 
       {/* Centro — contador de unidades */}
-      <div className="trial-banner-center" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+      <div className="trial-banner-center" style={{ display: 'flex', alignItems: 'center', gap: 6, position: 'absolute', left: '50%', transform: 'translateX(-50%)' }}>
         {[
           { val: pad(timeLeft.days),    label: 'dias' },
           { val: pad(timeLeft.hours),   label: 'horas' },
