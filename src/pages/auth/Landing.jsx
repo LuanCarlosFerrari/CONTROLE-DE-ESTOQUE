@@ -102,7 +102,7 @@ export default function Landing() {
               borderRadius: 8, gap: 6, display: 'inline-flex', alignItems: 'center',
               fontFamily: 'DM Sans, sans-serif', fontWeight: 600,
             }}>
-              Começar grátis <ArrowRight size={13} />
+              <span className="header-cta-text">Começar grátis</span> <ArrowRight size={13} />
             </Link>
           </div>
 
@@ -162,7 +162,7 @@ export default function Landing() {
 
           {/* Headline */}
           <div className="animate-fade-in" style={{ textAlign: 'center', maxWidth: 860, margin: '0 auto' }}>
-            <h1 style={{
+            <h1 className="hero-title" style={{
               fontFamily: 'DM Sans, sans-serif',
               fontSize: 'clamp(38px, 5.5vw, 64px)',
               fontWeight: 700,
@@ -186,7 +186,7 @@ export default function Landing() {
             </p>
 
             {/* CTAs */}
-            <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 56 }}>
+            <div className="hero-ctas" style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 56 }}>
               <Link to="/register" className="btn-primary" style={{
                 textDecoration: 'none', padding: '14px 28px', fontSize: 15,
                 display: 'inline-flex', alignItems: 'center', gap: 8, borderRadius: 10,
@@ -202,7 +202,7 @@ export default function Landing() {
             </div>
 
             {/* Stats row */}
-            <div style={{
+            <div className="landing-stats-row" style={{
               display: 'flex', justifyContent: 'center', gap: 0,
               border: '1px solid rgba(255,255,255,0.06)',
               borderRadius: 12, overflow: 'hidden',
@@ -463,7 +463,7 @@ export default function Landing() {
             <p style={{ color: 'var(--text-muted)', fontSize: 16, marginBottom: 40, lineHeight: 1.6 }}>
               Crie sua conta e comece a controlar seu estoque em minutos. Sem custo.
             </p>
-            <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
+            <div className="hero-ctas" style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
               <Link to="/register" className="btn-primary" style={{
                 textDecoration: 'none', padding: '15px 32px', fontSize: 15,
                 display: 'inline-flex', alignItems: 'center', gap: 8, borderRadius: 10,

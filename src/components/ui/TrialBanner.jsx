@@ -61,7 +61,7 @@ export default function TrialBanner() {
   )
 
   const countdown = (
-    <div className="trial-banner-center" style={{ display: 'flex', alignItems: 'center', gap: 6, position: 'absolute', left: '50%', transform: 'translateX(-50%)' }}>
+    <div className="trial-banner-center" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
       {[
         { val: pad(timeLeft.days),    label: 'dias' },
         { val: pad(timeLeft.hours),   label: 'horas' },

@@ -42,7 +42,7 @@ export default function Login() {
         </Link>
 
         {/* Card */}
-        <div style={{ background: 'var(--bg-800)', border: '1px solid var(--bg-500)', borderRadius: 16, padding: '36px 32px' }}>
+        <div className="auth-card" style={{ background: 'var(--bg-800)', border: '1px solid var(--bg-500)', borderRadius: 16, padding: '36px 32px' }}>
           {/* Logo */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 28 }}>
             <img src={stockTagImg} alt="StockTag" style={{ width: 104, height: 104, objectFit: 'contain', borderRadius: 16 }} />

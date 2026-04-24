@@ -103,7 +103,7 @@ export default function Register() {
           <ArrowLeft size={14} /> Voltar
         </Link>
 
-        <div style={{ background: 'var(--bg-800)', border: '1px solid var(--bg-500)', borderRadius: 16, padding: '36px 32px' }}>
+        <div className="auth-card" style={{ background: 'var(--bg-800)', border: '1px solid var(--bg-500)', borderRadius: 16, padding: '36px 32px' }}>
           {/* Logo + progress */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 28 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -127,7 +127,7 @@ export default function Register() {
                 Escolha o tipo para personalizarmos a plataforma.
               </p>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 24 }}>
+              <div className="business-type-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 24 }}>
                 {BUSINESS_TYPES.map(({ value, icon: Icon, label, desc }) => {
                   const selected = businessType === value
                   return (
