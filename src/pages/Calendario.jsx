@@ -1,9 +1,12 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { ChevronLeft, ChevronRight, X, CalendarDays, Plus, LogIn, LogOut, Wrench, Play, CheckCircle } from 'lucide-react'
+import { ChevronLeft, ChevronRight, X, CalendarDays, Plus, LogIn, LogOut, Wrench, Play, CheckCircle, DollarSign } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 import Modal from '../components/ui/Modal'
 import Label from '../components/ui/FormLabel'
+
+const FORMAS = ['dinheiro', 'pix', 'cartao', 'outros']
+const FORMA_LABEL = { dinheiro: 'Dinheiro', pix: 'PIX', cartao: 'Cartão', outros: 'Outros' }
 
 const DAYS   = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom']
 const MONTHS = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']
@@ -41,7 +44,7 @@ const EMPTY_HOTEL = { nome_hospede: '', quarto_id: '', check_in: '', check_out: 
 const EMPTY_OS    = { veiculo_id: '', cliente_id: '', descricao: '', valor_mao_obra: 0, data_previsao: '' }
 
 export default function Calendario() {
-  const { businessType } = useAuth()
+  const { businessType, user } = useAuth()
   const [current, setCurrent] = useState(() => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), 1) })
   const [events, setEvents]   = useState({})
   const [loading, setLoading] = useState(true)
@@ -54,6 +57,7 @@ export default function Calendario() {
   const [form, setForm]       = useState({})
   const [auxData, setAuxData] = useState({ quartos: [], veiculos: [], clientes: [] })
   const [saving, setSaving]   = useState(false)
+  const [payModal, setPayModal] = useState(null) // { ev, valor, forma }
 
   const year  = current.getFullYear()
   const month = current.getMonth()
@@ -236,6 +240,68 @@ export default function Calendario() {
       }
       await loadEvents()
     } catch (e) { console.error(e) }
+  }
+
+  // ── Open payment modal ──
+  const openPayModal = (ev) => {
+    setPayModal({ ev, valor: String(ev.value || ''), forma: 'dinheiro', step: 'payment', saldoInicial: '' })
+  }
+
+  // ── Confirm payment → movimentacao_extra + status update ──
+  const confirmPayment = async (e) => {
+    e.preventDefault()
+    const { ev, valor, forma, step, saldoInicial } = payModal
+    const today = new Date().toISOString().split('T')[0]
+    setSaving(true)
+    try {
+      // Find user's open caixa for today
+      let { data: caixaHoje } = await supabase
+        .from('caixas')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('data', today)
+        .eq('status', 'aberto')
+        .maybeSingle()
+
+      // No open caixa → ask user to open one first
+      if (!caixaHoje && step === 'payment') {
+        setPayModal(p => ({ ...p, step: 'open_caixa' }))
+        setSaving(false)
+        return
+      }
+
+      // User just filled saldo_inicial → open caixa now
+      if (!caixaHoje && step === 'open_caixa') {
+        const { data: novo, error } = await supabase
+          .from('caixas')
+          .insert({ data: today, saldo_inicial: Number(saldoInicial) || 0, status: 'aberto', user_id: user.id })
+          .select('id').single()
+        if (error) { setSaving(false); return }
+        caixaHoje = novo
+      }
+
+      const descricao = ev.type === 'os'
+        ? `OS ${ev.label}${ev.sublabel ? ' — ' + ev.sublabel : ''}`
+        : ev.type === 'reserva'
+        ? `Check-out — ${ev.label}`
+        : `Crediário — ${ev.label} (${ev.sublabel || ''})`
+
+      // Register in caixa
+      await supabase.from('movimentacoes_extras').insert({
+        caixa_id: caixaHoje?.id || null,
+        tipo: 'entrada',
+        descricao,
+        valor: Number(valor),
+        forma_pagamento: forma,
+      })
+
+      // Update record status
+      const newStatus = ev.type === 'os' ? 'concluida' : ev.type === 'reserva' ? 'checkout' : 'pago'
+      await changeStatus(ev, newStatus)
+
+      setPayModal(null)
+    } catch (err) { console.error(err) }
+    finally { setSaving(false) }
   }
 
   // ── Calendar cells ──
@@ -430,7 +496,7 @@ export default function Calendario() {
                         </button>
                       )}
                       {ev.type === 'reserva' && ev.status === 'checkin' && (
-                        <button onClick={() => changeStatus(ev, 'checkout')} style={actionBtn('#A78BFA')}>
+                        <button onClick={() => openPayModal(ev)} style={actionBtn('#A78BFA')}>
                           <LogOut size={13} /> Fazer Check-out
                         </button>
                       )}
@@ -442,14 +508,14 @@ export default function Calendario() {
                         </button>
                       )}
                       {ev.type === 'os' && ev.status === 'em_andamento' && (
-                        <button onClick={() => changeStatus(ev, 'concluida')} style={actionBtn('#34D399')}>
+                        <button onClick={() => openPayModal(ev)} style={actionBtn('#34D399')}>
                           <Wrench size={13} /> Concluir OS
                         </button>
                       )}
 
                       {/* ── Crediário quick action ── */}
                       {ev.type === 'parcela' && (
-                        <button onClick={() => changeStatus(ev, 'pago')} style={actionBtn('#34D399')}>
+                        <button onClick={() => openPayModal(ev)} style={actionBtn('#34D399')}>
                           <CheckCircle size={13} /> Registrar pagamento
                         </button>
                       )}
@@ -471,6 +537,113 @@ export default function Calendario() {
             </div>
           </div>
         </>
+      )}
+
+      {/* ── Modal: Pagamento ── */}
+      {payModal && (
+        <Modal
+          title={
+            payModal.step === 'open_caixa' ? 'Abrir caixa para continuar'
+            : payModal.ev.type === 'os' ? 'Concluir OS — Receber pagamento'
+            : payModal.ev.type === 'reserva' ? 'Check-out — Receber pagamento'
+            : 'Registrar pagamento de parcela'
+          }
+          onClose={() => setPayModal(null)}
+        >
+          <form onSubmit={confirmPayment} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+
+            {/* ── Etapa: sem caixa aberto ── */}
+            {payModal.step === 'open_caixa' ? (
+              <>
+                <div style={{
+                  display: 'flex', alignItems: 'flex-start', gap: 12,
+                  background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.25)',
+                  borderRadius: 10, padding: '12px 14px',
+                }}>
+                  <DollarSign size={16} color="#F59E0B" style={{ flexShrink: 0, marginTop: 1 }} />
+                  <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: 0, lineHeight: 1.5 }}>
+                    Nenhum caixa aberto hoje. Informe o saldo inicial para abrir o caixa e registrar o pagamento em seguida.
+                  </p>
+                </div>
+                <div>
+                  <Label>Troco inicial / Saldo em caixa (R$)</Label>
+                  <input
+                    type="number" step="0.01" min="0"
+                    style={inp}
+                    value={payModal.saldoInicial}
+                    onChange={e => setPayModal(p => ({ ...p, saldoInicial: e.target.value }))}
+                    placeholder="0,00"
+                    autoFocus
+                  />
+                </div>
+              </>
+            ) : (
+              <>
+                {/* Info do evento */}
+                <div style={{
+                  background: 'var(--bg-700)', border: '1px solid var(--bg-500)',
+                  borderRadius: 10, padding: '12px 14px',
+                  display: 'flex', flexDirection: 'column', gap: 4,
+                }}>
+                  <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)', margin: 0 }}>{payModal.ev.label}</p>
+                  {payModal.ev.sublabel && (
+                    <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: 0 }}>{payModal.ev.sublabel}</p>
+                  )}
+                </div>
+
+                {/* Valor */}
+                <div>
+                  <Label>Valor recebido (R$) *</Label>
+                  <input
+                    type="number" step="0.01" min="0.01" required
+                    style={inp}
+                    value={payModal.valor}
+                    onChange={e => setPayModal(p => ({ ...p, valor: e.target.value }))}
+                    autoFocus
+                  />
+                </div>
+
+                {/* Forma de pagamento */}
+                <div>
+                  <Label>Forma de pagamento *</Label>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
+                    {FORMAS.map(f => (
+                      <button
+                        key={f} type="button"
+                        onClick={() => setPayModal(p => ({ ...p, forma: f }))}
+                        style={{
+                          padding: '8px 4px', borderRadius: 8, fontSize: 12, fontWeight: 600,
+                          cursor: 'pointer', fontFamily: 'DM Sans, sans-serif',
+                          border: payModal.forma === f ? '1px solid var(--amber)' : '1px solid var(--bg-500)',
+                          background: payModal.forma === f ? 'rgba(16,185,129,0.12)' : 'var(--bg-700)',
+                          color: payModal.forma === f ? 'var(--amber)' : 'var(--text-muted)',
+                          transition: 'all 0.15s',
+                        }}
+                      >
+                        {FORMA_LABEL[f]}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, paddingTop: 4 }}>
+              <button type="button" onClick={() => setPayModal(null)} style={{ ...btnBase, padding: '9px 18px', fontSize: 14 }}>
+                Cancelar
+              </button>
+              <button
+                type="submit" disabled={saving}
+                style={{ ...btnBase, padding: '9px 18px', fontSize: 14, fontWeight: 600, background: 'var(--amber)', border: 'none', color: '#fff', gap: 6, opacity: saving ? 0.7 : 1 }}
+              >
+                <DollarSign size={14} />
+                {saving ? 'Processando...'
+                  : payModal.step === 'open_caixa' ? 'Abrir caixa e registrar'
+                  : 'Confirmar pagamento'}
+              </button>
+            </div>
+          </form>
+        </Modal>
       )}
 
       {/* ── Modal: Nova Reserva (Hotel) ── */}
