@@ -512,12 +512,7 @@ Deno.serve(async (req) => {
   if (secret) {
     if (secret !== NOTIFY_SECRET) return new Response('Unauthorized', { status: 401, headers: CORS })
   } else if (auth) {
-    const userClient = createClient(
-      Deno.env.get('SUPABASE_URL')!,
-      Deno.env.get('SUPABASE_ANON_KEY')!,
-      { global: { headers: { Authorization: auth } } }
-    )
-    const { data: { user }, error: authErr } = await userClient.auth.getUser()
+    const { data: { user }, error: authErr } = await db.auth.getUser(auth.replace('Bearer ', ''))
     if (authErr || !user) return new Response('Unauthorized', { status: 401, headers: CORS })
     verifiedUserId = user.id
   } else {

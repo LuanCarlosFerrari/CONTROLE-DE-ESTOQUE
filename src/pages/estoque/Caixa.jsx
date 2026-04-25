@@ -3,6 +3,7 @@ import { useToast } from '../../hooks/useToast'
 import { formatCurrency as fmt } from '../../utils/format'
 import { Search, ShoppingCart, ArrowUpCircle, ArrowDownCircle, Lock, Unlock, Wallet, Wrench, BedDouble } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
+import { notifyTelegram } from '../../lib/notify'
 import Modal from '../../components/ui/Modal'
 import Toast from '../../components/ui/Toast'
 import Label from '../../components/ui/FormLabel'
@@ -101,15 +102,6 @@ export default function Caixa() {
   const caixaFechado = caixa?.status === 'fechado'
   const semCaixa     = !caixa
 
-  /* ── Notificação Telegram ────────────────────────────── */
-  const notifyTelegram = useCallback(async (type, payload = {}) => {
-    try {
-      const { error } = await supabase.functions.invoke('telegram-notify', { body: { type, payload } })
-      if (error) console.error('[telegram-notify]', type, error)
-    } catch (e) {
-      console.error('[telegram-notify]', type, e)
-    }
-  }, [])
 
   /* ── Ações ────────────────────────────────────────────── */
   const handleAbrirCaixa = async (e) => {
