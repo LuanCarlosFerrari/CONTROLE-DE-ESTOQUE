@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 
 const AuthContext = createContext({})
@@ -7,6 +8,7 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
   const [subscription, setSubscription] = useState(null)
   const [loading, setLoading] = useState(true)
+  const navigate = useNavigate()
 
   const loadSubscription = async (userId) => {
     if (!userId) return setSubscription(null)
@@ -53,9 +55,10 @@ export function AuthProvider({ children }) {
       setLoading(false)
     })
 
-    const { data: { subscription: authSub } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription: authSub } } = supabase.auth.onAuthStateChange((event, session) => {
       setUser(session?.user ?? null)
       loadSubscription(session?.user?.id)
+      if (event === 'SIGNED_OUT') navigate('/')
     })
 
     return () => authSub.unsubscribe()

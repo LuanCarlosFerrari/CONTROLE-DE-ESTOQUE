@@ -1,4 +1,4 @@
-import { NavLink, useNavigate } from 'react-router-dom'
+import { NavLink } from 'react-router-dom'
 import {
   LayoutDashboard, Package, Users, LogOut,
   Wrench, BedDouble, Truck, Car, Calendar, CalendarDays, Settings, Wallet, LayoutGrid,
@@ -70,12 +70,7 @@ export default function Sidebar({ isOpen, onClose }) {
   const { signOut, user, businessType, businessName } = useAuth()
   const { theme, toggle } = useTheme()
 
-  const navigate = useNavigate()
-
-  const handleSignOut = async () => {
-    await signOut()
-    navigate('/')
-  }
+  const handleSignOut = () => signOut()
 
   const links = MENUS[businessType] ?? MENUS.estoque
 
