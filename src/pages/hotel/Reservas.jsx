@@ -3,6 +3,7 @@ import { useToast } from '../../hooks/useToast'
 import { formatCurrency as fmt } from '../../utils/format'
 import { Plus, Pencil, Trash2, Calendar } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
+import { notifyTelegram } from '../../lib/notify'
 import Modal from '../../components/ui/Modal'
 import Toast from '../../components/ui/Toast'
 import Label from '../../components/ui/FormLabel'
@@ -157,6 +158,27 @@ export default function Reservas() {
       : await supabase.from('reservas').insert(payload)
     setSaving(false)
     if (error) return showToast(error.message, 'error')
+    const quarto = quartos.find(q => q.id === form.quarto_id)
+    const quartoStr = quarto ? `Quarto ${quarto.numero}` : '—'
+    const diasReserva = diffDias(form.check_in, form.check_out)
+    if (!editing) {
+      notifyTelegram('nova_reserva', {
+        hospede: form.nome_hospede,
+        quarto: quartoStr,
+        check_in: form.check_in ? new Date(form.check_in + 'T12:00:00').toLocaleDateString('pt-BR') : '—',
+        check_out: form.check_out ? new Date(form.check_out + 'T12:00:00').toLocaleDateString('pt-BR') : '—',
+        dias: diasReserva,
+        valor_total: Number(form.valor_total),
+      })
+    } else {
+      notifyTelegram('reserva_atualizada', {
+        hospede: form.nome_hospede,
+        quarto: quartoStr,
+        status_novo: form.status,
+        check_in: form.check_in ? new Date(form.check_in + 'T12:00:00').toLocaleDateString('pt-BR') : null,
+        check_out: form.check_out ? new Date(form.check_out + 'T12:00:00').toLocaleDateString('pt-BR') : null,
+      })
+    }
     showToast(editing ? 'Reserva atualizada!' : 'Reserva criada!')
     setModal(null)
     load()

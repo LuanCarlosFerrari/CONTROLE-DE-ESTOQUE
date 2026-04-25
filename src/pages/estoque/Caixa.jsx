@@ -186,6 +186,12 @@ export default function Caixa() {
     setModal(null)
     setOsId(''); setOsValor(''); setOsForma('dinheiro'); setOsObs('')
     showToast('OS recebida e concluída!')
+    notifyTelegram('os_concluida', {
+      numero: os?.numero || '',
+      veiculo: os?.veiculos ? `${os.veiculos.placa} · ${os.veiculos.modelo}` : null,
+      valor,
+      forma_pagamento: FORMA_LABEL[osForma] || osForma,
+    })
     loadMovimentacoes(); loadOptions()
   }
 
@@ -205,6 +211,12 @@ export default function Caixa() {
     setModal(null)
     setReservaId(''); setReservaValor(''); setReservaForma('dinheiro')
     showToast('Reserva recebida e check-out realizado!')
+    notifyTelegram('reserva_recebida', {
+      hospede: res?.nome_hospede || '',
+      quarto: res?.quartos?.numero ? `Quarto ${res.quartos.numero}` : '—',
+      valor,
+      forma_pagamento: FORMA_LABEL[reservaForma] || reservaForma,
+    })
     loadMovimentacoes(); loadOptions()
   }
 

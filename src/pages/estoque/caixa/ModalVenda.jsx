@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { formatCurrency as fmt } from '../../../utils/format'
 import { Plus, X, CreditCard } from 'lucide-react'
 import { supabase } from '../../../lib/supabase'
+import { notifyTelegram } from '../../../lib/notify'
 import Modal from '../../../components/ui/Modal'
 import Label from '../../../components/ui/FormLabel'
 
@@ -92,6 +93,20 @@ export default function ModalVenda({ clientes, produtos, title = 'Registrar vend
     }
 
     setSaving(false)
+    const clienteNome = clientes.find(c => c.id === clienteId)?.nome || '—'
+    notifyTelegram('nova_venda', {
+      cliente_nome: clienteNome,
+      forma_pagamento: FORMA_LABEL[formaVenda] || formaVenda,
+      total: totalVenda,
+      itens: validItens.map(i => ({
+        nome: produtos.find(p => p.id === i.produto_id)?.nome || '—',
+        quantidade: Number(i.quantidade),
+        preco_unitario: Number(i.preco_unitario),
+      })),
+      crediario: formaVenda === 'crediario'
+        ? { num_parcelas: Number(numParcelas), valor_parcela: valorParcela }
+        : null,
+    })
     onSaved('Venda registrada!')
   }
 

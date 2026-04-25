@@ -3,6 +3,7 @@ import { useToast } from '../../hooks/useToast'
 import { formatCurrency as fmt } from '../../utils/format'
 import { Plus, Pencil, Trash2, AlertTriangle, Package, SlidersHorizontal } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
+import { notifyTelegram } from '../../lib/notify'
 import Modal from '../../components/ui/Modal'
 import Toast from '../../components/ui/Toast'
 import Label from '../../components/ui/FormLabel'
@@ -47,6 +48,14 @@ export default function Estoque() {
       : await supabase.from('produtos').insert(payload)
     setSaving(false)
     if (error) return showToast(error.message, 'error')
+    if (!editing) {
+      notifyTelegram('novo_produto', {
+        nome: payload.nome,
+        categoria: payload.categoria || '—',
+        quantidade: payload.quantidade,
+        preco_venda: payload.preco_venda,
+      })
+    }
     showToast(editing ? 'Produto atualizado!' : 'Produto cadastrado!')
     setModal(null)
     load()

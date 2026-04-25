@@ -3,6 +3,7 @@ import { useToast } from '../../hooks/useToast'
 import { formatCurrency as fmt } from '../../utils/format'
 import { Plus, Pencil, Trash2, Wrench, X } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
+import { notifyTelegram } from '../../lib/notify'
 import Modal from '../../components/ui/Modal'
 import Toast from '../../components/ui/Toast'
 import Label from '../../components/ui/FormLabel'
@@ -151,6 +152,26 @@ export default function OrdensServico() {
     }
 
     setSaving(false)
+    const veiculo = veiculos.find(v => v.id === form.veiculo_id)
+    const cliente = clientes.find(c => c.id === form.cliente_id)
+    const veiculoStr = veiculo ? `${veiculo.placa} · ${veiculo.marca} ${veiculo.modelo}` : null
+    if (!editing) {
+      const numero = await gerarNumero()
+      notifyTelegram('nova_os', {
+        numero,
+        veiculo: veiculoStr,
+        cliente: cliente?.nome || null,
+        valor_total: totalGeral,
+      })
+    } else {
+      notifyTelegram('os_atualizada', {
+        numero: ordens.find(o => o.id === editing)?.numero || '—',
+        status_novo: form.status,
+        veiculo: veiculoStr,
+        cliente: cliente?.nome || null,
+        valor_total: totalGeral,
+      })
+    }
     showToast(editing ? 'OS atualizada!' : 'OS criada!')
     setModal(null)
     load()

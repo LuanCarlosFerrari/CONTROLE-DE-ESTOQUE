@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from 'react'
 import { useToast } from '../../hooks/useToast'
 import { Plus, Pencil, Trash2, Users, Mail, Phone, MapPin } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
+import { notifyTelegram } from '../../lib/notify'
 import Modal from '../../components/ui/Modal'
 import Toast from '../../components/ui/Toast'
 import Label from '../../components/ui/FormLabel'
@@ -54,6 +55,13 @@ export default function Clientes() {
       : await supabase.from('clientes').insert(form)
     setSaving(false)
     if (error) return showToast(error.message, 'error')
+    if (!editing) {
+      notifyTelegram('novo_cliente', {
+        nome: form.nome,
+        telefone: form.telefone || null,
+        cidade: form.cidade || null,
+      })
+    }
     showToast(editing ? 'Cliente atualizado!' : 'Cliente cadastrado!')
     setModal(false)
     load()

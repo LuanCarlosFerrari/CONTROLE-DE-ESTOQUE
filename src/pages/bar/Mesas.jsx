@@ -4,6 +4,7 @@ import { formatCurrency as fmt } from '../../utils/format'
 import { Plus, Search, Pencil, Trash2, LayoutGrid, Users, ShoppingBag, X, Receipt, Minus, Printer, CheckCircle } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../contexts/AuthContext'
+import { notifyTelegram } from '../../lib/notify'
 import Modal from '../../components/ui/Modal'
 import Toast from '../../components/ui/Toast'
 import Label from '../../components/ui/FormLabel'
@@ -134,10 +135,16 @@ export default function Mesas() {
 
   const handleFecharComanda = async () => {
     if (!comandaMesa) return
+    const total = itens.reduce((s, i) => s + Number(i.quantidade) * Number(i.preco_unitario), 0)
     setFechandoComanda(true)
     await supabase.from('comanda_itens').delete().eq('mesa_id', comandaMesa.id)
     await supabase.from('mesas').update({ status: 'disponivel' }).eq('id', comandaMesa.id)
     setFechandoComanda(false)
+    notifyTelegram('comanda_fechada', {
+      mesa: `Mesa ${comandaMesa.numero}`,
+      num_itens: itens.length,
+      total,
+    })
     setMesas(prev => prev.map(x => x.id === comandaMesa.id ? { ...x, status: 'disponivel' } : x))
     setComandaMesa(null)
     setItens([])

@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { ChevronLeft, ChevronRight, X, CalendarDays, Plus, LogIn, LogOut, Wrench, Play, CheckCircle, DollarSign } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
+import { notifyTelegram } from '../lib/notify'
 import Modal from '../components/ui/Modal'
 import Label from '../components/ui/FormLabel'
 
@@ -100,6 +101,8 @@ export default function Calendario() {
             id: p.id, type: 'parcela',
             status: atrasado ? 'atrasado' : 'pendente',
             label: p.cliente_nome || 'Cliente',
+            numero: p.numero,
+            total_parcelas: p.total_parcelas,
             sublabel: `Parcela ${p.numero}/${p.total_parcelas} · Crediário`,
             value: p.valor,
             color: atrasado ? '#F87171' : isHoje ? '#F59E0B' : '#60A5FA',
@@ -228,15 +231,34 @@ export default function Calendario() {
     try {
       if (ev.type === 'reserva') {
         await supabase.from('reservas').update({ status: newStatus }).eq('id', ev.id)
+        notifyTelegram('reserva_atualizada', {
+          hospede: ev.label,
+          quarto: ev.sublabel || '—',
+          status_novo: newStatus,
+        })
       } else if (ev.type === 'os') {
         const upd = { status: newStatus }
         if (newStatus === 'concluida') upd.data_conclusao = new Date().toISOString()
         await supabase.from('ordens_servico').update(upd).eq('id', ev.id)
+        notifyTelegram('os_atualizada', {
+          numero: ev.label,
+          status_novo: newStatus,
+          veiculo: ev.sublabel || null,
+          valor_total: ev.value || 0,
+        })
       } else if (ev.type === 'parcela') {
         await supabase.from('parcelas_crediario').update({
           status: newStatus,
           data_pagamento: new Date().toISOString().split('T')[0],
         }).eq('id', ev.id)
+        if (newStatus === 'pago') {
+          notifyTelegram('parcela_paga', {
+            cliente: ev.label,
+            parcela_num: ev.numero,
+            total_parcelas: ev.total_parcelas,
+            valor: ev.value,
+          })
+        }
       }
       await loadEvents()
     } catch (e) { console.error(e) }
