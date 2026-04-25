@@ -104,8 +104,11 @@ export default function Caixa() {
   /* ── Notificação Telegram ────────────────────────────── */
   const notifyTelegram = useCallback(async (type, payload = {}) => {
     try {
-      await supabase.functions.invoke('telegram-notify', { body: { type, payload } })
-    } catch { /* notificação é não-crítica */ }
+      const { error } = await supabase.functions.invoke('telegram-notify', { body: { type, payload } })
+      if (error) console.error('[telegram-notify]', type, error)
+    } catch (e) {
+      console.error('[telegram-notify]', type, e)
+    }
   }, [])
 
   /* ── Ações ────────────────────────────────────────────── */
@@ -120,7 +123,10 @@ export default function Caixa() {
     setCaixa(data)
     setModal(null)
     showToast('Caixa aberto!')
-    notifyTelegram('caixa_aberto', { saldo_inicial: Number(saldoInicial) })
+    notifyTelegram('caixa_aberto', {
+      saldo_inicial: Number(saldoInicial),
+      data: today,
+    })
   }
 
   const handleFecharCaixa = async (e) => {
@@ -134,7 +140,17 @@ export default function Caixa() {
     loadCaixa()
     setModal(null)
     showToast('Caixa fechado com sucesso!')
-    notifyTelegram('caixa_fechado', { saldo_contado: Number(saldoContado), saldo_esperado: saldoEsperado })
+    notifyTelegram('caixa_fechado', {
+      data: today,
+      saldo_inicial: Number(caixa.saldo_inicial),
+      total_vendas: totalVendas,
+      num_vendas: vendas.length,
+      total_entradas: totalEntradas,
+      total_saidas: totalSaidas,
+      saldo_esperado: saldoEsperado,
+      saldo_contado: Number(saldoContado),
+      observacoes: obsFechar || null,
+    })
   }
 
   const handleReabrirCaixa = async () => {
@@ -147,7 +163,11 @@ export default function Caixa() {
     loadCaixa()
     setModal(null)
     showToast('Caixa reaberto!')
-    notifyTelegram('caixa_reaberto')
+    notifyTelegram('caixa_reaberto', {
+      data: today,
+      saldo_final_anterior: caixa.saldo_final,
+      fechado_at: caixa.fechado_at,
+    })
   }
 
   const handleReceberOS = async (e) => {

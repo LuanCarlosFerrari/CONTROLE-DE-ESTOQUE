@@ -14,7 +14,7 @@ const db = createClient(
 interface InlineButton { text: string; callback_data: string }
 
 async function send(chatId: number, text: string, keyboard?: InlineButton[][]) {
-  const body: Record<string, unknown> = { chat_id: chatId, text, parse_mode: 'Markdown' }
+  const body: Record<string, unknown> = { chat_id: chatId, text, parse_mode: 'HTML' }
   if (keyboard) body.reply_markup = { inline_keyboard: keyboard }
   await fetch(`${TG_API}/sendMessage`, {
     method: 'POST',
@@ -105,14 +105,14 @@ async function queryCaixa(userId: string): Promise<string> {
   const saldo       = Number(caixa.saldo_inicial || 0) + totalVendas + entradas - saidas
 
   return [
-    '💰 *Resumo do caixa — hoje*',
+    '💰 <b>Resumo do caixa — hoje</b>',
     '',
     `Saldo inicial:  R$ ${fmt(Number(caixa.saldo_inicial || 0))}`,
     `Vendas:         R$ ${fmt(totalVendas)}`,
     `Entradas:       R$ ${fmt(entradas)}`,
     `Saídas:         R$ ${fmt(saidas)}`,
     '',
-    `*Saldo atual:   R$ ${fmt(saldo)}*`,
+    `<b>Saldo atual:   R$ ${fmt(saldo)}</b>`,
     `Status: ${caixa.status === 'aberto' ? '🟢 Aberto' : '🔴 Fechado'}`,
   ].join('\n')
 }
@@ -128,8 +128,8 @@ async function queryEstoque(): Promise<string> {
 
   if (!baixo.length) return '✅ Nenhum produto com estoque baixo.'
 
-  const lines = baixo.map(p => `• *${p.nome}* — ${p.quantidade} un (mín: ${p.estoque_minimo})`)
-  return [`📦 *Estoque baixo (${baixo.length})*`, '', ...lines].join('\n')
+  const lines = baixo.map(p => `• <b>${p.nome}</b> — ${p.quantidade} un (mín: ${p.estoque_minimo})`)
+  return [`📦 <b>Estoque baixo (${baixo.length})</b>`, '', ...lines].join('\n')
 }
 
 async function queryParcelas(): Promise<string> {
@@ -147,10 +147,10 @@ async function queryParcelas(): Promise<string> {
 
   const lines = (data || []).map(p => {
     const dias = Math.floor((new Date(today).getTime() - new Date(p.data_vencimento + 'T12:00:00').getTime()) / 86400000)
-    return `• *${p.cliente_nome}* — R$ ${fmt(Number(p.valor))} · ${p.numero}/${p.total_parcelas} (${dias}d)`
+    return `• <b>${p.cliente_nome}</b> — R$ ${fmt(Number(p.valor))} · ${p.numero}/${p.total_parcelas} (${dias}d)`
   })
 
-  return [`📋 *Parcelas vencidas (${data.length})*`, '', ...lines].join('\n')
+  return [`📋 <b>Parcelas vencidas (${data.length})</b>`, '', ...lines].join('\n')
 }
 
 async function queryOS(): Promise<string> {
@@ -167,10 +167,45 @@ async function queryOS(): Promise<string> {
     const icon  = o.status === 'em_andamento' ? '🔄' : '🔧'
     const veiculo = (o as any).veiculos
     const info  = veiculo ? `${veiculo.placa} · ${veiculo.modelo}` : ''
-    return `${icon} *${o.numero}*${info ? ` — ${info}` : ''}`
+    return `${icon} <b>${o.numero}</b>${info ? ` — ${info}` : ''}`
   })
 
-  return [`🔧 *OS em aberto (${data.length})*`, '', ...lines].join('\n')
+  return [`🔧 <b>OS em aberto (${data.length})</b>`, '', ...lines].join('\n')
+}
+
+async function queryVendasDia(userId: string, date: string): Promise<string> {
+  const start = `${date}T00:00:00`
+  const end   = `${date}T23:59:59`
+
+  const { data } = await db
+    .from('vendas')
+    .select('total, forma_pagamento, clientes(nome), venda_itens(quantidade, preco_unitario, produtos(nome))')
+    .gte('created_at', start)
+    .lte('created_at', end)
+    .order('created_at')
+
+  const vendas = data || []
+  if (!vendas.length) return '🛒 Nenhuma venda registrada neste dia.'
+
+  const FORMA: Record<string, string> = { dinheiro: 'Dinheiro', pix: 'PIX', cartao: 'Cartão', outros: 'Outros', crediario: 'Crediário' }
+  const dateLabel = new Date(date + 'T12:00:00').toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: '2-digit' })
+  const total = vendas.reduce((s, v) => s + Number(v.total), 0)
+
+  const lines: string[] = [`🛒 <b>Vendas — ${dateLabel} (${vendas.length})</b>`, '']
+
+  for (const v of vendas) {
+    const cliente = (v as any).clientes?.nome || '—'
+    const forma   = FORMA[(v as any).forma_pagamento] || (v as any).forma_pagamento || '—'
+    lines.push(`<b>${cliente}</b> — R$ ${fmt(Number(v.total))} · ${forma}`)
+    const itens: any[] = (v as any).venda_itens || []
+    for (const i of itens) {
+      const nome = i.produtos?.nome || '?'
+      lines.push(`   ↳ ${i.quantidade}× ${nome} — R$ ${fmt(Number(i.preco_unitario))}`)
+    }
+  }
+
+  lines.push('', `─────────────────────────`, `💰 <b>Total: R$ ${fmt(total)}</b>`)
+  return lines.join('\n')
 }
 
 async function queryCheckout(): Promise<string> {
@@ -187,10 +222,10 @@ async function queryCheckout(): Promise<string> {
 
   const lines = (data || []).map(r => {
     const qto = (r as any).quartos?.numero ? `Qto ${(r as any).quartos.numero}` : ''
-    return `• *${r.nome_hospede}* ${qto ? `· ${qto} ` : ''}— R$ ${fmt(Number(r.valor_total))}`
+    return `• <b>${r.nome_hospede}</b> ${qto ? `· ${qto} ` : ''}— R$ ${fmt(Number(r.valor_total))}`
   })
 
-  return [`🏨 *Check-outs hoje (${data.length})*`, '', ...lines].join('\n')
+  return [`🏨 <b>Check-outs hoje (${data.length})</b>`, '', ...lines].join('\n')
 }
 
 // ── Flow handlers ──────────────────────────────────────────────────
@@ -233,19 +268,25 @@ async function handleTokenLink(chatId: number, token: string) {
 
   const nome = sub?.business_name || 'gestor'
 
-  await send(chatId, `✅ *Conta vinculada com sucesso!*\n\nBem-vindo, *${nome}*! 🎉`)
+  await send(chatId, `✅ <b>Conta vinculada com sucesso!</b>\n\nBem-vindo, <b>${nome}</b>! 🎉`)
   await sendMainMenu(chatId)
 }
 
 async function handleNotLinked(chatId: number) {
   await send(chatId,
-    '👋 Olá! Para usar este bot, acesse as *Configurações* no StockTag e clique em *"Conectar no Telegram"*.'
+    '👋 Olá! Para usar este bot, acesse as <b>Configurações</b> no StockTag e clique em <b>"Conectar no Telegram"</b>.'
   )
 }
 
 async function handleAction(chatId: number, action: string, userId: string) {
-  let text = ''
+  if (action.startsWith('vendas_dia:')) {
+    const date = action.slice('vendas_dia:'.length)
+    const text = await queryVendasDia(userId, date)
+    await send(chatId, text)
+    return
+  }
 
+  let text = ''
   if      (action === 'caixa')    text = await queryCaixa(userId)
   else if (action === 'estoque')  text = await queryEstoque()
   else if (action === 'parcelas') text = await queryParcelas()
@@ -253,7 +294,7 @@ async function handleAction(chatId: number, action: string, userId: string) {
   else if (action === 'checkout') text = await queryCheckout()
 
   await send(chatId, text)
-  await sendMainMenu(chatId, '_Deseja consultar mais alguma coisa?_')
+  await sendMainMenu(chatId, '<i>Deseja consultar mais alguma coisa?</i>')
 }
 
 // ── Main ───────────────────────────────────────────────────────────

@@ -14,7 +14,7 @@ export function AuthProvider({ children }) {
       .from('subscriptions')
       .select('*')
       .eq('user_id', userId)
-      .single()
+      .maybeSingle()
 
     // Aplica business_type pendente do onboarding (caso email confirmation esteja ativo)
     const pendingType = localStorage.getItem('pending_business_type')
