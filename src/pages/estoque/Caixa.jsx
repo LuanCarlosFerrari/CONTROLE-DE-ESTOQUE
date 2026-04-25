@@ -101,6 +101,13 @@ export default function Caixa() {
   const caixaFechado = caixa?.status === 'fechado'
   const semCaixa     = !caixa
 
+  /* ── Notificação Telegram ────────────────────────────── */
+  const notifyTelegram = useCallback(async (type, payload = {}) => {
+    try {
+      await supabase.functions.invoke('telegram-notify', { body: { type, payload } })
+    } catch { /* notificação é não-crítica */ }
+  }, [])
+
   /* ── Ações ────────────────────────────────────────────── */
   const handleAbrirCaixa = async (e) => {
     e.preventDefault()
@@ -113,6 +120,7 @@ export default function Caixa() {
     setCaixa(data)
     setModal(null)
     showToast('Caixa aberto!')
+    notifyTelegram('caixa_aberto', { saldo_inicial: Number(saldoInicial) })
   }
 
   const handleFecharCaixa = async (e) => {
@@ -126,6 +134,7 @@ export default function Caixa() {
     loadCaixa()
     setModal(null)
     showToast('Caixa fechado com sucesso!')
+    notifyTelegram('caixa_fechado', { saldo_contado: Number(saldoContado), saldo_esperado: saldoEsperado })
   }
 
   const handleReabrirCaixa = async () => {
@@ -138,6 +147,7 @@ export default function Caixa() {
     loadCaixa()
     setModal(null)
     showToast('Caixa reaberto!')
+    notifyTelegram('caixa_reaberto')
   }
 
   const handleReceberOS = async (e) => {

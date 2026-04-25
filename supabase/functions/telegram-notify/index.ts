@@ -9,6 +9,8 @@ const db = createClient(
   Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 )
 
+const ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!
+
 // ── Helpers ────────────────────────────────────────────────────────────────
 
 async function sendMsg(chatId: number, text: string) {
@@ -42,6 +44,53 @@ async function handleNovaOS(userId: string, payload: Record<string, unknown>) {
   const sessions = await getLinkedSessions(userId)
   const veiculo  = payload.veiculo ? ` — ${payload.veiculo}` : ''
   const text = `🔧 *Nova OS aberta!*\n\n*${payload.numero}*${veiculo}`
+  for (const s of sessions) await sendMsg(Number(s.chat_id), text)
+}
+
+function timeStr() {
+  return new Date().toLocaleTimeString('pt-BR', {
+    hour: '2-digit', minute: '2-digit', timeZone: 'America/Sao_Paulo',
+  })
+}
+
+async function handleCaixaAberto(userId: string, payload: Record<string, unknown>) {
+  const sessions = await getLinkedSessions(userId)
+  const saldo = fmt(Number(payload.saldo_inicial || 0))
+  const text = [
+    '🟢 *Caixa aberto*',
+    '',
+    `Saldo inicial: R$ ${saldo}`,
+    `🕐 ${timeStr()}`,
+  ].join('\n')
+  for (const s of sessions) await sendMsg(Number(s.chat_id), text)
+}
+
+async function handleCaixaFechado(userId: string, payload: Record<string, unknown>) {
+  const sessions   = await getLinkedSessions(userId)
+  const contado    = Number(payload.saldo_contado  || 0)
+  const esperado   = Number(payload.saldo_esperado || 0)
+  const diff       = contado - esperado
+  const diffIcon   = Math.abs(diff) < 0.01 ? '✅' : diff < 0 ? '⚠️' : '💚'
+  const diffStr    = `${diff >= 0 ? '+' : ''}R$ ${fmt(diff)}`
+  const text = [
+    '🔴 *Caixa fechado*',
+    '',
+    `Saldo contado:  R$ ${fmt(contado)}`,
+    `Saldo esperado: R$ ${fmt(esperado)}`,
+    `${diffIcon} Diferença: ${diffStr}`,
+    `🕐 ${timeStr()}`,
+  ].join('\n')
+  for (const s of sessions) await sendMsg(Number(s.chat_id), text)
+}
+
+async function handleCaixaReaberto(userId: string) {
+  const sessions = await getLinkedSessions(userId)
+  const text = [
+    '🔄 *Caixa reaberto*',
+    '',
+    `O caixa foi reaberto manualmente.`,
+    `🕐 ${timeStr()}`,
+  ].join('\n')
   for (const s of sessions) await sendMsg(Number(s.chat_id), text)
 }
 
@@ -112,16 +161,34 @@ async function handleResumoMatinal() {
 Deno.serve(async (req) => {
   if (req.method !== 'POST') return new Response('OK')
 
-  if (req.headers.get('X-Notify-Secret') !== NOTIFY_SECRET) {
+  const secret = req.headers.get('X-Notify-Secret')
+  const auth   = req.headers.get('Authorization')
+
+  let verifiedUserId: string | null = null
+
+  if (secret) {
+    if (secret !== NOTIFY_SECRET) return new Response('Unauthorized', { status: 401 })
+  } else if (auth) {
+    const userDb = createClient(Deno.env.get('SUPABASE_URL')!, ANON_KEY, {
+      global: { headers: { Authorization: auth } },
+    })
+    const { data: { user } } = await userDb.auth.getUser()
+    if (!user) return new Response('Unauthorized', { status: 401 })
+    verifiedUserId = user.id
+  } else {
     return new Response('Unauthorized', { status: 401 })
   }
 
   try {
     const { type, user_id, payload = {} } = await req.json()
+    const uid = verifiedUserId ?? user_id
 
-    if (type === 'estoque_baixo')   await handleEstoqueBaixo(user_id, payload)
-    else if (type === 'nova_os')    await handleNovaOS(user_id, payload)
-    else if (type === 'resumo_matinal') await handleResumoMatinal()
+    if      (type === 'caixa_aberto')    await handleCaixaAberto(uid, payload)
+    else if (type === 'caixa_fechado')   await handleCaixaFechado(uid, payload)
+    else if (type === 'caixa_reaberto')  await handleCaixaReaberto(uid)
+    else if (type === 'estoque_baixo')   await handleEstoqueBaixo(uid, payload)
+    else if (type === 'nova_os')         await handleNovaOS(uid, payload)
+    else if (type === 'resumo_matinal')  await handleResumoMatinal()
   } catch (err) {
     console.error('telegram-notify error:', err)
   }
