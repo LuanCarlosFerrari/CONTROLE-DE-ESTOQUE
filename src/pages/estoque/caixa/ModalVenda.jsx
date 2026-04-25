@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { formatCurrency as fmt } from '../../../utils/format'
 import { Plus, X, CreditCard } from 'lucide-react'
 import { supabase } from '../../../lib/supabase'
+import { useAuth } from '../../../contexts/AuthContext'
 import { notifyTelegram } from '../../../lib/notify'
 import Modal from '../../../components/ui/Modal'
 import Label from '../../../components/ui/FormLabel'
@@ -16,6 +17,7 @@ function nextMonthDate(base, addMonths) {
 }
 
 export default function ModalVenda({ clientes, produtos, title = 'Registrar venda', onClose, onSaved, onError }) {
+  const { user } = useAuth()
   const [clienteId, setClienteId]   = useState('')
   const [observacao, setObservacao] = useState('')
   const [formaVenda, setFormaVenda] = useState('dinheiro')
@@ -61,7 +63,7 @@ export default function ModalVenda({ clientes, produtos, title = 'Registrar vend
 
     setSaving(true)
     const { data: venda, error: errV } = await supabase.from('vendas')
-      .insert({ cliente_id: clienteId, total: totalVenda, observacao, forma_pagamento: formaVenda })
+      .insert({ cliente_id: clienteId, total: totalVenda, observacao, forma_pagamento: formaVenda, user_id: user.id })
       .select().single()
     if (errV) { setSaving(false); return onError(errV.message) }
 

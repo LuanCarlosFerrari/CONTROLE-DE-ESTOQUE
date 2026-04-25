@@ -85,7 +85,7 @@ export default function DashboardOficina() {
         days.push({ name: label, total })
       }
       setChartData(days)
-    } catch (e) { console.error(e) }
+    } catch (e) { if (import.meta.env.DEV) console.error(e) }
     finally { setLoading(false) }
   }
 

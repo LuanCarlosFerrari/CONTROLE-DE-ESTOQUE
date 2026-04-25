@@ -152,7 +152,7 @@ export default function Calendario() {
       }
 
       if (loadSeqRef.current === seq) setEvents(map)
-    } catch (e) { console.error(e) }
+    } catch (e) { if (import.meta.env.DEV) console.error(e) }
     finally { if (loadSeqRef.current === seq) setLoading(false) }
   }, [year, month, businessType])
 
@@ -199,7 +199,7 @@ export default function Calendario() {
       })
       setModal(null)
       await loadEvents()
-    } catch (e) { console.error(e) }
+    } catch (e) { if (import.meta.env.DEV) console.error(e) }
     finally { setSaving(false) }
   }
 
@@ -222,7 +222,7 @@ export default function Calendario() {
       })
       setModal(null)
       await loadEvents()
-    } catch (e) { console.error(e) }
+    } catch (e) { if (import.meta.env.DEV) console.error(e) }
     finally { setSaving(false) }
   }
 
@@ -261,7 +261,7 @@ export default function Calendario() {
         }
       }
       await loadEvents()
-    } catch (e) { console.error(e) }
+    } catch (e) { if (import.meta.env.DEV) console.error(e) }
   }
 
   // ── Open payment modal ──

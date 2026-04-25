@@ -3,6 +3,7 @@ import { useToast } from '../../hooks/useToast'
 import { formatCurrency as fmt } from '../../utils/format'
 import { Plus, Pencil, Trash2, AlertTriangle, Package, SlidersHorizontal } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
+import { useAuth } from '../../contexts/AuthContext'
 import { notifyTelegram } from '../../lib/notify'
 import Modal from '../../components/ui/Modal'
 import Toast from '../../components/ui/Toast'
@@ -18,6 +19,7 @@ const CATEGORIAS = ['Alimentos', 'Bebidas', 'Eletrônicos', 'Vestuário', 'Limpe
 
 
 export default function Estoque() {
+  const { user } = useAuth()
   const [produtos, setProdutos] = useState([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
@@ -45,7 +47,7 @@ export default function Estoque() {
     const payload = { ...form, quantidade: Number(form.quantidade), preco_custo: Number(form.preco_custo), preco_venda: Number(form.preco_venda), estoque_minimo: Number(form.estoque_minimo) }
     const { error } = editing
       ? await supabase.from('produtos').update(payload).eq('id', editing)
-      : await supabase.from('produtos').insert(payload)
+      : await supabase.from('produtos').insert({ ...payload, user_id: user.id })
     setSaving(false)
     if (error) return showToast(error.message, 'error')
     if (!editing) {

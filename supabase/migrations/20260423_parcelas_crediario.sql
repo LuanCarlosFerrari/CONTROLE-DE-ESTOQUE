@@ -19,6 +19,7 @@ create index if not exists idx_parcelas_crediario_cliente    on parcelas_crediar
 
 alter table parcelas_crediario enable row level security;
 
+drop policy if exists "authenticated can manage parcelas_crediario" on parcelas_crediario;
 create policy "authenticated can manage parcelas_crediario"
   on parcelas_crediario for all to authenticated
   using (true) with check (true);

@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from 'react'
 import { useToast } from '../../hooks/useToast'
 import { Plus, Pencil, Trash2, Users, Mail, Phone, MapPin } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
+import { useAuth } from '../../contexts/AuthContext'
 import { notifyTelegram } from '../../lib/notify'
 import Modal from '../../components/ui/Modal'
 import Toast from '../../components/ui/Toast'
@@ -26,6 +27,7 @@ function Avatar({ nome }) {
 }
 
 export default function Clientes() {
+  const { user } = useAuth()
   const [clientes, setClientes] = useState([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
@@ -52,7 +54,7 @@ export default function Clientes() {
     setSaving(true)
     const { error } = editing
       ? await supabase.from('clientes').update(form).eq('id', editing)
-      : await supabase.from('clientes').insert(form)
+      : await supabase.from('clientes').insert({ ...form, user_id: user.id })
     setSaving(false)
     if (error) return showToast(error.message, 'error')
     if (!editing) {

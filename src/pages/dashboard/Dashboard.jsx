@@ -63,7 +63,7 @@ export default function Dashboard() {
         days.push({ name: label, total })
       }
       setSalesChart(days)
-    } catch (e) { console.error(e) }
+    } catch (e) { if (import.meta.env.DEV) console.error(e) }
     finally { setLoading(false) }
   }
 
