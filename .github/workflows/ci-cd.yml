@@ -1,0 +1,58 @@
+name: CI / CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  # ── Testes ─────────────────────────────────────────────────────────────────
+  test:
+    name: Testes
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Rodar testes
+        run: npm test
+
+  # ── Deploy (somente push na main, após testes passarem) ────────────────────
+  deploy:
+    name: Deploy → Vercel
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+        env:
+          VITE_SUPABASE_URL:      ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          VITE_NOTIFY_SECRET:     ${{ secrets.VITE_NOTIFY_SECRET }}
+          VITE_APP_URL:           ${{ secrets.VITE_APP_URL }}
+
+      - name: Deploy para Vercel
+        run: npx vercel deploy --prod --token ${{ secrets.VERCEL_TOKEN }}
+        env:
+          VERCEL_ORG_ID:     team_jiFMervXzuE2Lpvq2QsP5OBg
+          VERCEL_PROJECT_ID: prj_DX2y9jkUe5JNPPoeSTb8mM7ssZTN

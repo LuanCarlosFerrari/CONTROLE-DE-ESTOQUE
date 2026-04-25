@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { formatCurrency as fmt } from '../../../utils/format'
+import { nextMonthDate, calcularCrediario } from '../../../utils/finance'
 import { Plus, X, CreditCard } from 'lucide-react'
 import { supabase } from '../../../lib/supabase'
 import { useAuth } from '../../../contexts/AuthContext'
@@ -9,12 +10,6 @@ import Label from '../../../components/ui/FormLabel'
 
 const FORMAS = ['dinheiro', 'pix', 'cartao', 'crediario', 'outros']
 const FORMA_LABEL = { dinheiro: 'Dinheiro', pix: 'PIX', cartao: 'Cartão', crediario: 'Crediário', outros: 'Outros' }
-
-function nextMonthDate(base, addMonths) {
-  const d = new Date(base + 'T12:00:00')
-  d.setMonth(d.getMonth() + addMonths)
-  return d.toISOString().split('T')[0]
-}
 
 export default function ModalVenda({ clientes, produtos, title = 'Registrar venda', onClose, onSaved, onError }) {
   const { user } = useAuth()
@@ -44,15 +39,8 @@ export default function ModalVenda({ clientes, produtos, title = 'Registrar vend
     }))
   }
 
-  const totalVenda    = itens.reduce((s, i) => s + Number(i.quantidade) * Number(i.preco_unitario), 0)
-  const valorRestante = Math.max(0, totalVenda - Number(entrada || 0))
-  const valorParcela  = numParcelas > 0 ? valorRestante / Number(numParcelas) : 0
-
-  const previewParcelas = Array.from({ length: Number(numParcelas) }, (_, i) => ({
-    num: i + 1,
-    valor: valorParcela,
-    data: nextMonthDate(dataFirstParcela, i),
-  }))
+  const { totalVenda, valorRestante, valorParcela, parcelas: previewParcelas } =
+    calcularCrediario({ itens, entrada, numParcelas, dataFirstParcela })
 
   const handleSubmit = async (e) => {
     e.preventDefault()
