@@ -128,6 +128,18 @@ export default function Caixa() {
     showToast('Caixa fechado com sucesso!')
   }
 
+  const handleReabrirCaixa = async () => {
+    setSaving(true)
+    const { error } = await supabase.from('caixas')
+      .update({ status: 'aberto', saldo_final: null, observacoes: null, fechado_at: null })
+      .eq('id', caixa.id)
+    setSaving(false)
+    if (error) return showToast(error.message, 'error')
+    loadCaixa()
+    setModal(null)
+    showToast('Caixa reaberto!')
+  }
+
   const handleReceberOS = async (e) => {
     e.preventDefault()
     if (!osId) return showToast('Selecione uma OS.', 'error')
@@ -210,6 +222,12 @@ export default function Caixa() {
             <button className="btn-secondary" onClick={() => openModal('fechar', () => { setSaldoContado(''); setObsFechar('') })}
               style={{ borderColor: 'rgba(239,68,68,0.3)', color: '#F87171' }}>
               <Lock size={15} /> Fechar caixa
+            </button>
+          )}
+          {caixaFechado && (
+            <button className="btn-secondary" onClick={() => setModal('reabrir')}
+              style={{ borderColor: 'rgba(16,185,129,0.3)', color: 'var(--amber)' }}>
+              <Unlock size={15} /> Reabrir caixa
             </button>
           )}
         </div>
@@ -324,6 +342,20 @@ export default function Caixa() {
               </button>
             </div>
           </form>
+        </Modal>
+      )}
+
+      {modal === 'reabrir' && (
+        <Modal title="Reabrir caixa" onClose={() => setModal(null)}>
+          <p style={{ fontSize: 14, color: 'var(--text-muted)', marginBottom: 24, lineHeight: 1.6 }}>
+            O resumo de fechamento será removido e o caixa voltará para o status <strong style={{ color: 'var(--amber)' }}>aberto</strong>. As movimentações registradas permanecem.
+          </p>
+          <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
+            <button type="button" className="btn-secondary" onClick={() => setModal(null)}>Cancelar</button>
+            <button type="button" className="btn-primary" disabled={saving} onClick={handleReabrirCaixa}>
+              <Unlock size={14} /> {saving ? 'Reabrindo...' : 'Confirmar reabertura'}
+            </button>
+          </div>
         </Modal>
       )}
 
