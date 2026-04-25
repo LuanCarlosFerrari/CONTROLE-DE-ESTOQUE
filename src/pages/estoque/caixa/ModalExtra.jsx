@@ -33,7 +33,7 @@ export default function ModalExtra({ tipo, caixaId, onClose, onSaved, onError })
           <input className="input-field" required value={descricao} onChange={e => setDescricao(e.target.value)}
             placeholder={tipo === 'entrada' ? 'Ex: PIX recebido, devolução...' : 'Ex: Compra de embalagens, energia...'} autoFocus />
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 24 }}>
+        <div className="modal-2col" style={{ marginBottom: 24 }}>
           <div>
             <Label required>Valor (R$)</Label>
             <input className="input-field" type="number" min="0.01" step="0.01" required

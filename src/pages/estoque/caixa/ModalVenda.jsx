@@ -98,7 +98,7 @@ export default function ModalVenda({ clientes, produtos, title = 'Registrar vend
   return (
     <Modal title={title} onClose={onClose} size="lg">
       <form onSubmit={handleSubmit}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
+        <div className="modal-2col">
           <div>
             <Label required>Cliente</Label>
             <select className="input-field" value={clienteId} onChange={e => setClienteId(e.target.value)} required>
@@ -123,7 +123,7 @@ export default function ModalVenda({ clientes, produtos, title = 'Registrar vend
                 Configurar crediário
               </p>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 14 }}>
+            <div className="modal-3col">
               <div>
                 <Label>Entrada (R$)</Label>
                 <input className="input-field" type="number" min="0" step="0.01"
@@ -184,13 +184,13 @@ export default function ModalVenda({ clientes, produtos, title = 'Registrar vend
               <Plus size={12} /> Adicionar
             </button>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 80px 120px 32px', gap: 4, marginBottom: 6 }}>
+          <div className="modal-item-header">
             {['Produto', 'Qtd.', 'Preço unit.', ''].map((h, i) => (
               <div key={i} style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--text-subtle)', padding: '0 4px' }}>{h}</div>
             ))}
           </div>
           {itens.map((item, idx) => (
-            <div key={idx} style={{ display: 'grid', gridTemplateColumns: '1fr 80px 120px 32px', gap: 4, marginBottom: 6, alignItems: 'center' }}>
+            <div key={idx} className="modal-item-row">
               <select className="input-field" value={item.produto_id} onChange={e => updateItem(idx, 'produto_id', e.target.value)} style={{ fontSize: 13 }}>
                 <option value="">Selecionar...</option>
                 {produtos.map(p => <option key={p.id} value={p.id}>{p.nome} ({p.quantidade} em estq.)</option>)}
