@@ -28,7 +28,7 @@ const CustomTooltip = ({ active, payload, label }) => {
 
 
 export default function Dashboard() {
-  const { businessType } = useAuth()
+  const { businessType, user } = useAuth()
   if (businessType === 'oficina') return <DashboardOficina />
   if (businessType === 'hotel') return <DashboardHotel />
 
@@ -42,11 +42,11 @@ export default function Dashboard() {
   const loadDashboard = async () => {
     try {
       const [{ count: produtos }, { count: clientes }, { data: vendas }, { data: estoqueBaixo }, { data: vendasMes }] = await Promise.all([
-        supabase.from('produtos').select('*', { count: 'exact', head: true }),
-        supabase.from('clientes').select('*', { count: 'exact', head: true }),
-        supabase.from('vendas').select('total, created_at, clientes(nome)').order('created_at', { ascending: false }).limit(5),
-        supabase.from('produtos').select('*'),
-        supabase.from('vendas').select('total, created_at').gte('created_at', new Date(Date.now() - 30 * 86400000).toISOString()),
+        supabase.from('produtos').select('*', { count: 'exact', head: true }).eq('user_id', user.id),
+        supabase.from('clientes').select('*', { count: 'exact', head: true }).eq('user_id', user.id),
+        supabase.from('vendas').select('total, created_at, clientes(nome)').eq('user_id', user.id).order('created_at', { ascending: false }).limit(5),
+        supabase.from('produtos').select('*').eq('user_id', user.id),
+        supabase.from('vendas').select('total, created_at').eq('user_id', user.id).gte('created_at', new Date(Date.now() - 30 * 86400000).toISOString()),
       ])
       const hoje = new Date().toDateString()
       const vendasHoje = (vendas || []).filter(v => new Date(v.created_at).toDateString() === hoje)

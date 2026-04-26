@@ -31,7 +31,7 @@ export default function Estoque() {
   const [deleteId, setDeleteId] = useState(null)
 
   const load = useCallback(async () => {
-    const { data } = await supabase.from('produtos').select('*').order('nome')
+    const { data } = await supabase.from('produtos').select('*').eq('user_id', user.id).order('nome')
     setProdutos(data || [])
     setLoading(false)
   }, [])

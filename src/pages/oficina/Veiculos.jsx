@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from 'react'
 import { useToast } from '../../hooks/useToast'
 import { Plus, Pencil, Trash2, Car, Users } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
+import { useAuth } from '../../contexts/AuthContext'
 import Modal from '../../components/ui/Modal'
 import Toast from '../../components/ui/Toast'
 import Label from '../../components/ui/FormLabel'
@@ -14,6 +15,7 @@ const EMPTY = { placa: '', marca: '', modelo: '', ano: '', cor: '', km_atual: 0,
 
 
 export default function Veiculos() {
+  const { user } = useAuth()
   const [veiculos, setVeiculos] = useState([])
   const [clientes, setClientes] = useState([])
   const [loading, setLoading] = useState(true)
@@ -27,8 +29,8 @@ export default function Veiculos() {
 
   const load = useCallback(async () => {
     const [{ data: v }, { data: c }] = await Promise.all([
-      supabase.from('veiculos').select('*, clientes(nome)').order('created_at', { ascending: false }),
-      supabase.from('clientes').select('id, nome').order('nome'),
+      supabase.from('veiculos').select('*, clientes(nome)').eq('user_id', user.id).order('created_at', { ascending: false }),
+      supabase.from('clientes').select('id, nome').eq('user_id', user.id).order('nome'),
     ])
     setVeiculos(v || [])
     setClientes(c || [])
@@ -52,7 +54,7 @@ export default function Veiculos() {
     }
     const { error } = editing
       ? await supabase.from('veiculos').update(payload).eq('id', editing)
-      : await supabase.from('veiculos').insert(payload)
+      : await supabase.from('veiculos').insert({ ...payload, user_id: user.id })
     setSaving(false)
     if (error) return showToast(error.message, 'error')
     showToast(editing ? 'Veículo atualizado!' : 'Veículo cadastrado!')

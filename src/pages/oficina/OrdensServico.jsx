@@ -4,6 +4,7 @@ import { formatCurrency as fmt } from '../../utils/format'
 import { Plus, Pencil, Trash2, Wrench, X } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { notifyTelegram } from '../../lib/notify'
+import { useAuth } from '../../contexts/AuthContext'
 import Modal from '../../components/ui/Modal'
 import Toast from '../../components/ui/Toast'
 import Label from '../../components/ui/FormLabel'
@@ -38,6 +39,7 @@ const StatusBadge = ({ status }) => {
 
 
 export default function OrdensServico() {
+  const { user } = useAuth()
   const [ordens, setOrdens] = useState([])
   const [veiculos, setVeiculos] = useState([])
   const [clientes, setClientes] = useState([])
@@ -56,9 +58,10 @@ export default function OrdensServico() {
     const [{ data: o }, { data: v }, { data: c }] = await Promise.all([
       supabase.from('ordens_servico')
         .select('*, veiculos(placa, marca, modelo), clientes(nome)')
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false }),
-      supabase.from('veiculos').select('id, placa, marca, modelo, cliente_id').order('placa'),
-      supabase.from('clientes').select('id, nome').order('nome'),
+      supabase.from('veiculos').select('id, placa, marca, modelo, cliente_id').eq('user_id', user.id).order('placa'),
+      supabase.from('clientes').select('id, nome').eq('user_id', user.id).order('nome'),
     ])
     setOrdens(o || [])
     setVeiculos(v || [])
@@ -69,7 +72,7 @@ export default function OrdensServico() {
   useEffect(() => { load() }, [load])
 
   const gerarNumero = async () => {
-    const { count } = await supabase.from('ordens_servico').select('*', { count: 'exact', head: true })
+    const { count } = await supabase.from('ordens_servico').select('*', { count: 'exact', head: true }).eq('user_id', user.id)
     return `OS-${String((count || 0) + 1).padStart(4, '0')}`
   }
 
@@ -123,7 +126,7 @@ export default function OrdensServico() {
       const numero = await gerarNumero()
       const { data, error } = await supabase
         .from('ordens_servico')
-        .insert({ ...payload, numero })
+        .insert({ ...payload, numero, user_id: user.id })
         .select('id')
         .single()
       if (error) { setSaving(false); return showToast(error.message, 'error') }

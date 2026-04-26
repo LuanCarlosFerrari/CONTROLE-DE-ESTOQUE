@@ -59,7 +59,7 @@ export default function Mesas() {
   const [fechandoComanda, setFechandoComanda] = useState(false)
 
   const load = useCallback(async () => {
-    const { data } = await supabase.from('mesas').select('*').order('numero')
+    const { data } = await supabase.from('mesas').select('*').eq('user_id', user.id).order('numero')
     setMesas(data || [])
     setLoading(false)
   }, [])

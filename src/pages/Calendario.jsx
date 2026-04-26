@@ -78,7 +78,7 @@ export default function Calendario() {
       if (businessType === 'estoque' || businessType === 'bar') {
         const { data } = await supabase
           .from('vendas').select('id, created_at, total, forma_pagamento, clientes(nome)')
-          .gte('created_at', startISO).lte('created_at', endISO).order('created_at')
+          .eq('user_id', user.id).gte('created_at', startISO).lte('created_at', endISO).order('created_at')
         ;(data || []).forEach(v => add(v.created_at.split('T')[0], {
           label: v.clientes?.nome || 'Cliente',
           sublabel: v.forma_pagamento === 'crediario' ? 'Venda · Crediário' : 'Venda realizada',
@@ -115,7 +115,7 @@ export default function Calendario() {
         const { data } = await supabase
           .from('ordens_servico')
           .select('id, created_at, numero, status, valor_total, clientes(nome), veiculos(placa, marca, modelo)')
-          .gte('created_at', startISO).lte('created_at', endISO).order('created_at')
+          .eq('user_id', user.id).gte('created_at', startISO).lte('created_at', endISO).order('created_at')
         ;(data || []).forEach(o => add(o.created_at.split('T')[0], {
           id: o.id, type: 'os', status: o.status,
           label: o.numero,
@@ -132,7 +132,7 @@ export default function Calendario() {
         const { data } = await supabase
           .from('reservas')
           .select('id, check_in, check_out, nome_hospede, valor_total, status, quartos(numero, tipo)')
-          .lte('check_in', endDate).gte('check_out', startDate).order('check_in')
+          .eq('user_id', user.id).lte('check_in', endDate).gte('check_out', startDate).order('check_in')
         ;(data || []).forEach(r => {
           if (r.check_in >= startDate && r.check_in <= endDate)
             add(r.check_in, {
@@ -168,14 +168,14 @@ export default function Calendario() {
   // ── Open creation modal ──
   const openCreate = async () => {
     if (businessType === 'hotel') {
-      const { data: q } = await supabase.from('quartos').select('id, numero, tipo, preco_diaria').order('numero')
+      const { data: q } = await supabase.from('quartos').select('id, numero, tipo, preco_diaria').eq('user_id', user.id).order('numero')
       setAuxData(a => ({ ...a, quartos: q || [] }))
       setForm({ ...EMPTY_HOTEL, check_in: selected || '' })
       setModal('hotel')
     } else if (businessType === 'oficina') {
       const [{ data: v }, { data: c }] = await Promise.all([
-        supabase.from('veiculos').select('id, placa, marca, modelo, cliente_id').order('placa'),
-        supabase.from('clientes').select('id, nome').order('nome'),
+        supabase.from('veiculos').select('id, placa, marca, modelo, cliente_id').eq('user_id', user.id).order('placa'),
+        supabase.from('clientes').select('id, nome').eq('user_id', user.id).order('nome'),
       ])
       setAuxData(a => ({ ...a, veiculos: v || [], clientes: c || [] }))
       setForm({ ...EMPTY_OS, data_previsao: selected || '' })
@@ -196,6 +196,7 @@ export default function Calendario() {
         valor_diaria: Number(form.valor_diaria) || 0,
         valor_total: Number(form.valor_total) || 0,
         status: 'confirmada',
+        user_id: user.id,
       })
       setModal(null)
       await loadEvents()
@@ -219,6 +220,7 @@ export default function Calendario() {
         valor_total: Number(form.valor_mao_obra) || 0,
         data_previsao: form.data_previsao || null,
         status: 'aberta',
+        user_id: user.id,
       })
       setModal(null)
       await loadEvents()
@@ -315,6 +317,7 @@ export default function Calendario() {
         descricao,
         valor: Number(valor),
         forma_pagamento: forma,
+        user_id: user.id,
       })
 
       // Update record status

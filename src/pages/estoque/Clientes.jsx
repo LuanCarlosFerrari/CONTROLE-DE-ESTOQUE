@@ -43,7 +43,7 @@ export default function Clientes() {
   const [cepError, setCepError]     = useState('')
 
   const load = useCallback(async () => {
-    const { data } = await supabase.from('clientes').select('*').order('nome')
+    const { data } = await supabase.from('clientes').select('*').eq('user_id', user.id).order('nome')
     setClientes(data || [])
     setLoading(false)
   }, [])

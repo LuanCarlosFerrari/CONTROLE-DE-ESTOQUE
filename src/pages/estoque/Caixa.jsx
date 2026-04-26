@@ -65,8 +65,8 @@ export default function Caixa() {
     const start = `${today}T00:00:00`
     const end   = `${today}T23:59:59`
     const [{ data: v }, { data: e }] = await Promise.all([
-      supabase.from('vendas').select('*, clientes(nome), venda_itens(*, produtos(nome))').gte('created_at', start).lte('created_at', end).order('created_at', { ascending: false }),
-      supabase.from('movimentacoes_extras').select('*').gte('created_at', start).lte('created_at', end).order('created_at', { ascending: false }),
+      supabase.from('vendas').select('*, clientes(nome), venda_itens(*, produtos(nome))').eq('user_id', user.id).gte('created_at', start).lte('created_at', end).order('created_at', { ascending: false }),
+      supabase.from('movimentacoes_extras').select('*').eq('user_id', user.id).gte('created_at', start).lte('created_at', end).order('created_at', { ascending: false }),
     ])
     setVendas(v || [])
     setExtras(e || [])
@@ -75,10 +75,10 @@ export default function Caixa() {
 
   const loadOptions = useCallback(async () => {
     const [{ data: c }, { data: p }, { data: os }, { data: res }] = await Promise.all([
-      supabase.from('clientes').select('id, nome').order('nome'),
-      supabase.from('produtos').select('id, nome, preco_venda, quantidade').order('nome'),
-      supabase.from('ordens_servico').select('id, numero, descricao, valor_total, status, veiculos(placa, modelo)').in('status', ['aberta', 'em_andamento']).order('numero'),
-      supabase.from('reservas').select('id, nome_hospede, check_in, check_out, valor_total, valor_pago, status, quartos(numero)').in('status', ['confirmada', 'checkin']).order('check_in'),
+      supabase.from('clientes').select('id, nome').eq('user_id', user.id).order('nome'),
+      supabase.from('produtos').select('id, nome, preco_venda, quantidade').eq('user_id', user.id).order('nome'),
+      supabase.from('ordens_servico').select('id, numero, descricao, valor_total, status, veiculos(placa, modelo)').eq('user_id', user.id).in('status', ['aberta', 'em_andamento']).order('numero'),
+      supabase.from('reservas').select('id, nome_hospede, check_in, check_out, valor_total, valor_pago, status, quartos(numero)').eq('user_id', user.id).in('status', ['confirmada', 'checkin']).order('check_in'),
     ])
     setClientes(c || [])
     setProdutos(p || [])
@@ -171,7 +171,7 @@ export default function Caixa() {
     const os = ordensAbertas.find(o => o.id === osId)
     setSaving(true)
     const [{ error: e1 }, { error: e2 }] = await Promise.all([
-      supabase.from('movimentacoes_extras').insert({ caixa_id: caixa?.id || null, tipo: 'entrada', descricao: `OS ${os?.numero || ''} — ${(os?.descricao || '').slice(0, 40)}${osObs ? ` (${osObs})` : ''}`, valor, forma_pagamento: osForma }),
+      supabase.from('movimentacoes_extras').insert({ caixa_id: caixa?.id || null, tipo: 'entrada', descricao: `OS ${os?.numero || ''} — ${(os?.descricao || '').slice(0, 40)}${osObs ? ` (${osObs})` : ''}`, valor, forma_pagamento: osForma, user_id: user.id }),
       supabase.from('ordens_servico').update({ status: 'concluida', data_conclusao: new Date().toISOString(), valor_total: valor }).eq('id', osId),
     ])
     setSaving(false)
@@ -196,7 +196,7 @@ export default function Caixa() {
     const res = reservasPendentes.find(r => r.id === reservaId)
     setSaving(true)
     const [{ error: e1 }, { error: e2 }] = await Promise.all([
-      supabase.from('movimentacoes_extras').insert({ caixa_id: caixa?.id || null, tipo: 'entrada', descricao: `Reserva — ${res?.nome_hospede || ''} (Qto ${res?.quartos?.numero || ''})`, valor, forma_pagamento: reservaForma }),
+      supabase.from('movimentacoes_extras').insert({ caixa_id: caixa?.id || null, tipo: 'entrada', descricao: `Reserva — ${res?.nome_hospede || ''} (Qto ${res?.quartos?.numero || ''})`, valor, forma_pagamento: reservaForma, user_id: user.id }),
       supabase.from('reservas').update({ valor_pago: Number(res?.valor_pago || 0) + valor, status: 'checkout', forma_pagamento: reservaForma }).eq('id', reservaId),
     ])
     setSaving(false)

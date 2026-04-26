@@ -3,6 +3,7 @@ import { formatCurrency as fmt } from '../../utils/format'
 import { Wrench, Car, CheckCircle, TrendingUp, ArrowUpRight, Clock } from 'lucide-react'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 import { supabase } from '../../lib/supabase'
+import { useAuth } from '../../contexts/AuthContext'
 import StatCard from '../../components/ui/StatCard'
 import PageHeader from '../../components/ui/PageHeader'
 
@@ -38,6 +39,7 @@ const CustomTooltip = ({ active, payload, label }) => {
 }
 
 export default function DashboardOficina() {
+  const { user } = useAuth()
   const [stats, setStats] = useState({ abertas: 0, em_andamento: 0, concluidas_hoje: 0, veiculos: 0, receita_mes: 0 })
   const [recentOS, setRecentOS] = useState([])
   const [chartData, setChartData] = useState([])
@@ -57,15 +59,17 @@ export default function DashboardOficina() {
         { data: osRecentes },
         { data: osMes },
       ] = await Promise.all([
-        supabase.from('ordens_servico').select('*', { count: 'exact', head: true }).eq('status', 'aberta'),
-        supabase.from('ordens_servico').select('*', { count: 'exact', head: true }).eq('status', 'em_andamento'),
-        supabase.from('veiculos').select('*', { count: 'exact', head: true }),
+        supabase.from('ordens_servico').select('*', { count: 'exact', head: true }).eq('user_id', user.id).eq('status', 'aberta'),
+        supabase.from('ordens_servico').select('*', { count: 'exact', head: true }).eq('user_id', user.id).eq('status', 'em_andamento'),
+        supabase.from('veiculos').select('*', { count: 'exact', head: true }).eq('user_id', user.id),
         supabase.from('ordens_servico')
           .select('*, veiculos(placa, marca, modelo), clientes(nome)')
+          .eq('user_id', user.id)
           .order('created_at', { ascending: false })
           .limit(6),
         supabase.from('ordens_servico')
           .select('valor_total, status, data_conclusao, created_at')
+          .eq('user_id', user.id)
           .gte('created_at', inicioMes),
       ])
 

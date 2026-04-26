@@ -56,7 +56,7 @@ export default function Fornecedores() {
   const [cnpjMsg, setCnpjMsg]         = useState('')
 
   const load = useCallback(async () => {
-    const { data } = await supabase.from('fornecedores').select('*').order('nome')
+    const { data } = await supabase.from('fornecedores').select('*').eq('user_id', user.id).order('nome')
     setFornecedores(data || [])
     setLoading(false)
   }, [])

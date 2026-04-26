@@ -3,6 +3,7 @@ import { formatCurrency as fmt } from '../../utils/format'
 import { BedDouble, Calendar, LogIn, LogOut, TrendingUp, ArrowUpRight } from 'lucide-react'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 import { supabase } from '../../lib/supabase'
+import { useAuth } from '../../contexts/AuthContext'
 import StatCard from '../../components/ui/StatCard'
 import PageHeader from '../../components/ui/PageHeader'
 
@@ -25,6 +26,7 @@ const CustomTooltip = ({ active, payload, label }) => {
 }
 
 export default function DashboardHotel() {
+  const { user } = useAuth()
   const [stats, setStats] = useState({ disponiveis: 0, ocupados: 0, checkins_hoje: 0, checkouts_hoje: 0, receita_mes: 0, total_quartos: 0 })
   const [recentReservas, setRecentReservas] = useState([])
   const [proximosCheckins, setProximosCheckins] = useState([])
@@ -47,13 +49,13 @@ export default function DashboardHotel() {
         { data: recentes },
         { data: proximos },
       ] = await Promise.all([
-        supabase.from('quartos').select('*', { count: 'exact', head: true }),
-        supabase.from('reservas').select('quarto_id').eq('status', 'checkin').lte('check_in', hoje).gte('check_out', hoje),
-        supabase.from('reservas').select('*', { count: 'exact', head: true }).eq('check_in', hoje).in('status', ['confirmada', 'checkin']),
-        supabase.from('reservas').select('*', { count: 'exact', head: true }).eq('check_out', hoje).eq('status', 'checkin'),
-        supabase.from('reservas').select('valor_total, check_out, status').gte('check_out', inicioMes),
-        supabase.from('reservas').select('*, quartos(numero, tipo), clientes(nome)').order('check_in', { ascending: false }).limit(6),
-        supabase.from('reservas').select('*, quartos(numero, tipo)').eq('status', 'confirmada').gte('check_in', hoje).order('check_in').limit(5),
+        supabase.from('quartos').select('*', { count: 'exact', head: true }).eq('user_id', user.id),
+        supabase.from('reservas').select('quarto_id').eq('user_id', user.id).eq('status', 'checkin').lte('check_in', hoje).gte('check_out', hoje),
+        supabase.from('reservas').select('*', { count: 'exact', head: true }).eq('user_id', user.id).eq('check_in', hoje).in('status', ['confirmada', 'checkin']),
+        supabase.from('reservas').select('*', { count: 'exact', head: true }).eq('user_id', user.id).eq('check_out', hoje).eq('status', 'checkin'),
+        supabase.from('reservas').select('valor_total, check_out, status').eq('user_id', user.id).gte('check_out', inicioMes),
+        supabase.from('reservas').select('*, quartos(numero, tipo), clientes(nome)').eq('user_id', user.id).order('check_in', { ascending: false }).limit(6),
+        supabase.from('reservas').select('*, quartos(numero, tipo)').eq('user_id', user.id).eq('status', 'confirmada').gte('check_in', hoje).order('check_in').limit(5),
       ])
 
       const ocupados = (checkins_ativos || []).length

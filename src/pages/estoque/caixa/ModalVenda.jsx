@@ -84,7 +84,6 @@ export default function ModalVenda({ clientes, produtos, caixaId, title = 'Regis
             valor: p.valor,
             data_vencimento: p.data,
             status: 'pendente',
-            user_id: user.id,
           }))
         )
         if (errC) { setSaving(false); return onError(errC.message) }
@@ -98,6 +97,7 @@ export default function ModalVenda({ clientes, produtos, caixaId, title = 'Regis
           descricao: `Entrada crediário — ${clienteNome}`,
           valor: Number(entrada),
           forma_pagamento: 'dinheiro',
+          user_id: user.id,
         })
       }
     }

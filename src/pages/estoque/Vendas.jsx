@@ -21,7 +21,7 @@ const statusMap = {
 }
 
 export default function Vendas() {
-  const { subscription } = useAuth()
+  const { subscription, user } = useAuth()
   const [vendas, setVendas] = useState([])
   const [clientes, setClientes] = useState([])
   const [produtos, setProdutos] = useState([])
@@ -39,6 +39,7 @@ export default function Vendas() {
     const { data } = await supabase
       .from('vendas')
       .select('*, clientes(nome), venda_itens(*, produtos(nome))')
+      .eq('user_id', user.id)
       .order('created_at', { ascending: false })
     setVendas(data || [])
     setLoading(false)
@@ -46,8 +47,8 @@ export default function Vendas() {
 
   const loadOptions = useCallback(async () => {
     const [{ data: c }, { data: p }] = await Promise.all([
-      supabase.from('clientes').select('id, nome').order('nome'),
-      supabase.from('produtos').select('id, nome, preco_venda, quantidade').order('nome'),
+      supabase.from('clientes').select('id, nome').eq('user_id', user.id).order('nome'),
+      supabase.from('produtos').select('id, nome, preco_venda, quantidade').eq('user_id', user.id).order('nome'),
     ])
     setClientes(c || [])
     setProdutos(p || [])
@@ -84,7 +85,7 @@ export default function Vendas() {
     const validItens = itens.filter(i => i.produto_id && Number(i.quantidade) > 0)
     if (validItens.length === 0) return showToast('Adicione pelo menos um produto.', 'error')
     setSaving(true)
-    const { data: venda, error: errVenda } = await supabase.from('vendas').insert({ cliente_id: clienteId, total, observacao }).select().single()
+    const { data: venda, error: errVenda } = await supabase.from('vendas').insert({ cliente_id: clienteId, total, observacao, user_id: user.id }).select().single()
     if (errVenda) { setSaving(false); return showToast(errVenda.message, 'error') }
     const { error: errItens } = await supabase.from('venda_itens').insert(
       validItens.map(i => ({ venda_id: venda.id, produto_id: i.produto_id, quantidade: Number(i.quantidade), preco_unitario: Number(i.preco_unitario) }))
