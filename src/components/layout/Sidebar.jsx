@@ -60,7 +60,7 @@ const MENUS = {
 }
 
 const LABELS = {
-  estoque: 'Loja Comércio',
+  estoque: 'Loja/Comércio',
   oficina: 'Oficina Mecânica',
   hotel: 'Hotel / Pousada',
   bar: 'Bar / Restaurante',
@@ -102,7 +102,7 @@ export default function Sidebar({ isOpen, onClose }) {
           {theme === 'dark' ? 'Claro' : 'Escuro'}
         </button>
         <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--amber)' }}>
-          {businessName || LABELS[businessType] || 'Loja Comércio'}
+          {businessName || LABELS[businessType] || 'Loja/Comércio'}
         </span>
       </div>
 
