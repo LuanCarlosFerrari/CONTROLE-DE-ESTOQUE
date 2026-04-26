@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { formatCurrency as fmt } from '../../../utils/format'
 import { nextMonthDate, calcularCrediario } from '../../../utils/finance'
-import { Plus, X, CreditCard, QrCode } from 'lucide-react'
+import { Plus, X, CreditCard, QrCode, Printer, CheckCircle } from 'lucide-react'
 import { supabase } from '../../../lib/supabase'
 import { useAuth } from '../../../contexts/AuthContext'
 import { notifyTelegram } from '../../../lib/notify'
+import { imprimirRecibo } from '../../../lib/recibo'
 import Modal from '../../../components/ui/Modal'
 import Label from '../../../components/ui/FormLabel'
 import PixModal from '../../../components/ui/PixModal'
@@ -20,6 +21,7 @@ export default function ModalVenda({ clientes, produtos, title = 'Registrar vend
   const [itens, setItens]           = useState([{ produto_id: '', quantidade: 1, preco_unitario: 0 }])
   const [saving, setSaving]         = useState(false)
   const [showPix, setShowPix]       = useState(false)
+  const [vendaSalva, setVendaSalva] = useState(null)
 
   // Crediário
   const hoje = new Date().toISOString().split('T')[0]
@@ -85,9 +87,9 @@ export default function ModalVenda({ clientes, produtos, title = 'Registrar vend
     }
 
     setSaving(false)
-    const clienteNome = clientes.find(c => c.id === clienteId)?.nome || '—'
+    const cliente = clientes.find(c => c.id === clienteId) || {}
     notifyTelegram('nova_venda', {
-      cliente_nome: clienteNome,
+      cliente_nome: cliente.nome || '—',
       forma_pagamento: FORMA_LABEL[formaVenda] || formaVenda,
       total: totalVenda,
       itens: validItens.map(i => ({
@@ -99,7 +101,52 @@ export default function ModalVenda({ clientes, produtos, title = 'Registrar vend
         ? { num_parcelas: Number(numParcelas), valor_parcela: valorParcela }
         : null,
     })
-    onSaved('Venda registrada!')
+    setVendaSalva({
+      venda: { ...venda, forma_pagamento: formaVenda, observacao },
+      itens: validItens.map(i => ({
+        nome: produtos.find(p => p.id === i.produto_id)?.nome || '—',
+        quantidade: Number(i.quantidade),
+        preco_unitario: Number(i.preco_unitario),
+      })),
+      cliente,
+    })
+  }
+
+  if (vendaSalva) {
+    return (
+      <Modal title="Venda registrada" onClose={() => onSaved('Venda registrada!')} size="sm">
+        <div style={{ textAlign: 'center', padding: '8px 0 24px' }}>
+          <div style={{ width: 56, height: 56, borderRadius: 16, background: 'rgba(52,211,153,0.12)', border: '1px solid rgba(52,211,153,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+            <CheckCircle size={26} color="#34D399" />
+          </div>
+          <p style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)', marginBottom: 6 }}>Venda registrada com sucesso!</p>
+          <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 4 }}>
+            {vendaSalva.cliente.nome} · {FORMA_LABEL[vendaSalva.venda.forma_pagamento] || vendaSalva.venda.forma_pagamento}
+          </p>
+          <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 28, fontWeight: 800, color: 'var(--amber)', letterSpacing: '-0.02em', marginBottom: 28 }}>
+            R$ {fmt(vendaSalva.venda.total)}
+          </p>
+          <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
+            <button
+              type="button"
+              className="btn-secondary"
+              onClick={() => imprimirRecibo({
+                venda: vendaSalva.venda,
+                itens: vendaSalva.itens,
+                cliente: vendaSalva.cliente,
+                negocio: { nome: subscription?.business_name, pix_chave: subscription?.pix_chave },
+              })}
+              style={{ display: 'flex', alignItems: 'center', gap: 8 }}
+            >
+              <Printer size={14} /> Imprimir recibo
+            </button>
+            <button type="button" className="btn-primary" onClick={() => onSaved('Venda registrada!')}>
+              Fechar
+            </button>
+          </div>
+        </div>
+      </Modal>
+    )
   }
 
   return (

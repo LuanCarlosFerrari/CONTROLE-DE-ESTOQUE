@@ -1,8 +1,10 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useToast } from '../../hooks/useToast'
 import { formatCurrency as fmt } from '../../utils/format'
-import { Plus, ShoppingCart, X, ChevronDown, Receipt, Package } from 'lucide-react'
+import { Plus, ShoppingCart, X, ChevronDown, Receipt, Package, Printer } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
+import { useAuth } from '../../contexts/AuthContext'
+import { imprimirRecibo } from '../../lib/recibo'
 import Modal from '../../components/ui/Modal'
 import Toast from '../../components/ui/Toast'
 import Label from '../../components/ui/FormLabel'
@@ -19,6 +21,7 @@ const statusMap = {
 }
 
 export default function Vendas() {
+  const { subscription } = useAuth()
   const [vendas, setVendas] = useState([])
   const [clientes, setClientes] = useState([])
   const [produtos, setProdutos] = useState([])
@@ -201,6 +204,25 @@ export default function Vendas() {
                         <span style={{ fontSize: 13, color: 'var(--text-muted)', marginRight: 16 }}>Total</span>
                         <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 16, fontWeight: 800, color: '#34D399' }}>R$ {fmt(v.total)}</span>
                       </div>
+                    </div>
+
+                    <div style={{ marginTop: 14, display: 'flex', justifyContent: 'flex-end' }}>
+                      <button
+                        className="btn-secondary"
+                        style={{ fontSize: 12, padding: '6px 14px', display: 'flex', alignItems: 'center', gap: 7 }}
+                        onClick={() => imprimirRecibo({
+                          venda: { ...v, forma_pagamento: v.forma_pagamento },
+                          itens: (v.venda_itens || []).map(i => ({
+                            nome: i.produtos?.nome || '—',
+                            quantidade: i.quantidade,
+                            preco_unitario: i.preco_unitario,
+                          })),
+                          cliente: v.clientes || {},
+                          negocio: { nome: subscription?.business_name, pix_chave: subscription?.pix_chave },
+                        })}
+                      >
+                        <Printer size={13} /> Imprimir recibo
+                      </button>
                     </div>
                   </div>
                 )}
