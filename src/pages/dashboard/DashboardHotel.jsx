@@ -33,7 +33,7 @@ export default function DashboardHotel() {
   const [chartData, setChartData] = useState([])
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => { load() }, [])
+  useEffect(() => { load() }, [user?.id])
 
   const load = async () => {
     try {

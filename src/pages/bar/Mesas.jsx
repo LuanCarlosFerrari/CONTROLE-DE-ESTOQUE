@@ -57,6 +57,7 @@ export default function Mesas() {
   const [itemProdId, setItemProdId]     = useState('')
   const [savingItem, setSavingItem]     = useState(false)
   const [fechandoComanda, setFechandoComanda] = useState(false)
+  const [formaFechar, setFormaFechar]   = useState('dinheiro')
 
   const load = useCallback(async () => {
     const { data } = await supabase.from('mesas').select('*').eq('user_id', user.id).order('numero')
@@ -96,7 +97,7 @@ export default function Mesas() {
     setItemDesc(''); setItemQtd(1); setItemPreco(''); setItemProdId('')
     const [{ data: its }, { data: prods }] = await Promise.all([
       supabase.from('comanda_itens').select('*').eq('mesa_id', m.id).order('created_at', { ascending: false }),
-      supabase.from('produtos').select('id, nome, preco_venda').order('nome'),
+      supabase.from('produtos').select('id, nome, preco_venda').eq('user_id', user.id).order('nome'),
     ])
     setItens(its || [])
     setProdutos(prods || [])
@@ -137,6 +138,16 @@ export default function Mesas() {
     if (!comandaMesa) return
     const total = itens.reduce((s, i) => s + Number(i.quantidade) * Number(i.preco_unitario), 0)
     setFechandoComanda(true)
+    if (total > 0) {
+      await supabase.from('movimentacoes_extras').insert({
+        caixa_id: null,
+        tipo: 'entrada',
+        descricao: `Comanda - Mesa ${comandaMesa.numero}`,
+        valor: total,
+        forma_pagamento: formaFechar,
+        user_id: user.id,
+      })
+    }
     await supabase.from('comanda_itens').delete().eq('mesa_id', comandaMesa.id)
     await supabase.from('mesas').update({ status: 'disponivel' }).eq('id', comandaMesa.id)
     setFechandoComanda(false)
@@ -445,15 +456,34 @@ export default function Mesas() {
             </div>
 
             {/* Footer */}
-            <div style={{ padding: '16px 24px', borderTop: '1px solid var(--bg-600)', background: 'var(--bg-800)', flexShrink: 0, display: 'flex', gap: 10 }}>
-              <button onClick={() => window.print()} style={{ flex: 1, padding: '10px', background: 'var(--bg-700)', border: '1px solid var(--bg-500)', borderRadius: 10, cursor: 'pointer', color: 'var(--text-muted)', fontSize: 13, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, transition: 'all 0.15s' }}
-                onMouseEnter={e => { e.currentTarget.style.color = 'var(--amber)'; e.currentTarget.style.borderColor = 'rgba(16,185,129,0.3)' }}
-                onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-muted)'; e.currentTarget.style.borderColor = 'var(--bg-500)' }}
-              ><Printer size={14} /> Imprimir</button>
-              <button onClick={handleFecharComanda} disabled={fechandoComanda} style={{ flex: 1, padding: '10px', background: 'rgba(52,211,153,0.1)', border: '1px solid rgba(52,211,153,0.3)', borderRadius: 10, cursor: 'pointer', color: '#34D399', fontSize: 13, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, transition: 'all 0.15s' }}
-                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(52,211,153,0.2)' }}
-                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(52,211,153,0.1)' }}
-              ><CheckCircle size={14} /> {fechandoComanda ? 'Fechando...' : 'Fechar comanda'}</button>
+            <div style={{ padding: '16px 24px', borderTop: '1px solid var(--bg-600)', background: 'var(--bg-800)', flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {itens.length > 0 && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <span style={{ fontSize: 12, color: 'var(--text-subtle)', whiteSpace: 'nowrap' }}>Forma de pagamento:</span>
+                  <select className="input-field" value={formaFechar} onChange={e => setFormaFechar(e.target.value)} style={{ flex: 1, fontSize: 13 }}>
+                    <option value="dinheiro">Dinheiro</option>
+                    <option value="pix">PIX</option>
+                    <option value="cartao">Cartão</option>
+                    <option value="outros">Outros</option>
+                  </select>
+                </div>
+              )}
+              <div style={{ display: 'flex', gap: 10 }}>
+                <button onClick={() => {
+                  const total = itens.reduce((s, i) => s + i.quantidade * i.preco_unitario, 0)
+                  const linhas = itens.map(i => `${String(i.quantidade).padEnd(3)} ${i.descricao.padEnd(20)} R$ ${fmt(i.quantidade * i.preco_unitario)}`).join('\n')
+                  const w = window.open('', '_blank', 'width=320,height=600')
+                  w.document.write(`<pre style="font-family:monospace;font-size:13px;padding:16px;white-space:pre-wrap">COMANDA — Mesa ${comandaMesa.numero}\n${new Date().toLocaleString('pt-BR')}\n${'─'.repeat(36)}\n${linhas}\n${'─'.repeat(36)}\nTOTAL: R$ ${fmt(total)}</pre>`)
+                  w.document.close(); w.print(); w.close()
+                }} style={{ flex: 1, padding: '10px', background: 'var(--bg-700)', border: '1px solid var(--bg-500)', borderRadius: 10, cursor: 'pointer', color: 'var(--text-muted)', fontSize: 13, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, transition: 'all 0.15s' }}
+                  onMouseEnter={e => { e.currentTarget.style.color = 'var(--amber)'; e.currentTarget.style.borderColor = 'rgba(16,185,129,0.3)' }}
+                  onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-muted)'; e.currentTarget.style.borderColor = 'var(--bg-500)' }}
+                ><Printer size={14} /> Imprimir</button>
+                <button onClick={handleFecharComanda} disabled={fechandoComanda} style={{ flex: 1, padding: '10px', background: 'rgba(52,211,153,0.1)', border: '1px solid rgba(52,211,153,0.3)', borderRadius: 10, cursor: 'pointer', color: '#34D399', fontSize: 13, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, transition: 'all 0.15s' }}
+                  onMouseEnter={e => { e.currentTarget.style.background = 'rgba(52,211,153,0.2)' }}
+                  onMouseLeave={e => { e.currentTarget.style.background = 'rgba(52,211,153,0.1)' }}
+                ><CheckCircle size={14} /> {fechandoComanda ? 'Fechando...' : 'Fechar comanda'}</button>
+              </div>
             </div>
           </div>
         </div>

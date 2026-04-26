@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useToast } from '../hooks/useToast'
 import { Package, Wrench, BedDouble, UtensilsCrossed, Save, Zap, KeyRound, CheckCircle, Clock, ShieldAlert, User, Sun, Moon, Send, Link2, LinkIcon, Link2Off, QrCode } from 'lucide-react'
 import { useTheme } from '../contexts/ThemeContext'
@@ -6,7 +7,6 @@ import PageHeader from '../components/ui/PageHeader'
 import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabase'
 import Toast from '../components/ui/Toast'
-import { createPaymentPreference } from '../lib/mercadopago'
 import Label from '../components/ui/FormLabel'
 
 const BUSINESS_TYPES = [
@@ -46,25 +46,14 @@ export default function Configuracoes() {
 
   const { toast, showToast, clearToast } = useToast()
   const { theme, toggle } = useTheme()
-  const [loadingPay, setLoadingPay] = useState(false)
-  const [payError, setPayError] = useState(null)
+  const navigate = useNavigate()
 
   const [telegramSession, setTelegramSession] = useState(null)
   const [telegramLoading, setTelegramLoading] = useState(true)
   const [unlinking, setUnlinking] = useState(false)
   const [linking, setLinking] = useState(false)
 
-  const handlePagar = async () => {
-    setLoadingPay(true)
-    setPayError(null)
-    try {
-      const url = await createPaymentPreference()
-      window.location.href = url
-    } catch (err) {
-      setPayError('Não foi possível iniciar o pagamento. Tente novamente.')
-      setLoadingPay(false)
-    }
-  }
+  const handlePagar = () => navigate('/app/pagar')
 
   useEffect(() => {
     setSelectedType(businessType)
@@ -442,15 +431,11 @@ export default function Configuracoes() {
             </ul>
             <button
               onClick={handlePagar}
-              disabled={loadingPay}
               className="btn-primary"
-              style={{ display: 'inline-flex', padding: '10px 20px', fontSize: 14, opacity: loadingPay ? 0.7 : 1, cursor: loadingPay ? 'not-allowed' : 'pointer', border: 'none' }}
+              style={{ display: 'inline-flex', padding: '10px 20px', fontSize: 14, border: 'none' }}
             >
-              <Zap size={15} /> {loadingPay ? 'Redirecionando...' : 'Pagar com MercadoPago'}
+              <Zap size={15} /> Assinar via PIX
             </button>
-            {payError && (
-              <p style={{ color: 'var(--red)', fontSize: 13, marginTop: 8 }}>{payError}</p>
-            )}
           </div>
         )}
       </Section>

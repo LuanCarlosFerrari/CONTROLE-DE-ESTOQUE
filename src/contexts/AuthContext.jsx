@@ -12,6 +12,10 @@ export function AuthProvider({ children }) {
 
   const loadSubscription = async (userId) => {
     if (!userId) return setSubscription(null)
+
+    // Expira trial no servidor antes de ler o status — não pode ser interceptado pelo cliente
+    await supabase.rpc('expire_trial_if_needed', { p_user_id: userId })
+
     const { data } = await supabase
       .from('subscriptions')
       .select('*')
@@ -76,9 +80,18 @@ export function AuthProvider({ children }) {
     ? Math.max(0, Math.ceil((new Date(subscription.trial_ends_at) - new Date()) / 86400000))
     : null
 
-  const isBanned   = subscription?.status === 'banned' || subscription?.status === 'expired'
+  // Checa a data client-side também (belt-and-suspenders): o RPC já terá
+  // atualizado o status no DB, mas na mesma sessão o estado local pode
+  // ainda ter 'trial' antes do próximo loadSubscription.
+  const trialExpiredLocally = subscription?.status === 'trial' && subscription?.trial_ends_at
+    ? new Date(subscription.trial_ends_at) < new Date()
+    : false
+
+  const isBanned   = subscription?.status === 'banned'
+                  || subscription?.status === 'expired'
+                  || trialExpiredLocally
   const isActive   = subscription?.status === 'active'
-  const isTrial    = subscription?.status === 'trial'
+  const isTrial    = subscription?.status === 'trial' && !trialExpiredLocally
   const businessType = subscription?.business_type ?? 'estoque'
   const businessName = subscription?.business_name ?? ''
 

@@ -31,6 +31,7 @@ export default function Vendas() {
   const [clienteId, setClienteId] = useState('')
   const [observacao, setObservacao] = useState('')
   const [itens, setItens] = useState([{ produto_id: '', quantidade: 1, preco_unitario: 0 }])
+  const [formaVenda, setFormaVenda] = useState('dinheiro')
   const [saving, setSaving] = useState(false)
   const { toast, showToast, clearToast } = useToast()
   const [expanded, setExpanded] = useState(null)
@@ -57,7 +58,7 @@ export default function Vendas() {
   useEffect(() => { loadVendas(); loadOptions() }, [loadVendas, loadOptions])
 
   const openModal = () => {
-    setClienteId(''); setObservacao('')
+    setClienteId(''); setObservacao(''); setFormaVenda('dinheiro')
     setItens([{ produto_id: '', quantidade: 1, preco_unitario: 0 }])
     setModal(true)
   }
@@ -85,7 +86,7 @@ export default function Vendas() {
     const validItens = itens.filter(i => i.produto_id && Number(i.quantidade) > 0)
     if (validItens.length === 0) return showToast('Adicione pelo menos um produto.', 'error')
     setSaving(true)
-    const { data: venda, error: errVenda } = await supabase.from('vendas').insert({ cliente_id: clienteId, total, observacao, user_id: user.id }).select().single()
+    const { data: venda, error: errVenda } = await supabase.from('vendas').insert({ cliente_id: clienteId, total, observacao, forma_pagamento: formaVenda, user_id: user.id }).select().single()
     if (errVenda) { setSaving(false); return showToast(errVenda.message, 'error') }
     const { error: errItens } = await supabase.from('venda_itens').insert(
       validItens.map(i => ({ venda_id: venda.id, produto_id: i.produto_id, quantidade: Number(i.quantidade), preco_unitario: Number(i.preco_unitario) }))
@@ -237,12 +238,22 @@ export default function Vendas() {
       {modal && (
         <Modal title="Registrar venda" onClose={() => setModal(false)} size="lg">
           <form onSubmit={handleSave}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 20 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16, marginBottom: 20 }}>
               <div>
                 <Label required>Cliente</Label>
                 <select className="input-field" value={clienteId} onChange={e => setClienteId(e.target.value)} required>
                   <option value="">Selecionar cliente...</option>
                   {clientes.map(c => <option key={c.id} value={c.id}>{c.nome}</option>)}
+                </select>
+              </div>
+              <div>
+                <Label required>Forma de pagamento</Label>
+                <select className="input-field" value={formaVenda} onChange={e => setFormaVenda(e.target.value)}>
+                  <option value="dinheiro">Dinheiro</option>
+                  <option value="pix">PIX</option>
+                  <option value="cartao">Cartão</option>
+                  <option value="crediario">Crediário</option>
+                  <option value="outros">Outros</option>
                 </select>
               </div>
               <div>

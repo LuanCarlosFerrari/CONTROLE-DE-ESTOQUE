@@ -45,7 +45,7 @@ export default function DashboardOficina() {
   const [chartData, setChartData] = useState([])
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => { load() }, [])
+  useEffect(() => { load() }, [user?.id])
 
   const load = async () => {
     try {

@@ -121,12 +121,13 @@ export default function OrdensServico() {
     }
 
     let osId = editing
+    let osNumero = null
 
     if (!editing) {
-      const numero = await gerarNumero()
+      osNumero = await gerarNumero()
       const { data, error } = await supabase
         .from('ordens_servico')
-        .insert({ ...payload, numero, user_id: user.id })
+        .insert({ ...payload, numero: osNumero, user_id: user.id })
         .select('id')
         .single()
       if (error) { setSaving(false); return showToast(error.message, 'error') }
@@ -159,9 +160,8 @@ export default function OrdensServico() {
     const cliente = clientes.find(c => c.id === form.cliente_id)
     const veiculoStr = veiculo ? `${veiculo.placa} · ${veiculo.marca} ${veiculo.modelo}` : null
     if (!editing) {
-      const numero = await gerarNumero()
       notifyTelegram('nova_os', {
-        numero,
+        numero: osNumero,
         veiculo: veiculoStr,
         cliente: cliente?.nome || null,
         valor_total: totalGeral,

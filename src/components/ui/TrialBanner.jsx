@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Clock, X, Zap } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
-import { createPaymentPreference } from '../../lib/mercadopago'
 
 function pad(n) {
   return String(n).padStart(2, '0')
@@ -9,19 +9,11 @@ function pad(n) {
 
 export default function TrialBanner() {
   const { subscription, isTrial } = useAuth()
+  const navigate = useNavigate()
   const [dismissed, setDismissed] = useState(false)
   const [timeLeft, setTimeLeft] = useState(null)
-  const [loadingPay, setLoadingPay] = useState(false)
 
-  const handlePagar = async () => {
-    setLoadingPay(true)
-    try {
-      const url = await createPaymentPreference()
-      window.location.href = url
-    } catch {
-      setLoadingPay(false)
-    }
-  }
+  const handlePagar = () => navigate('/app/pagar')
 
   useEffect(() => {
     if (!isTrial || !subscription?.trial_ends_at) return
@@ -93,20 +85,18 @@ export default function TrialBanner() {
   const assinarbtn = (
     <button
       onClick={handlePagar}
-      disabled={loadingPay}
       style={{
         display: 'inline-flex', alignItems: 'center', gap: 6,
         background: color, color: '#000',
         fontWeight: 700, fontSize: 12,
         padding: '6px 14px', borderRadius: 6,
         border: 'none', whiteSpace: 'nowrap',
-        cursor: loadingPay ? 'not-allowed' : 'pointer',
-        opacity: loadingPay ? 0.7 : 1,
+        cursor: 'pointer',
         transition: 'opacity 0.2s',
         flexShrink: 0,
       }}
     >
-      <Zap size={12} /> {loadingPay ? 'Aguarde...' : 'Assinar agora'}
+      <Zap size={12} /> Assinar agora
     </button>
   )
 
