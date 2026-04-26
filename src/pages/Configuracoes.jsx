@@ -40,6 +40,7 @@ export default function Configuracoes() {
   const [pixNome,   setPixNome]   = useState(subscription?.pix_nome   || '')
   const [pixCidade, setPixCidade] = useState(subscription?.pix_cidade || '')
   const [savingPix, setSavingPix] = useState(false)
+  const [pixEditing, setPixEditing] = useState(false)
 
   const [resetLoading, setResetLoading] = useState(false)
   const [resetSent, setResetSent] = useState(false)
@@ -76,7 +77,14 @@ export default function Configuracoes() {
     })
     setSavingPix(false)
     if (error) return showToast(typeof error === 'string' ? error : error.message, 'error')
+    setPixEditing(false)
     showToast('PIX configurado!')
+  }
+
+  const maskPix = (str) => {
+    if (!str) return ''
+    if (str.length <= 6) return str[0] + '****' + str[str.length - 1]
+    return str.slice(0, 3) + '****' + str.slice(-3)
   }
 
   useEffect(() => {
@@ -337,71 +345,101 @@ export default function Configuracoes() {
 
       {/* Seção: PIX */}
       <Section title="PIX" subtitle="Configure sua chave PIX para gerar QR Codes nas vendas">
-        <form onSubmit={handleSavePix}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 20 }}>
-            <div style={{ gridColumn: '1 / -1' }}>
-              <Label>Chave PIX</Label>
-              <input
-                className="input-field"
-                placeholder="CPF, CNPJ, email, telefone ou chave aleatória"
-                value={pixChave}
-                onChange={e => setPixChave(e.target.value)}
-                style={{ width: '100%' }}
-              />
-              <p style={{ fontSize: 11, color: 'var(--text-subtle)', marginTop: 4 }}>
-                Exibida no QR Code — use a mesma chave cadastrada no seu banco.
-              </p>
+        {subscription?.pix_chave && !pixEditing ? (
+          /* Modo visualização — dados mascarados */
+          <div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
+              <div style={{ gridColumn: '1 / -1' }}>
+                <p style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-subtle)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>Chave PIX</p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', background: 'var(--bg-700)', border: '1px solid var(--bg-500)', borderRadius: 8 }}>
+                  <KeyRound size={14} color="var(--text-subtle)" />
+                  <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)', letterSpacing: '0.05em' }}>{maskPix(subscription.pix_chave)}</span>
+                </div>
+              </div>
+              {subscription.pix_nome && (
+                <div>
+                  <p style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-subtle)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>Recebedor</p>
+                  <div style={{ padding: '10px 14px', background: 'var(--bg-700)', border: '1px solid var(--bg-500)', borderRadius: 8, fontSize: 13, color: 'var(--text-muted)' }}>
+                    {maskPix(subscription.pix_nome)}
+                  </div>
+                </div>
+              )}
+              {subscription.pix_cidade && (
+                <div>
+                  <p style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-subtle)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>Cidade</p>
+                  <div style={{ padding: '10px 14px', background: 'var(--bg-700)', border: '1px solid var(--bg-500)', borderRadius: 8, fontSize: 13, color: 'var(--text-muted)' }}>
+                    {maskPix(subscription.pix_cidade)}
+                  </div>
+                </div>
+              )}
             </div>
-            <div>
-              <Label>Nome do recebedor</Label>
-              <input
-                className="input-field"
-                placeholder="Seu nome ou razão social"
-                value={pixNome}
-                onChange={e => setPixNome(e.target.value)}
-                maxLength={25}
-              />
-              <p style={{ fontSize: 11, color: 'var(--text-subtle)', marginTop: 4 }}>Máx. 25 chars, sem acentos.</p>
-            </div>
-            <div>
-              <Label>Cidade</Label>
-              <input
-                className="input-field"
-                placeholder="Ex: Sao Paulo"
-                value={pixCidade}
-                onChange={e => setPixCidade(e.target.value)}
-                maxLength={15}
-              />
-              <p style={{ fontSize: 11, color: 'var(--text-subtle)', marginTop: 4 }}>Máx. 15 chars, sem acentos.</p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 14px', background: 'rgba(52,211,153,0.08)', border: '1px solid rgba(52,211,153,0.25)', borderRadius: 8, fontSize: 12, fontWeight: 600, color: '#34D399' }}>
+                <CheckCircle size={13} /> Chave PIX salva
+              </div>
+              <button
+                type="button"
+                onClick={() => setPixEditing(true)}
+                style={{ background: 'none', border: '1px solid var(--bg-500)', borderRadius: 8, padding: '8px 14px', cursor: 'pointer', fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 6 }}
+              >
+                <Save size={13} /> Editar
+              </button>
             </div>
           </div>
-
-          {pixChave && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', background: 'rgba(52,211,153,0.06)', border: '1px solid rgba(52,211,153,0.2)', borderRadius: 10, marginBottom: 20 }}>
-              <QrCode size={16} color="#34D399" />
-              <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: 0 }}>
-                QR Code PIX ativo — aparecerá nas vendas com pagamento em PIX.
-              </p>
-            </div>
-          )}
-
-          {(() => {
-            const pixSaved =
-              (pixChave.trim() || '') === (subscription?.pix_chave || '') &&
-              (pixNome.trim()  || '') === (subscription?.pix_nome  || '') &&
-              (pixCidade.trim()|| '') === (subscription?.pix_cidade|| '')
-            return pixSaved && pixChave ? (
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '9px 16px', background: 'rgba(52,211,153,0.08)', border: '1px solid rgba(52,211,153,0.25)', borderRadius: 8, fontSize: 13, fontWeight: 600, color: '#34D399' }}>
-                <CheckCircle size={15} /> Chave PIX salva
+        ) : (
+          /* Modo edição */
+          <form onSubmit={handleSavePix}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 20 }}>
+              <div style={{ gridColumn: '1 / -1' }}>
+                <Label>Chave PIX</Label>
+                <input
+                  className="input-field"
+                  placeholder="CPF, CNPJ, email, telefone ou chave aleatória"
+                  value={pixChave}
+                  onChange={e => setPixChave(e.target.value)}
+                  style={{ width: '100%' }}
+                />
+                <p style={{ fontSize: 11, color: 'var(--text-subtle)', marginTop: 4 }}>
+                  Exibida no QR Code — use a mesma chave cadastrada no seu banco.
+                </p>
               </div>
-            ) : (
+              <div>
+                <Label>Nome do recebedor</Label>
+                <input
+                  className="input-field"
+                  placeholder="Seu nome ou razão social"
+                  value={pixNome}
+                  onChange={e => setPixNome(e.target.value)}
+                  maxLength={25}
+                />
+                <p style={{ fontSize: 11, color: 'var(--text-subtle)', marginTop: 4 }}>Máx. 25 chars, sem acentos.</p>
+              </div>
+              <div>
+                <Label>Cidade</Label>
+                <input
+                  className="input-field"
+                  placeholder="Ex: Sao Paulo"
+                  value={pixCidade}
+                  onChange={e => setPixCidade(e.target.value)}
+                  maxLength={15}
+                />
+                <p style={{ fontSize: 11, color: 'var(--text-subtle)', marginTop: 4 }}>Máx. 15 chars, sem acentos.</p>
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: 10 }}>
               <button type="submit" className="btn-primary" disabled={savingPix}>
                 <Save size={15} />
                 {savingPix ? 'Salvando...' : 'Salvar PIX'}
               </button>
-            )
-          })()}
-        </form>
+              {pixEditing && (
+                <button type="button" onClick={() => { setPixEditing(false); setPixChave(subscription?.pix_chave || ''); setPixNome(subscription?.pix_nome || ''); setPixCidade(subscription?.pix_cidade || '') }}
+                  style={{ background: 'none', border: '1px solid var(--bg-500)', borderRadius: 8, padding: '8px 14px', cursor: 'pointer', fontSize: 13, color: 'var(--text-muted)' }}>
+                  Cancelar
+                </button>
+              )}
+            </div>
+          </form>
+        )}
       </Section>
 
       {/* Seção: Assinatura */}
