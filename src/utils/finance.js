@@ -36,11 +36,16 @@ export function calcularCrediario({ itens, entrada, numParcelas, dataFirstParcel
   const totalVenda    = calcularTotal(itens)
   const valorRestante = Math.max(0, totalVenda - Number(entrada || 0))
   const n             = Number(numParcelas)
-  const valorParcela  = n > 0 ? valorRestante / n : 0
+  if (n <= 0) return { totalVenda, valorRestante, valorParcela: 0, parcelas: [] }
+
+  // Arredonda para 2 casas; a última parcela absorve a diferença de centavos
+  const valorBase    = Math.round(valorRestante * 100 / n) / 100
+  const sobra        = Math.round((valorRestante - valorBase * n) * 100) / 100
+  const valorParcela = valorBase
 
   const parcelas = Array.from({ length: n }, (_, i) => ({
     num:   i + 1,
-    valor: valorParcela,
+    valor: i === n - 1 ? Math.round((valorBase + sobra) * 100) / 100 : valorBase,
     data:  nextMonthDate(dataFirstParcela, i),
   }))
 

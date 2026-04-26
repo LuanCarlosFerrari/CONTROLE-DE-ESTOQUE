@@ -617,6 +617,19 @@ body {
   .quartos-grid { grid-template-columns: 1fr; gap: 8px; }
 }
 
+/* Garante que a barra de busca sempre apareça abaixo dos botões de ação em mobile */
+@media (max-width: 640px) {
+  .search-below-mobile {
+    flex-basis: 100%;
+    max-width: 100% !important;
+    margin-left: 0 !important;
+    order: 999;
+  }
+  .caixa-actions-row {
+    justify-content: center;
+  }
+}
+
 /* ── BILLING CARD ───────────────────────────────────────────────── */
 .billing-card {
   display: flex;

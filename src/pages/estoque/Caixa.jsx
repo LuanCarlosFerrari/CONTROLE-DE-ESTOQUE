@@ -93,7 +93,8 @@ export default function Caixa() {
   }, [loadCaixa, loadMovimentacoes, loadOptions])
 
   /* ── Cálculos ─────────────────────────────────────────── */
-  const totalVendas   = vendas.reduce((s, v) => s + Number(v.total), 0)
+  // Crediário não gera caixa no ato — a entrada vai para movimentacoes_extras
+  const totalVendas   = vendas.filter(v => v.forma_pagamento !== 'crediario').reduce((s, v) => s + Number(v.total), 0)
   const totalEntradas = extras.filter(e => e.tipo === 'entrada').reduce((s, e) => s + Number(e.valor), 0)
   const totalSaidas   = extras.filter(e => e.tipo === 'saida').reduce((s, e) => s + Number(e.valor), 0)
   const saldoEsperado = Number(caixa?.saldo_inicial || 0) + totalVendas + totalEntradas - totalSaidas
@@ -270,7 +271,7 @@ export default function Caixa() {
       <CaixaStats saldoEsperado={saldoEsperado} totalVendas={totalVendas} totalEntradas={totalEntradas} totalSaidas={totalSaidas} vendas={vendas} extras={extras} caixa={caixa} />
 
       {/* Botões de ação + busca */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20, flexWrap: 'wrap' }}>
+      <div className="caixa-actions-row" style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20, flexWrap: 'wrap' }}>
         {caixaAberto && (<>
           {businessType === 'oficina' ? (<>
             <button className="btn-primary" onClick={() => openModal('os', () => { setOsId(''); setOsValor(''); setOsForma('dinheiro'); setOsObs('') })}>
@@ -298,7 +299,7 @@ export default function Caixa() {
             <ArrowDownCircle size={14} /> Saída
           </button>
         </>)}
-        <div style={{ position: 'relative', flex: 1, maxWidth: 380, marginLeft: caixaAberto ? 'auto' : 0 }}>
+        <div className="search-below-mobile" style={{ position: 'relative', flex: 1, maxWidth: 380, marginLeft: caixaAberto ? 'auto' : 0 }}>
           <Search size={14} style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-subtle)' }} />
           <input className="input-field" placeholder="Buscar movimentação..." value={search} onChange={e => setSearch(e.target.value)} style={{ paddingLeft: 38, fontSize: 13 }} />
         </div>
@@ -397,6 +398,7 @@ export default function Caixa() {
       {modal === 'venda' && (
         <ModalVenda
           clientes={clientes} produtos={produtos}
+          caixaId={caixa?.id}
           title={businessType === 'hotel' ? 'Consumo avulso' : businessType === 'oficina' ? 'Venda avulsa' : 'Registrar venda'}
           onClose={() => setModal(null)}
           onSaved={(msg) => { setModal(null); showToast(msg); loadMovimentacoes(); loadOptions() }}

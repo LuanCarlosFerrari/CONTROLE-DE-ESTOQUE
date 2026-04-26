@@ -13,7 +13,7 @@ import PixModal from '../../../components/ui/PixModal'
 const FORMAS = ['dinheiro', 'pix', 'cartao', 'crediario', 'outros']
 const FORMA_LABEL = { dinheiro: 'Dinheiro', pix: 'PIX', cartao: 'Cartão', crediario: 'Crediário', outros: 'Outros' }
 
-export default function ModalVenda({ clientes, produtos, title = 'Registrar venda', onClose, onSaved, onError }) {
+export default function ModalVenda({ clientes, produtos, caixaId, title = 'Registrar venda', onClose, onSaved, onError }) {
   const { user, subscription } = useAuth()
   const [clienteId, setClienteId]   = useState('')
   const [observacao, setObservacao] = useState('')
@@ -71,19 +71,35 @@ export default function ModalVenda({ clientes, produtos, title = 'Registrar vend
 
     if (formaVenda === 'crediario') {
       const clienteNome = clientes.find(c => c.id === clienteId)?.nome || ''
-      const { error: errC } = await supabase.from('parcelas_crediario').insert(
-        previewParcelas.map(p => ({
-          venda_id: venda.id,
-          cliente_id: clienteId,
-          cliente_nome: clienteNome,
-          numero: p.num,
-          total_parcelas: Number(numParcelas),
-          valor: p.valor,
-          data_vencimento: p.data,
-          status: 'pendente',
-        }))
-      )
-      if (errC) { setSaving(false); return onError(errC.message) }
+
+      // Só cria parcelas se houver valor restante a pagar
+      if (valorRestante > 0) {
+        const { error: errC } = await supabase.from('parcelas_crediario').insert(
+          previewParcelas.map(p => ({
+            venda_id: venda.id,
+            cliente_id: clienteId,
+            cliente_nome: clienteNome,
+            numero: p.num,
+            total_parcelas: Number(numParcelas),
+            valor: p.valor,
+            data_vencimento: p.data,
+            status: 'pendente',
+            user_id: user.id,
+          }))
+        )
+        if (errC) { setSaving(false); return onError(errC.message) }
+      }
+
+      // Registra a entrada no caixa quando o cliente paga algo na hora
+      if (Number(entrada) > 0) {
+        await supabase.from('movimentacoes_extras').insert({
+          caixa_id: caixaId || null,
+          tipo: 'entrada',
+          descricao: `Entrada crediário — ${clienteNome}`,
+          valor: Number(entrada),
+          forma_pagamento: 'dinheiro',
+        })
+      }
     }
 
     setSaving(false)

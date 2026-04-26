@@ -112,9 +112,20 @@ describe('calcularCrediario', () => {
     expect(parcelas[1]).toMatchObject({ num: 2, data: '2026-06-01' })
   })
 
-  it('todas as parcelas têm o mesmo valor', () => {
+  it('todas as parcelas têm o mesmo valor quando a divisão é exata', () => {
     const { parcelas, valorParcela } = calcularCrediario({ itens, entrada: 0, numParcelas: 5, dataFirstParcela: '2026-05-01' })
     parcelas.forEach(p => expect(p.valor).toBeCloseTo(valorParcela))
+  })
+
+  it('última parcela absorve diferença de centavo em divisão não exata', () => {
+    const itensReais = [{ quantidade: 1, preco_unitario: 100 }]
+    const { parcelas } = calcularCrediario({ itens: itensReais, entrada: 0, numParcelas: 3, dataFirstParcela: '2026-05-01' })
+    // 100 / 3 → 33.33 + 33.33 + 33.34 = 100.00
+    expect(parcelas[0].valor).toBe(33.33)
+    expect(parcelas[1].valor).toBe(33.33)
+    expect(parcelas[2].valor).toBe(33.34)
+    const soma = parcelas.reduce((s, p) => Math.round((s + p.valor) * 100) / 100, 0)
+    expect(soma).toBe(100)
   })
 
   it('funciona com entrada string (campo de formulário)', () => {
