@@ -32,7 +32,7 @@ export function gerarPixPayload({ chave, nome, cidade, valor = null, txid = '***
 
   const gui  = tlv('00', 'br.gov.bcb.pix')
   const key  = tlv('01', chave)
-  const desc = descricao ? tlv('02', descricao.slice(0, 72)) : ''
+  const desc = descricao ? tlv('02', ascii(descricao).slice(0, 72)) : ''
   const mai  = tlv('26', gui + key + desc)
 
   const amount = valor !== null && Number(valor) > 0

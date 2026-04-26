@@ -12,7 +12,7 @@ const WHATSAPP   = import.meta.env.VITE_WHATSAPP_CONTATO      || ''
 const VALOR_MENSAL = 129
 
 const PLANS = [
-  { months: 1,  label: '1 mês',    discount: 0,  perMonth: VALOR_MENSAL },
+  { months: 1,  label: '1 mes',    discount: 0,  perMonth: VALOR_MENSAL },
   { months: 3,  label: '3 meses',  discount: 20, perMonth: VALOR_MENSAL * 0.8 },
   { months: 12, label: '12 meses', discount: 40, perMonth: VALOR_MENSAL * 0.6 },
 ]
@@ -230,12 +230,7 @@ export default function TrialExpired() {
                   <canvas ref={canvasRef} />
                 </div>
 
-                <div style={{ width: '100%', background: 'var(--bg-700)', borderRadius: 10, padding: '10px 14px' }}>
-                  <p style={{ fontSize: 11, color: 'var(--text-subtle)', marginBottom: 3 }}>Chave PIX · {PIX_NOME}</p>
-                  <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', wordBreak: 'break-all', margin: 0 }}>{PIX_CHAVE}</p>
-                </div>
-
-                <button onClick={handleCopy} style={{
+<button onClick={handleCopy} style={{
                   width: '100%', padding: '11px', borderRadius: 10,
                   background: copied ? 'rgba(52,211,153,0.1)' : 'var(--bg-700)',
                   border: `1px solid ${copied ? 'rgba(52,211,153,0.3)' : 'var(--bg-500)'}`,
