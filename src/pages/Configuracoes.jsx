@@ -10,7 +10,7 @@ import Toast from '../components/ui/Toast'
 import Label from '../components/ui/FormLabel'
 
 const BUSINESS_TYPES = [
-  { value: 'estoque', icon: Package, label: 'Estoque Geral',    desc: 'Produtos, clientes e vendas' },
+  { value: 'estoque', icon: Package, label: 'Loja Comércio',    desc: 'Produtos, clientes e vendas' },
   { value: 'oficina', icon: Wrench,  label: 'Oficina Mecânica', desc: 'OS, veículos e peças' },
   { value: 'hotel',   icon: BedDouble, label: 'Hotel / Pousada', desc: 'Quartos e reservas' },
   { value: 'bar',     icon: UtensilsCrossed, label: 'Bar / Restaurante', desc: 'Mesas, comandas e cardápio' },
