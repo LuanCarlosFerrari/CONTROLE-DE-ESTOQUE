@@ -1,23 +1,25 @@
 import { useState, useEffect } from 'react'
 import { formatCurrency as fmt } from '../../../utils/format'
 import { nextMonthDate, calcularCrediario } from '../../../utils/finance'
-import { Plus, X, CreditCard } from 'lucide-react'
+import { Plus, X, CreditCard, QrCode } from 'lucide-react'
 import { supabase } from '../../../lib/supabase'
 import { useAuth } from '../../../contexts/AuthContext'
 import { notifyTelegram } from '../../../lib/notify'
 import Modal from '../../../components/ui/Modal'
 import Label from '../../../components/ui/FormLabel'
+import PixModal from '../../../components/ui/PixModal'
 
 const FORMAS = ['dinheiro', 'pix', 'cartao', 'crediario', 'outros']
 const FORMA_LABEL = { dinheiro: 'Dinheiro', pix: 'PIX', cartao: 'Cartão', crediario: 'Crediário', outros: 'Outros' }
 
 export default function ModalVenda({ clientes, produtos, title = 'Registrar venda', onClose, onSaved, onError }) {
-  const { user } = useAuth()
+  const { user, subscription } = useAuth()
   const [clienteId, setClienteId]   = useState('')
   const [observacao, setObservacao] = useState('')
   const [formaVenda, setFormaVenda] = useState('dinheiro')
   const [itens, setItens]           = useState([{ produto_id: '', quantidade: 1, preco_unitario: 0 }])
   const [saving, setSaving]         = useState(false)
+  const [showPix, setShowPix]       = useState(false)
 
   // Crediário
   const hoje = new Date().toISOString().split('T')[0]
@@ -211,7 +213,7 @@ export default function ModalVenda({ clientes, produtos, title = 'Registrar vend
           ))}
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(16,185,129,0.06)', border: '1px solid rgba(16,185,129,0.2)', borderRadius: 10, padding: '14px 20px', marginBottom: 20 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(16,185,129,0.06)', border: '1px solid rgba(16,185,129,0.2)', borderRadius: 10, padding: '14px 20px', marginBottom: formaVenda === 'pix' && subscription?.pix_chave ? 12 : 20 }}>
           <div>
             <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--amber)', marginBottom: 2 }}>Total da venda</p>
             <p style={{ fontSize: 12, color: 'var(--text-subtle)' }}>
@@ -224,11 +226,37 @@ export default function ModalVenda({ clientes, produtos, title = 'Registrar vend
           <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 26, fontWeight: 800, color: 'var(--amber)', letterSpacing: '-0.02em' }}>R$ {fmt(totalVenda)}</span>
         </div>
 
+        {formaVenda === 'pix' && subscription?.pix_chave && totalVenda > 0 && (
+          <button
+            type="button"
+            onClick={() => setShowPix(true)}
+            style={{
+              width: '100%', padding: '10px', marginBottom: 16, borderRadius: 10,
+              background: 'rgba(52,211,153,0.06)', border: '1px solid rgba(52,211,153,0.25)',
+              cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+              color: '#34D399', fontSize: 13, fontWeight: 600,
+            }}
+          >
+            <QrCode size={15} />
+            Gerar QR Code PIX
+          </button>
+        )}
+
         <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
           <button type="button" className="btn-secondary" onClick={onClose}>Cancelar</button>
           <button type="submit" className="btn-primary" disabled={saving}>{saving ? 'Registrando...' : 'Registrar venda'}</button>
         </div>
       </form>
+
+      {showPix && (
+        <PixModal
+          chave={subscription.pix_chave}
+          nome={subscription.pix_nome || ''}
+          cidade={subscription.pix_cidade || ''}
+          valor={totalVenda}
+          onClose={() => setShowPix(false)}
+        />
+      )}
     </Modal>
   )
 }

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useToast } from '../hooks/useToast'
-import { Package, Wrench, BedDouble, UtensilsCrossed, Save, Zap, KeyRound, CheckCircle, Clock, ShieldAlert, User, Sun, Moon, Send, Link2, LinkIcon, Link2Off } from 'lucide-react'
+import { Package, Wrench, BedDouble, UtensilsCrossed, Save, Zap, KeyRound, CheckCircle, Clock, ShieldAlert, User, Sun, Moon, Send, Link2, LinkIcon, Link2Off, QrCode } from 'lucide-react'
 import { useTheme } from '../contexts/ThemeContext'
 import PageHeader from '../components/ui/PageHeader'
 import { useAuth } from '../contexts/AuthContext'
@@ -36,6 +36,11 @@ export default function Configuracoes() {
   const [name, setName] = useState(businessName)
   const [savingProfile, setSavingProfile] = useState(false)
 
+  const [pixChave,  setPixChave]  = useState(subscription?.pix_chave  || '')
+  const [pixNome,   setPixNome]   = useState(subscription?.pix_nome   || '')
+  const [pixCidade, setPixCidade] = useState(subscription?.pix_cidade || '')
+  const [savingPix, setSavingPix] = useState(false)
+
   const [resetLoading, setResetLoading] = useState(false)
   const [resetSent, setResetSent] = useState(false)
 
@@ -65,6 +70,25 @@ export default function Configuracoes() {
     setSelectedType(businessType)
     setName(businessName)
   }, [businessType, businessName])
+
+  useEffect(() => {
+    setPixChave(subscription?.pix_chave  || '')
+    setPixNome(subscription?.pix_nome    || '')
+    setPixCidade(subscription?.pix_cidade || '')
+  }, [subscription])
+
+  const handleSavePix = async (e) => {
+    e.preventDefault()
+    setSavingPix(true)
+    const { error } = await updateSubscription({
+      pix_chave:  pixChave.trim()  || null,
+      pix_nome:   pixNome.trim()   || null,
+      pix_cidade: pixCidade.trim() || null,
+    })
+    setSavingPix(false)
+    if (error) return showToast(typeof error === 'string' ? error : error.message, 'error')
+    showToast('PIX configurado!')
+  }
 
   useEffect(() => {
     if (!user?.id) return
@@ -320,6 +344,67 @@ export default function Configuracoes() {
             </p>
           </div>
         )}
+      </Section>
+
+      {/* Seção: PIX */}
+      <Section title="PIX" subtitle="Configure sua chave PIX para gerar QR Codes nas vendas">
+        <form onSubmit={handleSavePix}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 20 }}>
+            <div style={{ gridColumn: '1 / -1' }}>
+              <Label>Chave PIX</Label>
+              <input
+                className="input-field"
+                placeholder="CPF, CNPJ, email, telefone ou chave aleatória"
+                value={pixChave}
+                onChange={e => setPixChave(e.target.value)}
+                style={{ width: '100%' }}
+              />
+              <p style={{ fontSize: 11, color: 'var(--text-subtle)', marginTop: 4 }}>
+                Exibida no QR Code — use a mesma chave cadastrada no seu banco.
+              </p>
+            </div>
+            <div>
+              <Label>Nome do recebedor</Label>
+              <input
+                className="input-field"
+                placeholder="Seu nome ou razão social"
+                value={pixNome}
+                onChange={e => setPixNome(e.target.value)}
+                maxLength={25}
+              />
+              <p style={{ fontSize: 11, color: 'var(--text-subtle)', marginTop: 4 }}>Máx. 25 chars, sem acentos.</p>
+            </div>
+            <div>
+              <Label>Cidade</Label>
+              <input
+                className="input-field"
+                placeholder="Ex: Sao Paulo"
+                value={pixCidade}
+                onChange={e => setPixCidade(e.target.value)}
+                maxLength={15}
+              />
+              <p style={{ fontSize: 11, color: 'var(--text-subtle)', marginTop: 4 }}>Máx. 15 chars, sem acentos.</p>
+            </div>
+          </div>
+
+          {pixChave && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', background: 'rgba(52,211,153,0.06)', border: '1px solid rgba(52,211,153,0.2)', borderRadius: 10, marginBottom: 20 }}>
+              <QrCode size={16} color="#34D399" />
+              <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: 0 }}>
+                QR Code PIX ativo — aparecerá nas vendas com pagamento em PIX.
+              </p>
+            </div>
+          )}
+
+          <button
+            type="submit"
+            className="btn-primary"
+            disabled={savingPix}
+          >
+            <Save size={15} />
+            {savingPix ? 'Salvando...' : 'Salvar PIX'}
+          </button>
+        </form>
       </Section>
 
       {/* Seção: Assinatura */}
