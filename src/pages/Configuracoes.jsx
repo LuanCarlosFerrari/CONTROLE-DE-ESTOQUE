@@ -385,14 +385,22 @@ export default function Configuracoes() {
             </div>
           )}
 
-          <button
-            type="submit"
-            className="btn-primary"
-            disabled={savingPix}
-          >
-            <Save size={15} />
-            {savingPix ? 'Salvando...' : 'Salvar PIX'}
-          </button>
+          {(() => {
+            const pixSaved =
+              (pixChave.trim() || '') === (subscription?.pix_chave || '') &&
+              (pixNome.trim()  || '') === (subscription?.pix_nome  || '') &&
+              (pixCidade.trim()|| '') === (subscription?.pix_cidade|| '')
+            return pixSaved && pixChave ? (
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '9px 16px', background: 'rgba(52,211,153,0.08)', border: '1px solid rgba(52,211,153,0.25)', borderRadius: 8, fontSize: 13, fontWeight: 600, color: '#34D399' }}>
+                <CheckCircle size={15} /> Chave PIX salva
+              </div>
+            ) : (
+              <button type="submit" className="btn-primary" disabled={savingPix}>
+                <Save size={15} />
+                {savingPix ? 'Salvando...' : 'Salvar PIX'}
+              </button>
+            )
+          })()}
         </form>
       </Section>
 
