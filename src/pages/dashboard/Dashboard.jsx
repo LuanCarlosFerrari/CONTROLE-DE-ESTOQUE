@@ -163,8 +163,8 @@ export default function Dashboard() {
 
       {/* Month total */}
       <div className="billing-card" style={{
-        background: 'linear-gradient(135deg, rgba(16,185,129,0.08) 0%, rgba(16,185,129,0.03) 50%, transparent 100%)',
-        border: '1px solid rgba(16,185,129,0.18)',
+        background: 'var(--bg-700)',
+        border: '1px solid rgba(16,185,129,0.3)',
         borderRadius: 14, padding: '24px 28px',
         position: 'relative', overflow: 'hidden',
       }}>

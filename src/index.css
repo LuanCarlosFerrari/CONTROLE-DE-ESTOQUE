@@ -131,13 +131,13 @@ body {
   .landing-btn-entrar { display: none; }
 }
 
-/* Glow effects */
+/* Glow effects - removed for a more professional tool aesthetic */
 .glow-amber {
-  box-shadow: 0 0 30px rgba(16, 185, 129, 0.15), 0 0 60px rgba(16, 185, 129, 0.05);
+  box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
 }
 
 .glow-text {
-  text-shadow: 0 0 40px rgba(16, 185, 129, 0.5);
+  text-shadow: none;
 }
 
 /* Card hover */
@@ -376,8 +376,8 @@ body {
   align-items: center;
   gap: 10px;
 }
-.toast-success { border-left: 3px solid var(--emerald); }
-.toast-error { border-left: 3px solid var(--red); }
+.toast-success { border: 1px solid var(--emerald); background: rgba(16, 185, 129, 0.1); }
+.toast-error { border: 1px solid var(--red); background: rgba(239, 68, 68, 0.1); }
 
 /* ── MOBILE NAVIGATION ─────────────────────────────────────────── */
 .sidebar-root {

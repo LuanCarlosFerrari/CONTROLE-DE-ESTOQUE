@@ -211,7 +211,7 @@ export default function Mesas() {
             const statusColor = m.status === 'disponivel' ? '#34D399' : m.status === 'ocupada' ? '#60A5FA' : '#F59E0B'
             return (
               <div key={m.id} style={{
-                background: 'linear-gradient(135deg, var(--bg-700) 0%, rgba(16,185,129,0.06) 100%)',
+                background: 'var(--bg-800)',
                 border: '1px solid rgba(16,185,129,0.3)', borderRadius: 14, padding: 20,
                 display: 'flex', flexDirection: 'column', gap: 12, position: 'relative', overflow: 'hidden',
                 transition: 'transform 0.2s, box-shadow 0.2s', height: '100%', boxSizing: 'border-box',

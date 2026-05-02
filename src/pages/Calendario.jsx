@@ -469,7 +469,7 @@ export default function Calendario() {
                   {selectedEvs.map((ev, i) => (
                     <div key={i} style={{
                       background: 'var(--bg-700)', border: '1px solid var(--bg-500)',
-                      borderLeft: `3px solid ${ev.color}`,
+                      border: `1px solid ${ev.color}60`,
                       borderRadius: 10, padding: '12px 14px', marginBottom: 8,
                     }}>
                       <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', margin: '0 0 3px' }}>{ev.label}</p>

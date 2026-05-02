@@ -24,6 +24,7 @@ export default function Estoque() {
   const [form, setForm] = useState(EMPTY)
   const [editing, setEditing] = useState(null)
   const [saving, setSaving] = useState(false)
+  const [quickAdd, setQuickAdd] = useState({ nome: '', categoria: '', quantidade: 1, preco_venda: '' })
   const { toast, showToast, clearToast } = useToast()
   const [deleteId, setDeleteId] = useState(null)
 
