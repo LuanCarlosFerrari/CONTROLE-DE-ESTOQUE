@@ -3,6 +3,7 @@ import { useToast } from '../../hooks/useToast'
 import { formatCurrency as fmt } from '../../utils/format'
 import { Plus, Search, Pencil, Trash2, BedDouble, Users, ShoppingBag, X, Receipt, Calendar, Clock, Minus, Printer } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
+import { useAuth } from '../../contexts/AuthContext'
 import Modal from '../../components/ui/Modal'
 import Toast from '../../components/ui/Toast'
 import Label from '../../components/ui/FormLabel'
@@ -39,6 +40,7 @@ function StatusBadge({ status }) {
 
 
 export default function Quartos() {
+  const { user } = useAuth()
   const [quartos, setQuartos] = useState([])
   const [ocupados, setOcupados] = useState(new Set())
   const [loading, setLoading] = useState(true)
@@ -65,9 +67,10 @@ export default function Quartos() {
   const load = useCallback(async () => {
     const hoje = new Date().toISOString().split('T')[0]
     const [{ data: q }, { data: r }] = await Promise.all([
-      supabase.from('quartos').select('*').order('numero'),
+      supabase.from('quartos').select('*').eq('user_id', user.id).order('numero'),
       supabase.from('reservas')
         .select('quarto_id')
+        .eq('user_id', user.id)
         .eq('status', 'checkin')
         .lte('check_in', hoje)
         .gte('check_out', hoje),
@@ -94,7 +97,7 @@ export default function Quartos() {
     const payload = { ...form, capacidade: Number(form.capacidade), preco_diaria: Number(form.preco_diaria) }
     const { error } = editing
       ? await supabase.from('quartos').update(payload).eq('id', editing)
-      : await supabase.from('quartos').insert(payload)
+      : await supabase.from('quartos').insert({ ...payload, user_id: user.id })
     setSaving(false)
     if (error) return showToast(error.message, 'error')
     showToast(editing ? 'Quarto atualizado!' : 'Quarto cadastrado!')
@@ -116,8 +119,8 @@ export default function Quartos() {
     const hoje = new Date().toISOString().split('T')[0]
     const [{ data: res }, { data: prods }, ] = await Promise.all([
       supabase.from('reservas').select('id, nome_hospede, check_in, check_out, valor_total, valor_pago')
-        .eq('quarto_id', q.id).eq('status', 'checkin').lte('check_in', hoje).gte('check_out', hoje).maybeSingle(),
-      supabase.from('produtos').select('id, nome, preco_venda').order('nome'),
+        .eq('quarto_id', q.id).eq('user_id', user.id).eq('status', 'checkin').lte('check_in', hoje).gte('check_out', hoje).maybeSingle(),
+      supabase.from('produtos').select('id, nome, preco_venda').eq('user_id', user.id).order('nome'),
     ])
     setReservaAtiva(res || null)
     setProdutos(prods || [])

@@ -9,7 +9,7 @@ const BUSINESS_TYPES = [
   {
     value: 'estoque',
     icon: Package,
-    label: 'Estoque Geral',
+    label: 'Loja/Comércio',
     desc: 'Produtos, clientes e vendas',
   },
   {

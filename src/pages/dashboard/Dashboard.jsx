@@ -28,7 +28,7 @@ const CustomTooltip = ({ active, payload, label }) => {
 
 
 export default function Dashboard() {
-  const { businessType } = useAuth()
+  const { businessType, user } = useAuth()
   if (businessType === 'oficina') return <DashboardOficina />
   if (businessType === 'hotel') return <DashboardHotel />
 
@@ -37,21 +37,21 @@ export default function Dashboard() {
   const [recentSales, setRecentSales] = useState([])
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => { loadDashboard() }, [])
+  useEffect(() => { loadDashboard() }, [user?.id])
 
   const loadDashboard = async () => {
     try {
       const [{ count: produtos }, { count: clientes }, { data: vendas }, { data: estoqueBaixo }, { data: vendasMes }] = await Promise.all([
-        supabase.from('produtos').select('*', { count: 'exact', head: true }),
-        supabase.from('clientes').select('*', { count: 'exact', head: true }),
-        supabase.from('vendas').select('total, created_at, clientes(nome)').order('created_at', { ascending: false }).limit(5),
-        supabase.from('produtos').select('*'),
-        supabase.from('vendas').select('total, created_at').gte('created_at', new Date(Date.now() - 30 * 86400000).toISOString()),
+        supabase.from('produtos').select('*', { count: 'exact', head: true }).eq('user_id', user.id),
+        supabase.from('clientes').select('*', { count: 'exact', head: true }).eq('user_id', user.id),
+        supabase.from('vendas').select('total, created_at, forma_pagamento, clientes(nome)').eq('user_id', user.id).order('created_at', { ascending: false }).limit(5),
+        supabase.from('produtos').select('*').eq('user_id', user.id),
+        supabase.from('vendas').select('total, created_at, forma_pagamento').eq('user_id', user.id).gte('created_at', new Date(Date.now() - 30 * 86400000).toISOString()),
       ])
       const hoje = new Date().toDateString()
-      const vendasHoje = (vendas || []).filter(v => new Date(v.created_at).toDateString() === hoje)
+      const vendasHoje = (vendas || []).filter(v => new Date(v.created_at).toDateString() === hoje && v.forma_pagamento !== 'crediario')
       const totalHoje = vendasHoje.reduce((s, v) => s + Number(v.total), 0)
-      const totalMes = (vendasMes || []).reduce((s, v) => s + Number(v.total), 0)
+      const totalMes = (vendasMes || []).filter(v => v.forma_pagamento !== 'crediario').reduce((s, v) => s + Number(v.total), 0)
       const estoqueCritico = (estoqueBaixo || []).filter(p => p.quantidade <= p.estoque_minimo)
       setStats({ produtos: produtos || 0, clientes: clientes || 0, vendas_hoje: totalHoje, estoque_baixo: estoqueCritico.length, total_mes: totalMes })
       setRecentSales(vendas || [])
@@ -59,11 +59,11 @@ export default function Dashboard() {
       for (let i = 6; i >= 0; i--) {
         const d = new Date(Date.now() - i * 86400000)
         const label = d.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit' })
-        const total = (vendasMes || []).filter(v => new Date(v.created_at).toDateString() === d.toDateString()).reduce((s, v) => s + Number(v.total), 0)
+        const total = (vendasMes || []).filter(v => new Date(v.created_at).toDateString() === d.toDateString() && v.forma_pagamento !== 'crediario').reduce((s, v) => s + Number(v.total), 0)
         days.push({ name: label, total })
       }
       setSalesChart(days)
-    } catch (e) { console.error(e) }
+    } catch (e) { if (import.meta.env.DEV) console.error(e) }
     finally { setLoading(false) }
   }
 

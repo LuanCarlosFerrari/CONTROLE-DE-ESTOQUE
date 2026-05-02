@@ -1,7 +1,10 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useToast } from '../../hooks/useToast'
-import { Plus, Pencil, Trash2, Users, Mail, Phone, MapPin } from 'lucide-react'
+import { Plus, Pencil, Trash2, Users, Mail, Phone, MapPin, Loader } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
+import { useAuth } from '../../contexts/AuthContext'
+import { notifyTelegram } from '../../lib/notify'
+import { buscarCep, formatCep } from '../../lib/brasilapi'
 import Modal from '../../components/ui/Modal'
 import Toast from '../../components/ui/Toast'
 import Label from '../../components/ui/FormLabel'
@@ -25,6 +28,7 @@ function Avatar({ nome }) {
 }
 
 export default function Clientes() {
+  const { user } = useAuth()
   const [clientes, setClientes] = useState([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
@@ -34,26 +38,57 @@ export default function Clientes() {
   const [saving, setSaving] = useState(false)
   const { toast, showToast, clearToast } = useToast()
   const [deleteId, setDeleteId] = useState(null)
+  const [cepQuery, setCepQuery]     = useState('')
+  const [cepLoading, setCepLoading] = useState(false)
+  const [cepError, setCepError]     = useState('')
 
   const load = useCallback(async () => {
-    const { data } = await supabase.from('clientes').select('*').order('nome')
+    const { data } = await supabase.from('clientes').select('*').eq('user_id', user.id).order('nome')
     setClientes(data || [])
     setLoading(false)
   }, [])
 
   useEffect(() => { load() }, [load])
 
-  const openCreate = () => { setForm(EMPTY); setEditing(null); setModal(true) }
-  const openEdit = (c) => { setForm({ ...c }); setEditing(c.id); setModal(true) }
+  const openCreate = () => { setForm(EMPTY); setEditing(null); setCepQuery(''); setCepError(''); setModal(true) }
+  const openEdit = (c) => { setForm({ ...c }); setEditing(c.id); setCepQuery(''); setCepError(''); setModal(true) }
+
+  const handleCepChange = (e) => {
+    const v = formatCep(e.target.value)
+    setCepQuery(v)
+    setCepError('')
+  }
+
+  const handleCepBlur = async () => {
+    const digits = cepQuery.replace(/\D/g, '')
+    if (digits.length !== 8) return
+    setCepLoading(true)
+    const data = await buscarCep(cepQuery)
+    setCepLoading(false)
+    if (!data) { setCepError('CEP não encontrado'); return }
+    const endereco = [data.logradouro, data.bairro].filter(Boolean).join(', ')
+    setForm(f => ({
+      ...f,
+      endereco: endereco || f.endereco,
+      cidade:   data.cidade ? `${data.cidade} - ${data.estado}` : f.cidade,
+    }))
+  }
 
   const handleSave = async (e) => {
     e.preventDefault()
     setSaving(true)
     const { error } = editing
       ? await supabase.from('clientes').update(form).eq('id', editing)
-      : await supabase.from('clientes').insert(form)
+      : await supabase.from('clientes').insert({ ...form, user_id: user.id })
     setSaving(false)
     if (error) return showToast(error.message, 'error')
+    if (!editing) {
+      notifyTelegram('novo_cliente', {
+        nome: form.nome,
+        telefone: form.telefone || null,
+        cidade: form.cidade || null,
+      })
+    }
     showToast(editing ? 'Cliente atualizado!' : 'Cliente cadastrado!')
     setModal(false)
     load()
@@ -185,10 +220,27 @@ export default function Clientes() {
               </div>
               <div style={{ gridColumn: '1 / -1', height: 1, background: 'var(--bg-600)', margin: '4px 0' }} />
               <div>
+                <Label>CEP</Label>
+                <div style={{ position: 'relative' }}>
+                  <MapPin size={13} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-subtle)' }} />
+                  <input
+                    className="input-field"
+                    value={cepQuery}
+                    onChange={handleCepChange}
+                    onBlur={handleCepBlur}
+                    placeholder="00000-000"
+                    maxLength={9}
+                    style={{ paddingLeft: 34, paddingRight: cepLoading ? 34 : undefined }}
+                  />
+                  {cepLoading && <Loader size={13} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-subtle)', animation: 'spin 1s linear infinite' }} />}
+                </div>
+                {cepError && <p style={{ fontSize: 11, color: '#F87171', marginTop: 4 }}>{cepError}</p>}
+              </div>
+              <div>
                 <Label>Cidade</Label>
                 <input className="input-field" value={form.cidade} onChange={e => setForm(f => ({ ...f, cidade: e.target.value }))} placeholder="São Paulo" />
               </div>
-              <div>
+              <div style={{ gridColumn: '1 / -1' }}>
                 <Label>Endereço</Label>
                 <input className="input-field" value={form.endereco} onChange={e => setForm(f => ({ ...f, endereco: e.target.value }))} placeholder="Rua, número, bairro" />
               </div>

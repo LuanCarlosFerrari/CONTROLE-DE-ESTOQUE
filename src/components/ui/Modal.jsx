@@ -3,12 +3,32 @@ import { useEffect, useRef } from 'react'
 
 export default function Modal({ title, onClose, children, size = 'md' }) {
   const mouseDownTarget = useRef(null)
+  const boxRef = useRef(null)
+  const touchStartY = useRef(null)
+  const touchStartScrollTop = useRef(0)
 
   useEffect(() => {
     const handler = (e) => e.key === 'Escape' && onClose()
     window.addEventListener('keydown', handler)
-    return () => window.removeEventListener('keydown', handler)
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      window.removeEventListener('keydown', handler)
+      document.body.style.overflow = prev
+    }
   }, [onClose])
+
+  const handleTouchStart = (e) => {
+    touchStartY.current = e.touches[0].clientY
+    touchStartScrollTop.current = boxRef.current?.scrollTop ?? 0
+  }
+
+  const handleTouchEnd = (e) => {
+    if (touchStartY.current === null) return
+    const delta = e.changedTouches[0].clientY - touchStartY.current
+    if (delta > 80 && touchStartScrollTop.current === 0) onClose()
+    touchStartY.current = null
+  }
 
   const maxW = size === 'lg' ? 720 : size === 'xl' ? 900 : 520
 
@@ -22,7 +42,14 @@ export default function Modal({ title, onClose, children, size = 'md' }) {
         }
       }}
     >
-      <div className="modal-box" style={{ maxWidth: maxW }}>
+      <div
+        ref={boxRef}
+        className="modal-box"
+        style={{ maxWidth: maxW }}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+      >
+        <div className="modal-drag-handle" />
         <div style={{
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           padding: '20px 24px 16px', borderBottom: '1px solid var(--bg-500)'

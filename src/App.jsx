@@ -9,6 +9,7 @@ import Layout from './components/layout/Layout'
 import Landing from './pages/auth/Landing'
 import Login from './pages/auth/Login'
 import Register from './pages/auth/Register'
+import TrialExpired from './pages/auth/TrialExpired'
 
 const Dashboard      = lazy(() => import('./pages/dashboard/Dashboard'))
 const Estoque        = lazy(() => import('./pages/estoque/Estoque'))
@@ -35,8 +36,8 @@ export default function App() {
   return (
     <ErrorBoundary>
     <ThemeProvider>
-    <AuthProvider>
       <BrowserRouter>
+    <AuthProvider>
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
@@ -47,6 +48,7 @@ export default function App() {
             </PrivateRoute>
           }>
             <Route index element={<Navigate to="dashboard" replace />} />
+            <Route path="pagar" element={<TrialExpired />} />
             <Route path="dashboard" element={
               <Suspense fallback={<PageLoader />}><Dashboard /></Suspense>
             } />
@@ -108,8 +110,8 @@ export default function App() {
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
-      </BrowserRouter>
     </AuthProvider>
+      </BrowserRouter>
     </ThemeProvider>
     </ErrorBoundary>
   )

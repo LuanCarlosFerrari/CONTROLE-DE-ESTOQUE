@@ -3,6 +3,8 @@ import { useToast } from '../../hooks/useToast'
 import { formatCurrency as fmt } from '../../utils/format'
 import { Plus, Pencil, Trash2, AlertTriangle, Package, SlidersHorizontal } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
+import { useAuth } from '../../contexts/AuthContext'
+import { notifyTelegram } from '../../lib/notify'
 import Modal from '../../components/ui/Modal'
 import Toast from '../../components/ui/Toast'
 import Label from '../../components/ui/FormLabel'
@@ -17,6 +19,7 @@ const CATEGORIAS = ['Alimentos', 'Bebidas', 'Eletrônicos', 'Vestuário', 'Limpe
 
 
 export default function Estoque() {
+  const { user } = useAuth()
   const [produtos, setProdutos] = useState([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
@@ -29,7 +32,7 @@ export default function Estoque() {
   const [deleteId, setDeleteId] = useState(null)
 
   const load = useCallback(async () => {
-    const { data } = await supabase.from('produtos').select('*').order('nome')
+    const { data } = await supabase.from('produtos').select('*').eq('user_id', user.id).order('nome')
     setProdutos(data || [])
     setLoading(false)
   }, [])
@@ -45,9 +48,17 @@ export default function Estoque() {
     const payload = { ...form, quantidade: Number(form.quantidade), preco_custo: Number(form.preco_custo), preco_venda: Number(form.preco_venda), estoque_minimo: Number(form.estoque_minimo) }
     const { error } = editing
       ? await supabase.from('produtos').update(payload).eq('id', editing)
-      : await supabase.from('produtos').insert(payload)
+      : await supabase.from('produtos').insert({ ...payload, user_id: user.id })
     setSaving(false)
     if (error) return showToast(error.message, 'error')
+    if (!editing) {
+      notifyTelegram('novo_produto', {
+        nome: payload.nome,
+        categoria: payload.categoria || '—',
+        quantidade: payload.quantidade,
+        preco_venda: payload.preco_venda,
+      })
+    }
     showToast(editing ? 'Produto atualizado!' : 'Produto cadastrado!')
     setModal(null)
     load()

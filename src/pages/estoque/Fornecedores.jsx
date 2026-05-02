@@ -1,8 +1,9 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useToast } from '../../hooks/useToast'
-import { Plus, Search, Pencil, Trash2, Truck, Mail, Phone, MapPin, Building2, CheckCircle, XCircle } from 'lucide-react'
+import { Plus, Search, Pencil, Trash2, Truck, Mail, Phone, MapPin, Building2, CheckCircle, XCircle, Loader } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../contexts/AuthContext'
+import { buscarCep, buscarCnpj, formatCep, formatCnpj } from '../../lib/brasilapi'
 import Modal from '../../components/ui/Modal'
 import Toast from '../../components/ui/Toast'
 import Label from '../../components/ui/FormLabel'
@@ -47,22 +48,74 @@ export default function Fornecedores() {
   const [editing, setEditing] = useState(null)
   const [saving, setSaving] = useState(false)
   const { toast, showToast, clearToast } = useToast()
-  const [deleteId, setDeleteId] = useState(null)
+  const [deleteId, setDeleteId]       = useState(null)
+  const [cepQuery, setCepQuery]       = useState('')
+  const [cepLoading, setCepLoading]   = useState(false)
+  const [cepError, setCepError]       = useState('')
+  const [cnpjLoading, setCnpjLoading] = useState(false)
+  const [cnpjMsg, setCnpjMsg]         = useState('')
 
   const load = useCallback(async () => {
-    const { data } = await supabase.from('fornecedores').select('*').order('nome')
+    const { data } = await supabase.from('fornecedores').select('*').eq('user_id', user.id).order('nome')
     setFornecedores(data || [])
     setLoading(false)
   }, [])
 
   useEffect(() => { load() }, [load])
 
+  const resetLookupState = () => { setCepQuery(''); setCepError(''); setCnpjMsg('') }
+
   const openCreate = () => {
     setForm({ ...EMPTY, categoria: categorias[0] })
     setEditing(null)
+    resetLookupState()
     setModal(true)
   }
-  const openEdit = (f) => { setForm({ ...f }); setEditing(f.id); setModal(true) }
+  const openEdit = (f) => { setForm({ ...f }); setEditing(f.id); resetLookupState(); setModal(true) }
+
+  const handleCnpjChange = (e) => {
+    const v = formatCnpj(e.target.value)
+    setForm(f => ({ ...f, cnpj: v }))
+    setCnpjMsg('')
+  }
+
+  const handleCnpjBlur = async () => {
+    const digits = form.cnpj.replace(/\D/g, '')
+    if (digits.length !== 14) return
+    setCnpjLoading(true)
+    const data = await buscarCnpj(form.cnpj)
+    setCnpjLoading(false)
+    if (!data) { setCnpjMsg('CNPJ não encontrado'); return }
+    const nome = data.nomeFantasia || data.razaoSocial
+    setForm(f => ({
+      ...f,
+      nome:     nome     || f.nome,
+      email:    data.email    || f.email,
+      telefone: data.telefone || f.telefone,
+      cidade:   data.cidade   ? `${data.cidade} - ${data.estado}` : f.cidade,
+    }))
+    if (data.cep) setCepQuery(formatCep(data.cep))
+    setCnpjMsg('✓ Dados preenchidos automaticamente')
+  }
+
+  const handleCepChange = (e) => {
+    const v = formatCep(e.target.value)
+    setCepQuery(v)
+    setCepError('')
+  }
+
+  const handleCepBlur = async () => {
+    const digits = cepQuery.replace(/\D/g, '')
+    if (digits.length !== 8) return
+    setCepLoading(true)
+    const data = await buscarCep(cepQuery)
+    setCepLoading(false)
+    if (!data) { setCepError('CEP não encontrado'); return }
+    setForm(f => ({
+      ...f,
+      cidade: data.cidade ? `${data.cidade} - ${data.estado}` : f.cidade,
+    }))
+  }
 
   const handleSave = async (e) => {
     e.preventDefault()
@@ -255,8 +308,20 @@ export default function Fornecedores() {
                 <Label>CNPJ / CPF</Label>
                 <div style={{ position: 'relative' }}>
                   <Building2 size={13} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-subtle)' }} />
-                  <input className="input-field" value={form.cnpj} onChange={e => setForm(f => ({ ...f, cnpj: e.target.value }))} placeholder="00.000.000/0001-00" style={{ paddingLeft: 34 }} />
+                  <input
+                    className="input-field"
+                    value={form.cnpj}
+                    onChange={handleCnpjChange}
+                    onBlur={handleCnpjBlur}
+                    placeholder="00.000.000/0001-00"
+                    maxLength={18}
+                    style={{ paddingLeft: 34, paddingRight: cnpjLoading ? 34 : undefined }}
+                  />
+                  {cnpjLoading && <Loader size={13} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-subtle)', animation: 'spin 1s linear infinite' }} />}
                 </div>
+                {cnpjMsg && (
+                  <p style={{ fontSize: 11, color: cnpjMsg.startsWith('✓') ? '#34D399' : '#F87171', marginTop: 4 }}>{cnpjMsg}</p>
+                )}
               </div>
               <div>
                 <Label>Categoria</Label>
@@ -279,6 +344,23 @@ export default function Fornecedores() {
                 </div>
               </div>
               <div style={{ gridColumn: '1 / -1', height: 1, background: 'var(--bg-600)', margin: '4px 0' }} />
+              <div>
+                <Label>CEP</Label>
+                <div style={{ position: 'relative' }}>
+                  <MapPin size={13} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-subtle)' }} />
+                  <input
+                    className="input-field"
+                    value={cepQuery}
+                    onChange={handleCepChange}
+                    onBlur={handleCepBlur}
+                    placeholder="00000-000"
+                    maxLength={9}
+                    style={{ paddingLeft: 34, paddingRight: cepLoading ? 34 : undefined }}
+                  />
+                  {cepLoading && <Loader size={13} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-subtle)', animation: 'spin 1s linear infinite' }} />}
+                </div>
+                {cepError && <p style={{ fontSize: 11, color: '#F87171', marginTop: 4 }}>{cepError}</p>}
+              </div>
               <div>
                 <Label>Cidade</Label>
                 <div style={{ position: 'relative' }}>

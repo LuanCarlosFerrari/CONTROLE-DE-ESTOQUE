@@ -1,6 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
-const supabaseUrl = Deno.env.get('SUPABASE_URL')!
+const supabaseUrl    = Deno.env.get('SUPABASE_URL')!
 const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 
 const supabase = createClient(supabaseUrl, serviceRoleKey, {
@@ -8,17 +8,16 @@ const supabase = createClient(supabaseUrl, serviceRoleKey, {
 })
 
 Deno.serve(async (req) => {
-  // Aceita apenas POST com secret header para segurança
   const authHeader = req.headers.get('Authorization')
   const cronSecret = Deno.env.get('CRON_SECRET')
   if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
     return new Response('Unauthorized', { status: 401 })
   }
 
-  const results = { banned: 0, reactivated: 0, errors: [] as string[] }
+  const results = { expired: 0, errors: [] as string[] }
 
   try {
-    // 1. Buscar trials expirados ainda não banidos
+    // Trials vencidos → expired (usuário ainda consegue logar e ver a tela de pagamento)
     const { data: expiredTrials, error: trialError } = await supabase
       .from('subscriptions')
       .select('user_id')
@@ -27,44 +26,48 @@ Deno.serve(async (req) => {
 
     if (trialError) throw trialError
 
-    // 2. Banir usuários com trial expirado
     for (const sub of expiredTrials ?? []) {
-      const { error: banError } = await supabase.auth.admin.updateUserById(
-        sub.user_id,
-        { ban_duration: '876600h' } // ~100 anos
-      )
-      if (banError) {
-        results.errors.push(`ban ${sub.user_id}: ${banError.message}`)
-        continue
-      }
-      await supabase
+      const { error } = await supabase
         .from('subscriptions')
-        .update({ status: 'banned', banned_at: new Date().toISOString() })
+        .update({ status: 'expired' })
         .eq('user_id', sub.user_id)
-      results.banned++
+      if (error) results.errors.push(`expire trial ${sub.user_id}: ${error.message}`)
+      else results.expired++
     }
 
-    // 3. Buscar assinaturas pagas expiradas (para pagamentos futuros)
-    const { data: expiredSubs } = await supabase
+    // Assinaturas pagas vencidas → expired
+    const { data: expiredSubs, error: subError } = await supabase
       .from('subscriptions')
       .select('user_id')
       .eq('status', 'active')
+      .not('subscription_ends_at', 'is', null)
       .lt('subscription_ends_at', new Date().toISOString())
 
+    if (subError) throw subError
+
     for (const sub of expiredSubs ?? []) {
-      const { error: banError } = await supabase.auth.admin.updateUserById(
-        sub.user_id,
-        { ban_duration: '876600h' }
-      )
-      if (banError) {
-        results.errors.push(`ban-expired ${sub.user_id}: ${banError.message}`)
-        continue
-      }
+      const { error } = await supabase
+        .from('subscriptions')
+        .update({ status: 'expired' })
+        .eq('user_id', sub.user_id)
+      if (error) results.errors.push(`expire sub ${sub.user_id}: ${error.message}`)
+      else results.expired++
+    }
+
+    // Usuários com status 'banned' no auth.users mas sem motivo legítimo → desbanir
+    // (migração: limpar bans antigos gerados pela versão anterior desta function)
+    const { data: banned } = await supabase
+      .from('subscriptions')
+      .select('user_id')
+      .eq('status', 'banned')
+
+    for (const sub of banned ?? []) {
+      await supabase.auth.admin.updateUserById(sub.user_id, { ban_duration: 'none' })
       await supabase
         .from('subscriptions')
-        .update({ status: 'banned', banned_at: new Date().toISOString() })
+        .update({ status: 'expired', banned_at: null })
         .eq('user_id', sub.user_id)
-      results.banned++
+      results.expired++
     }
 
   } catch (err) {

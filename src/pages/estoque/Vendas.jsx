@@ -1,8 +1,10 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useToast } from '../../hooks/useToast'
 import { formatCurrency as fmt } from '../../utils/format'
-import { Plus, ShoppingCart, X, ChevronDown, Receipt, Package } from 'lucide-react'
+import { Plus, ShoppingCart, X, ChevronDown, Receipt, Package, Printer } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
+import { useAuth } from '../../contexts/AuthContext'
+import { imprimirRecibo } from '../../lib/recibo'
 import Modal from '../../components/ui/Modal'
 import Toast from '../../components/ui/Toast'
 import Label from '../../components/ui/FormLabel'
@@ -19,6 +21,7 @@ const statusMap = {
 }
 
 export default function Vendas() {
+  const { subscription, user } = useAuth()
   const [vendas, setVendas] = useState([])
   const [clientes, setClientes] = useState([])
   const [produtos, setProdutos] = useState([])
@@ -28,6 +31,7 @@ export default function Vendas() {
   const [clienteId, setClienteId] = useState('')
   const [observacao, setObservacao] = useState('')
   const [itens, setItens] = useState([{ produto_id: '', quantidade: 1, preco_unitario: 0 }])
+  const [formaVenda, setFormaVenda] = useState('dinheiro')
   const [saving, setSaving] = useState(false)
   const { toast, showToast, clearToast } = useToast()
   const [expanded, setExpanded] = useState(null)
@@ -36,6 +40,7 @@ export default function Vendas() {
     const { data } = await supabase
       .from('vendas')
       .select('*, clientes(nome), venda_itens(*, produtos(nome))')
+      .eq('user_id', user.id)
       .order('created_at', { ascending: false })
     setVendas(data || [])
     setLoading(false)
@@ -43,8 +48,8 @@ export default function Vendas() {
 
   const loadOptions = useCallback(async () => {
     const [{ data: c }, { data: p }] = await Promise.all([
-      supabase.from('clientes').select('id, nome').order('nome'),
-      supabase.from('produtos').select('id, nome, preco_venda, quantidade').order('nome'),
+      supabase.from('clientes').select('id, nome').eq('user_id', user.id).order('nome'),
+      supabase.from('produtos').select('id, nome, preco_venda, quantidade').eq('user_id', user.id).order('nome'),
     ])
     setClientes(c || [])
     setProdutos(p || [])
@@ -53,7 +58,7 @@ export default function Vendas() {
   useEffect(() => { loadVendas(); loadOptions() }, [loadVendas, loadOptions])
 
   const openModal = () => {
-    setClienteId(''); setObservacao('')
+    setClienteId(''); setObservacao(''); setFormaVenda('dinheiro')
     setItens([{ produto_id: '', quantidade: 1, preco_unitario: 0 }])
     setModal(true)
   }
@@ -81,7 +86,7 @@ export default function Vendas() {
     const validItens = itens.filter(i => i.produto_id && Number(i.quantidade) > 0)
     if (validItens.length === 0) return showToast('Adicione pelo menos um produto.', 'error')
     setSaving(true)
-    const { data: venda, error: errVenda } = await supabase.from('vendas').insert({ cliente_id: clienteId, total, observacao }).select().single()
+    const { data: venda, error: errVenda } = await supabase.from('vendas').insert({ cliente_id: clienteId, total, observacao, forma_pagamento: formaVenda, user_id: user.id }).select().single()
     if (errVenda) { setSaving(false); return showToast(errVenda.message, 'error') }
     const { error: errItens } = await supabase.from('venda_itens').insert(
       validItens.map(i => ({ venda_id: venda.id, produto_id: i.produto_id, quantidade: Number(i.quantidade), preco_unitario: Number(i.preco_unitario) }))
@@ -202,6 +207,25 @@ export default function Vendas() {
                         <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 16, fontWeight: 800, color: '#34D399' }}>R$ {fmt(v.total)}</span>
                       </div>
                     </div>
+
+                    <div style={{ marginTop: 14, display: 'flex', justifyContent: 'flex-end' }}>
+                      <button
+                        className="btn-secondary"
+                        style={{ fontSize: 12, padding: '6px 14px', display: 'flex', alignItems: 'center', gap: 7 }}
+                        onClick={() => imprimirRecibo({
+                          venda: { ...v, forma_pagamento: v.forma_pagamento },
+                          itens: (v.venda_itens || []).map(i => ({
+                            nome: i.produtos?.nome || '—',
+                            quantidade: i.quantidade,
+                            preco_unitario: i.preco_unitario,
+                          })),
+                          cliente: v.clientes || {},
+                          negocio: { nome: subscription?.business_name, pix_chave: subscription?.pix_chave },
+                        })}
+                      >
+                        <Printer size={13} /> Imprimir recibo
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>
@@ -214,12 +238,22 @@ export default function Vendas() {
       {modal && (
         <Modal title="Registrar venda" onClose={() => setModal(false)} size="lg">
           <form onSubmit={handleSave}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 20 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16, marginBottom: 20 }}>
               <div>
                 <Label required>Cliente</Label>
                 <select className="input-field" value={clienteId} onChange={e => setClienteId(e.target.value)} required>
                   <option value="">Selecionar cliente...</option>
                   {clientes.map(c => <option key={c.id} value={c.id}>{c.nome}</option>)}
+                </select>
+              </div>
+              <div>
+                <Label required>Forma de pagamento</Label>
+                <select className="input-field" value={formaVenda} onChange={e => setFormaVenda(e.target.value)}>
+                  <option value="dinheiro">Dinheiro</option>
+                  <option value="pix">PIX</option>
+                  <option value="cartao">Cartão</option>
+                  <option value="crediario">Crediário</option>
+                  <option value="outros">Outros</option>
                 </select>
               </div>
               <div>

@@ -1,4 +1,4 @@
-import { NavLink, useNavigate } from 'react-router-dom'
+import { NavLink } from 'react-router-dom'
 import {
   LayoutDashboard, Package, Users, LogOut,
   Wrench, BedDouble, Truck, Car, Calendar, CalendarDays, Settings, Wallet, LayoutGrid,
@@ -60,7 +60,7 @@ const MENUS = {
 }
 
 const LABELS = {
-  estoque: 'Estoque Geral',
+  estoque: 'Loja/Comércio',
   oficina: 'Oficina Mecânica',
   hotel: 'Hotel / Pousada',
   bar: 'Bar / Restaurante',
@@ -70,12 +70,7 @@ export default function Sidebar({ isOpen, onClose }) {
   const { signOut, user, businessType, businessName } = useAuth()
   const { theme, toggle } = useTheme()
 
-  const navigate = useNavigate()
-
-  const handleSignOut = async () => {
-    await signOut()
-    navigate('/')
-  }
+  const handleSignOut = () => signOut()
 
   const links = MENUS[businessType] ?? MENUS.estoque
 
@@ -107,7 +102,7 @@ export default function Sidebar({ isOpen, onClose }) {
           {theme === 'dark' ? 'Claro' : 'Escuro'}
         </button>
         <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--amber)' }}>
-          {businessName || LABELS[businessType] || 'Estoque Geral'}
+          {businessName || LABELS[businessType] || 'Loja/Comércio'}
         </span>
       </div>
 

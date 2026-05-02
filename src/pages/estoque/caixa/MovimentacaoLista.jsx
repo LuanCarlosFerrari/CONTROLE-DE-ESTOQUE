@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import { formatCurrency as fmt } from '../../../utils/format'
-import { Receipt, ArrowUpCircle, ArrowDownCircle, ChevronDown, Package, DollarSign } from 'lucide-react'
+import { Receipt, ArrowUpCircle, ArrowDownCircle, ChevronDown, Package, DollarSign, Printer } from 'lucide-react'
+import { imprimirRecibo } from '../../../lib/recibo'
+import { useAuth } from '../../../contexts/AuthContext'
 
-
-const FORMA_LABEL = { dinheiro: 'Dinheiro', pix: 'PIX', cartao: 'Cartão', outros: 'Outros' }
+const FORMA_LABEL = { dinheiro: 'Dinheiro', pix: 'PIX', cartao: 'Cartão', outros: 'Outros', crediario: 'Crediário' }
 
 export default function MovimentacaoLista({ filtered, loading, semCaixa, search }) {
+  const { subscription } = useAuth()
   const [expanded, setExpanded] = useState(null)
 
   if (loading) {
@@ -82,6 +84,25 @@ export default function MovimentacaoLista({ filtered, loading, semCaixa, search 
             <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 15, fontWeight: 700, color: valorColor }}>
               {sinal} R$ {fmt(valor)}
             </span>
+            {isVenda && (
+              <button
+                onClick={e => {
+                  e.stopPropagation()
+                  imprimirRecibo({
+                    venda: { id: mov.id, created_at: mov.created_at, total: mov.total, forma_pagamento: mov.forma_pagamento, observacao: mov.observacao },
+                    itens: (mov.venda_itens || []).map(i => ({ nome: i.produtos?.nome || '—', quantidade: i.quantidade, preco_unitario: i.preco_unitario })),
+                    cliente: mov.clientes || {},
+                    negocio: { nome: subscription?.business_name, pix_chave: subscription?.pix_chave },
+                  })
+                }}
+                title="Ver comprovante"
+                style={{ width: 30, height: 30, borderRadius: 7, background: 'var(--bg-600)', border: '1px solid var(--bg-500)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-subtle)', flexShrink: 0 }}
+                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(16,185,129,0.1)'; e.currentTarget.style.color = 'var(--amber)'; e.currentTarget.style.borderColor = 'rgba(16,185,129,0.25)' }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'var(--bg-600)'; e.currentTarget.style.color = 'var(--text-subtle)'; e.currentTarget.style.borderColor = 'var(--bg-500)' }}
+              >
+                <Printer size={13} />
+              </button>
+            )}
             {isVenda && (
               <ChevronDown size={14} color="var(--text-subtle)" style={{ transform: isOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
             )}

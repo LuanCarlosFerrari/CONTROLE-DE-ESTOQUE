@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { supabase } from '../../../lib/supabase'
+import { useAuth } from '../../../contexts/AuthContext'
 import Modal from '../../../components/ui/Modal'
 import Label from '../../../components/ui/FormLabel'
 
@@ -8,6 +9,7 @@ const FORMA_LABEL = { dinheiro: 'Dinheiro', pix: 'PIX', cartao: 'Cartão', outro
 
 
 export default function ModalExtra({ tipo, caixaId, onClose, onSaved, onError }) {
+  const { user } = useAuth()
   const [descricao, setDescricao] = useState('')
   const [valor, setValor]         = useState('')
   const [forma, setForma]         = useState('dinheiro')
@@ -18,7 +20,7 @@ export default function ModalExtra({ tipo, caixaId, onClose, onSaved, onError })
     if (!valor || Number(valor) <= 0) return onError('Informe um valor válido.')
     setSaving(true)
     const { error } = await supabase.from('movimentacoes_extras').insert({
-      caixa_id: caixaId || null, tipo, descricao, valor: Number(valor), forma_pagamento: forma,
+      caixa_id: caixaId || null, tipo, descricao, valor: Number(valor), forma_pagamento: forma, user_id: user.id,
     })
     setSaving(false)
     if (error) return onError(error.message)
@@ -33,7 +35,7 @@ export default function ModalExtra({ tipo, caixaId, onClose, onSaved, onError })
           <input className="input-field" required value={descricao} onChange={e => setDescricao(e.target.value)}
             placeholder={tipo === 'entrada' ? 'Ex: PIX recebido, devolução...' : 'Ex: Compra de embalagens, energia...'} autoFocus />
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 24 }}>
+        <div className="modal-2col" style={{ marginBottom: 24 }}>
           <div>
             <Label required>Valor (R$)</Label>
             <input className="input-field" type="number" min="0.01" step="0.01" required

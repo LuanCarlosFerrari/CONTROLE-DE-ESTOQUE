@@ -6,6 +6,7 @@
 -- Tabela: produtos
 create table if not exists produtos (
   id uuid default gen_random_uuid() primary key,
+  user_id uuid references auth.users(id),
   nome text not null,
   categoria text,
   quantidade integer default 0,
@@ -19,6 +20,7 @@ create table if not exists produtos (
 -- Tabela: clientes
 create table if not exists clientes (
   id uuid default gen_random_uuid() primary key,
+  user_id uuid references auth.users(id),
   nome text not null,
   email text,
   telefone text,
@@ -31,9 +33,11 @@ create table if not exists clientes (
 -- Tabela: vendas
 create table if not exists vendas (
   id uuid default gen_random_uuid() primary key,
+  user_id uuid references auth.users(id),
   cliente_id uuid references clientes(id) on delete set null,
   total numeric(10,2) default 0,
   status text default 'pago' check (status in ('pago', 'pendente', 'cancelado')),
+  forma_pagamento text,
   observacao text,
   created_at timestamptz default now()
 );
@@ -51,6 +55,7 @@ create table if not exists venda_itens (
 -- Tabela: mesas (Bar / Restaurante)
 create table if not exists mesas (
   id uuid default gen_random_uuid() primary key,
+  user_id uuid references auth.users(id),
   numero text not null,
   tipo text default 'salao' check (tipo in ('salao', 'varanda', 'reservado', 'bar')),
   capacidade integer default 4,
@@ -73,6 +78,7 @@ create table if not exists comanda_itens (
 -- Tabela: fornecedores
 create table if not exists fornecedores (
   id uuid default gen_random_uuid() primary key,
+  user_id uuid references auth.users(id),
   nome text not null,
   cnpj text,
   telefone text,
@@ -97,36 +103,50 @@ alter table mesas enable row level security;
 alter table comanda_itens enable row level security;
 alter table fornecedores enable row level security;
 
--- Políticas: qualquer usuário autenticado pode ler e escrever
--- (ajuste conforme necessário para multi-tenant)
+-- Políticas: cada usuário acessa apenas seus próprios dados
+-- user_id IS NULL cobre dados legados sem isolamento
 
 drop policy if exists "Authenticated users can do everything on produtos" on produtos;
-create policy "Authenticated users can do everything on produtos"
-  on produtos for all to authenticated using (true) with check (true);
+create policy "produtos isolated by user"
+  on produtos for all to authenticated
+  using  (user_id = auth.uid() or user_id is null)
+  with check (user_id = auth.uid());
 
 drop policy if exists "Authenticated users can do everything on clientes" on clientes;
-create policy "Authenticated users can do everything on clientes"
-  on clientes for all to authenticated using (true) with check (true);
+create policy "clientes isolated by user"
+  on clientes for all to authenticated
+  using  (user_id = auth.uid() or user_id is null)
+  with check (user_id = auth.uid());
 
 drop policy if exists "Authenticated users can do everything on vendas" on vendas;
-create policy "Authenticated users can do everything on vendas"
-  on vendas for all to authenticated using (true) with check (true);
+create policy "vendas isolated by user"
+  on vendas for all to authenticated
+  using  (user_id = auth.uid() or user_id is null)
+  with check (user_id = auth.uid());
 
 drop policy if exists "Authenticated users can do everything on venda_itens" on venda_itens;
-create policy "Authenticated users can do everything on venda_itens"
-  on venda_itens for all to authenticated using (true) with check (true);
+create policy "venda_itens isolated by user"
+  on venda_itens for all to authenticated
+  using  (venda_id in (select id from vendas where user_id = auth.uid() or user_id is null))
+  with check (venda_id in (select id from vendas where user_id = auth.uid() or user_id is null));
 
 drop policy if exists "Authenticated users can do everything on mesas" on mesas;
-create policy "Authenticated users can do everything on mesas"
-  on mesas for all to authenticated using (true) with check (true);
+create policy "mesas isolated by user"
+  on mesas for all to authenticated
+  using  (user_id = auth.uid() or user_id is null)
+  with check (user_id = auth.uid());
 
 drop policy if exists "Authenticated users can do everything on comanda_itens" on comanda_itens;
-create policy "Authenticated users can do everything on comanda_itens"
-  on comanda_itens for all to authenticated using (true) with check (true);
+create policy "comanda_itens isolated by user"
+  on comanda_itens for all to authenticated
+  using  (mesa_id in (select id from mesas where user_id = auth.uid() or user_id is null))
+  with check (mesa_id in (select id from mesas where user_id = auth.uid() or user_id is null));
 
 drop policy if exists "Authenticated users can do everything on fornecedores" on fornecedores;
-create policy "Authenticated users can do everything on fornecedores"
-  on fornecedores for all to authenticated using (true) with check (true);
+create policy "fornecedores isolated by user"
+  on fornecedores for all to authenticated
+  using  (user_id = auth.uid() or user_id is null)
+  with check (user_id = auth.uid());
 
 -- ============================================================
 -- Trigger: updated_at automático

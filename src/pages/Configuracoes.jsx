@@ -1,16 +1,16 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useToast } from '../hooks/useToast'
-import { Package, Wrench, BedDouble, UtensilsCrossed, Save, Zap, KeyRound, CheckCircle, Clock, ShieldAlert, User, Sun, Moon, Send, Link2, LinkIcon, Link2Off } from 'lucide-react'
+import { Package, Wrench, BedDouble, UtensilsCrossed, Save, Zap, KeyRound, CheckCircle, Clock, ShieldAlert, User, Sun, Moon, Send, Link2, LinkIcon, Link2Off, QrCode } from 'lucide-react'
 import { useTheme } from '../contexts/ThemeContext'
 import PageHeader from '../components/ui/PageHeader'
 import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabase'
 import Toast from '../components/ui/Toast'
-import { createPaymentPreference } from '../lib/mercadopago'
 import Label from '../components/ui/FormLabel'
 
 const BUSINESS_TYPES = [
-  { value: 'estoque', icon: Package, label: 'Estoque Geral',    desc: 'Produtos, clientes e vendas' },
+  { value: 'estoque', icon: Package, label: 'Loja/Comércio',    desc: 'Produtos, clientes e vendas' },
   { value: 'oficina', icon: Wrench,  label: 'Oficina Mecânica', desc: 'OS, veículos e peças' },
   { value: 'hotel',   icon: BedDouble, label: 'Hotel / Pousada', desc: 'Quartos e reservas' },
   { value: 'bar',     icon: UtensilsCrossed, label: 'Bar / Restaurante', desc: 'Mesas, comandas e cardápio' },
@@ -36,35 +36,56 @@ export default function Configuracoes() {
   const [name, setName] = useState(businessName)
   const [savingProfile, setSavingProfile] = useState(false)
 
+  const [pixChave,  setPixChave]  = useState(subscription?.pix_chave  || '')
+  const [pixNome,   setPixNome]   = useState(subscription?.pix_nome   || '')
+  const [pixCidade, setPixCidade] = useState(subscription?.pix_cidade || '')
+  const [savingPix, setSavingPix] = useState(false)
+  const [pixEditing, setPixEditing] = useState(false)
+
   const [resetLoading, setResetLoading] = useState(false)
   const [resetSent, setResetSent] = useState(false)
 
   const { toast, showToast, clearToast } = useToast()
   const { theme, toggle } = useTheme()
-  const [loadingPay, setLoadingPay] = useState(false)
-  const [payError, setPayError] = useState(null)
+  const navigate = useNavigate()
 
   const [telegramSession, setTelegramSession] = useState(null)
   const [telegramLoading, setTelegramLoading] = useState(true)
   const [unlinking, setUnlinking] = useState(false)
   const [linking, setLinking] = useState(false)
 
-  const handlePagar = async () => {
-    setLoadingPay(true)
-    setPayError(null)
-    try {
-      const url = await createPaymentPreference()
-      window.location.href = url
-    } catch (err) {
-      setPayError('Não foi possível iniciar o pagamento. Tente novamente.')
-      setLoadingPay(false)
-    }
-  }
+  const handlePagar = () => navigate('/app/pagar')
 
   useEffect(() => {
     setSelectedType(businessType)
     setName(businessName)
   }, [businessType, businessName])
+
+  useEffect(() => {
+    setPixChave(subscription?.pix_chave  || '')
+    setPixNome(subscription?.pix_nome    || '')
+    setPixCidade(subscription?.pix_cidade || '')
+  }, [subscription])
+
+  const handleSavePix = async (e) => {
+    e.preventDefault()
+    setSavingPix(true)
+    const { error } = await updateSubscription({
+      pix_chave:  pixChave.trim()  || null,
+      pix_nome:   pixNome.trim()   || null,
+      pix_cidade: pixCidade.trim() || null,
+    })
+    setSavingPix(false)
+    if (error) return showToast(typeof error === 'string' ? error : error.message, 'error')
+    setPixEditing(false)
+    showToast('PIX configurado!')
+  }
+
+  const maskPix = (str) => {
+    if (!str) return ''
+    if (str.length <= 6) return str[0] + '****' + str[str.length - 1]
+    return str.slice(0, 3) + '****' + str.slice(-3)
+  }
 
   useEffect(() => {
     if (!user?.id) return
@@ -322,6 +343,105 @@ export default function Configuracoes() {
         )}
       </Section>
 
+      {/* Seção: PIX */}
+      <Section title="PIX" subtitle="Configure sua chave PIX para gerar QR Codes nas vendas">
+        {subscription?.pix_chave && !pixEditing ? (
+          /* Modo visualização — dados mascarados */
+          <div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
+              <div style={{ gridColumn: '1 / -1' }}>
+                <p style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-subtle)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>Chave PIX</p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', background: 'var(--bg-700)', border: '1px solid var(--bg-500)', borderRadius: 8 }}>
+                  <KeyRound size={14} color="var(--text-subtle)" />
+                  <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)', letterSpacing: '0.05em' }}>{maskPix(subscription.pix_chave)}</span>
+                </div>
+              </div>
+              {subscription.pix_nome && (
+                <div>
+                  <p style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-subtle)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>Recebedor</p>
+                  <div style={{ padding: '10px 14px', background: 'var(--bg-700)', border: '1px solid var(--bg-500)', borderRadius: 8, fontSize: 13, color: 'var(--text-muted)' }}>
+                    {maskPix(subscription.pix_nome)}
+                  </div>
+                </div>
+              )}
+              {subscription.pix_cidade && (
+                <div>
+                  <p style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-subtle)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>Cidade</p>
+                  <div style={{ padding: '10px 14px', background: 'var(--bg-700)', border: '1px solid var(--bg-500)', borderRadius: 8, fontSize: 13, color: 'var(--text-muted)' }}>
+                    {maskPix(subscription.pix_cidade)}
+                  </div>
+                </div>
+              )}
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 14px', background: 'rgba(52,211,153,0.08)', border: '1px solid rgba(52,211,153,0.25)', borderRadius: 8, fontSize: 12, fontWeight: 600, color: '#34D399' }}>
+                <CheckCircle size={13} /> Chave PIX salva
+              </div>
+              <button
+                type="button"
+                onClick={() => setPixEditing(true)}
+                style={{ background: 'none', border: '1px solid var(--bg-500)', borderRadius: 8, padding: '8px 14px', cursor: 'pointer', fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 6 }}
+              >
+                <Save size={13} /> Editar
+              </button>
+            </div>
+          </div>
+        ) : (
+          /* Modo edição */
+          <form onSubmit={handleSavePix}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 20 }}>
+              <div style={{ gridColumn: '1 / -1' }}>
+                <Label>Chave PIX</Label>
+                <input
+                  className="input-field"
+                  placeholder="CPF, CNPJ, email, telefone ou chave aleatória"
+                  value={pixChave}
+                  onChange={e => setPixChave(e.target.value)}
+                  style={{ width: '100%' }}
+                />
+                <p style={{ fontSize: 11, color: 'var(--text-subtle)', marginTop: 4 }}>
+                  Exibida no QR Code — use a mesma chave cadastrada no seu banco.
+                </p>
+              </div>
+              <div>
+                <Label>Nome do recebedor</Label>
+                <input
+                  className="input-field"
+                  placeholder="Seu nome ou razão social"
+                  value={pixNome}
+                  onChange={e => setPixNome(e.target.value)}
+                  maxLength={25}
+                />
+                <p style={{ fontSize: 11, color: 'var(--text-subtle)', marginTop: 4 }}>Máx. 25 chars, sem acentos.</p>
+              </div>
+              <div>
+                <Label>Cidade</Label>
+                <input
+                  className="input-field"
+                  placeholder="Ex: Sao Paulo"
+                  value={pixCidade}
+                  onChange={e => setPixCidade(e.target.value)}
+                  maxLength={15}
+                />
+                <p style={{ fontSize: 11, color: 'var(--text-subtle)', marginTop: 4 }}>Máx. 15 chars, sem acentos.</p>
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button type="submit" className="btn-primary" disabled={savingPix}>
+                <Save size={15} />
+                {savingPix ? 'Salvando...' : 'Salvar PIX'}
+              </button>
+              {pixEditing && (
+                <button type="button" onClick={() => { setPixEditing(false); setPixChave(subscription?.pix_chave || ''); setPixNome(subscription?.pix_nome || ''); setPixCidade(subscription?.pix_cidade || '') }}
+                  style={{ background: 'none', border: '1px solid var(--bg-500)', borderRadius: 8, padding: '8px 14px', cursor: 'pointer', fontSize: 13, color: 'var(--text-muted)' }}>
+                  Cancelar
+                </button>
+              )}
+            </div>
+          </form>
+        )}
+      </Section>
+
       {/* Seção: Assinatura */}
       <Section title="Assinatura" subtitle="Status do seu plano atual">
         <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '16px 18px', background: subStatus.bg, border: `1px solid ${subStatus.border}`, borderRadius: 10, marginBottom: subscription?.status === 'trial' ? 16 : 0 }}>
@@ -357,15 +477,11 @@ export default function Configuracoes() {
             </ul>
             <button
               onClick={handlePagar}
-              disabled={loadingPay}
               className="btn-primary"
-              style={{ display: 'inline-flex', padding: '10px 20px', fontSize: 14, opacity: loadingPay ? 0.7 : 1, cursor: loadingPay ? 'not-allowed' : 'pointer', border: 'none' }}
+              style={{ display: 'inline-flex', padding: '10px 20px', fontSize: 14, border: 'none' }}
             >
-              <Zap size={15} /> {loadingPay ? 'Redirecionando...' : 'Pagar com MercadoPago'}
+              <Zap size={15} /> Assinar via PIX
             </button>
-            {payError && (
-              <p style={{ color: 'var(--red)', fontSize: 13, marginTop: 8 }}>{payError}</p>
-            )}
           </div>
         )}
       </Section>

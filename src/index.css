@@ -100,6 +100,15 @@ body {
   to   { transform: translateX(0);    opacity: 1; }
 }
 
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+
+@keyframes spin {
+  to { transform: translateY(-50%) rotate(360deg); }
+}
+
 .animate-fade-in { animation: fadeIn 0.4s ease forwards; }
 .animate-slide-in { animation: slideIn 0.3s ease forwards; }
 
@@ -314,6 +323,35 @@ body {
   max-height: 90vh;
   overflow-y: auto;
   animation: fadeIn 0.2s ease;
+}
+
+.modal-drag-handle { display: none; }
+
+/* Grids usados dentro de modais */
+.modal-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.modal-3col {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.modal-item-header {
+  display: grid;
+  grid-template-columns: 1fr 80px 120px 32px;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+.modal-item-row {
+  display: grid;
+  grid-template-columns: 1fr 80px 120px 32px;
+  gap: 4px;
+  margin-bottom: 6px;
+  align-items: center;
 }
 
 /* Stat card */
@@ -533,15 +571,19 @@ body {
   /* Quartos grid */
   .quartos-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
 
-  /* Modais como bottom-sheet */
-  .modal-backdrop { align-items: flex-end; padding: 0; }
-  .modal-box {
-    border-radius: 16px 16px 0 0 !important;
-    position: relative;
-    max-width: 100% !important;
-    max-height: 92vh;
-    border-bottom: none !important;
+  /* Modais: centralizados no mobile, largura adaptável */
+  .modal-box { max-width: 100%; }
+
+  /* Grids responsivos dentro de modais */
+  .modal-2col { grid-template-columns: 1fr; }
+  .modal-3col { grid-template-columns: 1fr 1fr; }
+  .modal-3col > :last-child { grid-column: 1 / -1; }
+  .modal-item-header { display: none; }
+  .modal-item-row {
+    grid-template-columns: 1fr auto 32px;
+    grid-template-rows: auto auto;
   }
+  .modal-item-row > :first-child { grid-column: 1 / -1; }
 
   /* Toast full-width */
   .toast { left: 16px; right: 16px; bottom: 16px; max-width: none; }
@@ -573,6 +615,19 @@ body {
   .stats-grid-4 { gap: 8px; }
   .stats-grid-3 { gap: 8px; }
   .quartos-grid { grid-template-columns: 1fr; gap: 8px; }
+}
+
+/* Garante que a barra de busca sempre apareça abaixo dos botões de ação em mobile */
+@media (max-width: 640px) {
+  .search-below-mobile {
+    flex-basis: 100%;
+    max-width: 100% !important;
+    margin-left: 0 !important;
+    order: 999;
+  }
+  .caixa-actions-row {
+    justify-content: center;
+  }
 }
 
 /* ── BILLING CARD ───────────────────────────────────────────────── */

@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { ChevronLeft, ChevronRight, X, CalendarDays, Plus, LogIn, LogOut, Wrench, Play, CheckCircle, DollarSign } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
+import { notifyTelegram } from '../lib/notify'
 import Modal from '../components/ui/Modal'
 import Label from '../components/ui/FormLabel'
 
@@ -77,7 +78,7 @@ export default function Calendario() {
       if (businessType === 'estoque' || businessType === 'bar') {
         const { data } = await supabase
           .from('vendas').select('id, created_at, total, forma_pagamento, clientes(nome)')
-          .gte('created_at', startISO).lte('created_at', endISO).order('created_at')
+          .eq('user_id', user.id).gte('created_at', startISO).lte('created_at', endISO).order('created_at')
         ;(data || []).forEach(v => add(v.created_at.split('T')[0], {
           label: v.clientes?.nome || 'Cliente',
           sublabel: v.forma_pagamento === 'crediario' ? 'Venda · Crediário' : 'Venda realizada',
@@ -100,6 +101,8 @@ export default function Calendario() {
             id: p.id, type: 'parcela',
             status: atrasado ? 'atrasado' : 'pendente',
             label: p.cliente_nome || 'Cliente',
+            numero: p.numero,
+            total_parcelas: p.total_parcelas,
             sublabel: `Parcela ${p.numero}/${p.total_parcelas} · Crediário`,
             value: p.valor,
             color: atrasado ? '#F87171' : isHoje ? '#F59E0B' : '#60A5FA',
@@ -112,7 +115,7 @@ export default function Calendario() {
         const { data } = await supabase
           .from('ordens_servico')
           .select('id, created_at, numero, status, valor_total, clientes(nome), veiculos(placa, marca, modelo)')
-          .gte('created_at', startISO).lte('created_at', endISO).order('created_at')
+          .eq('user_id', user.id).gte('created_at', startISO).lte('created_at', endISO).order('created_at')
         ;(data || []).forEach(o => add(o.created_at.split('T')[0], {
           id: o.id, type: 'os', status: o.status,
           label: o.numero,
@@ -129,7 +132,7 @@ export default function Calendario() {
         const { data } = await supabase
           .from('reservas')
           .select('id, check_in, check_out, nome_hospede, valor_total, status, quartos(numero, tipo)')
-          .lte('check_in', endDate).gte('check_out', startDate).order('check_in')
+          .eq('user_id', user.id).lte('check_in', endDate).gte('check_out', startDate).order('check_in')
         ;(data || []).forEach(r => {
           if (r.check_in >= startDate && r.check_in <= endDate)
             add(r.check_in, {
@@ -149,7 +152,7 @@ export default function Calendario() {
       }
 
       if (loadSeqRef.current === seq) setEvents(map)
-    } catch (e) { console.error(e) }
+    } catch (e) { if (import.meta.env.DEV) console.error(e) }
     finally { if (loadSeqRef.current === seq) setLoading(false) }
   }, [year, month, businessType])
 
@@ -165,14 +168,14 @@ export default function Calendario() {
   // ── Open creation modal ──
   const openCreate = async () => {
     if (businessType === 'hotel') {
-      const { data: q } = await supabase.from('quartos').select('id, numero, tipo, preco_diaria').order('numero')
+      const { data: q } = await supabase.from('quartos').select('id, numero, tipo, preco_diaria').eq('user_id', user.id).order('numero')
       setAuxData(a => ({ ...a, quartos: q || [] }))
       setForm({ ...EMPTY_HOTEL, check_in: selected || '' })
       setModal('hotel')
     } else if (businessType === 'oficina') {
       const [{ data: v }, { data: c }] = await Promise.all([
-        supabase.from('veiculos').select('id, placa, marca, modelo, cliente_id').order('placa'),
-        supabase.from('clientes').select('id, nome').order('nome'),
+        supabase.from('veiculos').select('id, placa, marca, modelo, cliente_id').eq('user_id', user.id).order('placa'),
+        supabase.from('clientes').select('id, nome').eq('user_id', user.id).order('nome'),
       ])
       setAuxData(a => ({ ...a, veiculos: v || [], clientes: c || [] }))
       setForm({ ...EMPTY_OS, data_previsao: selected || '' })
@@ -193,10 +196,11 @@ export default function Calendario() {
         valor_diaria: Number(form.valor_diaria) || 0,
         valor_total: Number(form.valor_total) || 0,
         status: 'confirmada',
+        user_id: user.id,
       })
       setModal(null)
       await loadEvents()
-    } catch (e) { console.error(e) }
+    } catch (e) { if (import.meta.env.DEV) console.error(e) }
     finally { setSaving(false) }
   }
 
@@ -216,10 +220,11 @@ export default function Calendario() {
         valor_total: Number(form.valor_mao_obra) || 0,
         data_previsao: form.data_previsao || null,
         status: 'aberta',
+        user_id: user.id,
       })
       setModal(null)
       await loadEvents()
-    } catch (e) { console.error(e) }
+    } catch (e) { if (import.meta.env.DEV) console.error(e) }
     finally { setSaving(false) }
   }
 
@@ -228,18 +233,37 @@ export default function Calendario() {
     try {
       if (ev.type === 'reserva') {
         await supabase.from('reservas').update({ status: newStatus }).eq('id', ev.id)
+        notifyTelegram('reserva_atualizada', {
+          hospede: ev.label,
+          quarto: ev.sublabel || '—',
+          status_novo: newStatus,
+        })
       } else if (ev.type === 'os') {
         const upd = { status: newStatus }
         if (newStatus === 'concluida') upd.data_conclusao = new Date().toISOString()
         await supabase.from('ordens_servico').update(upd).eq('id', ev.id)
+        notifyTelegram('os_atualizada', {
+          numero: ev.label,
+          status_novo: newStatus,
+          veiculo: ev.sublabel || null,
+          valor_total: ev.value || 0,
+        })
       } else if (ev.type === 'parcela') {
         await supabase.from('parcelas_crediario').update({
           status: newStatus,
           data_pagamento: new Date().toISOString().split('T')[0],
         }).eq('id', ev.id)
+        if (newStatus === 'pago') {
+          notifyTelegram('parcela_paga', {
+            cliente: ev.label,
+            parcela_num: ev.numero,
+            total_parcelas: ev.total_parcelas,
+            valor: ev.value,
+          })
+        }
       }
       await loadEvents()
-    } catch (e) { console.error(e) }
+    } catch (e) { if (import.meta.env.DEV) console.error(e) }
   }
 
   // ── Open payment modal ──
@@ -293,6 +317,7 @@ export default function Calendario() {
         descricao,
         valor: Number(valor),
         forma_pagamento: forma,
+        user_id: user.id,
       })
 
       // Update record status

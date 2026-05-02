@@ -3,6 +3,7 @@ import { useToast } from '../../hooks/useToast'
 import { formatCurrency as fmt } from '../../utils/format'
 import { Search, ShoppingCart, ArrowUpCircle, ArrowDownCircle, Lock, Unlock, Wallet, Wrench, BedDouble } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
+import { notifyTelegram } from '../../lib/notify'
 import Modal from '../../components/ui/Modal'
 import Toast from '../../components/ui/Toast'
 import Label from '../../components/ui/FormLabel'
@@ -64,8 +65,8 @@ export default function Caixa() {
     const start = `${today}T00:00:00`
     const end   = `${today}T23:59:59`
     const [{ data: v }, { data: e }] = await Promise.all([
-      supabase.from('vendas').select('*, clientes(nome), venda_itens(*, produtos(nome))').gte('created_at', start).lte('created_at', end).order('created_at', { ascending: false }),
-      supabase.from('movimentacoes_extras').select('*').gte('created_at', start).lte('created_at', end).order('created_at', { ascending: false }),
+      supabase.from('vendas').select('*, clientes(nome), venda_itens(*, produtos(nome))').eq('user_id', user.id).gte('created_at', start).lte('created_at', end).order('created_at', { ascending: false }),
+      supabase.from('movimentacoes_extras').select('*').eq('user_id', user.id).gte('created_at', start).lte('created_at', end).order('created_at', { ascending: false }),
     ])
     setVendas(v || [])
     setExtras(e || [])
@@ -74,10 +75,10 @@ export default function Caixa() {
 
   const loadOptions = useCallback(async () => {
     const [{ data: c }, { data: p }, { data: os }, { data: res }] = await Promise.all([
-      supabase.from('clientes').select('id, nome').order('nome'),
-      supabase.from('produtos').select('id, nome, preco_venda, quantidade').order('nome'),
-      supabase.from('ordens_servico').select('id, numero, descricao, valor_total, status, veiculos(placa, modelo)').in('status', ['aberta', 'em_andamento']).order('numero'),
-      supabase.from('reservas').select('id, nome_hospede, check_in, check_out, valor_total, valor_pago, status, quartos(numero)').in('status', ['confirmada', 'checkin']).order('check_in'),
+      supabase.from('clientes').select('id, nome').eq('user_id', user.id).order('nome'),
+      supabase.from('produtos').select('id, nome, preco_venda, quantidade').eq('user_id', user.id).order('nome'),
+      supabase.from('ordens_servico').select('id, numero, descricao, valor_total, status, veiculos(placa, modelo)').eq('user_id', user.id).in('status', ['aberta', 'em_andamento']).order('numero'),
+      supabase.from('reservas').select('id, nome_hospede, check_in, check_out, valor_total, valor_pago, status, quartos(numero)').eq('user_id', user.id).in('status', ['confirmada', 'checkin']).order('check_in'),
     ])
     setClientes(c || [])
     setProdutos(p || [])
@@ -92,7 +93,8 @@ export default function Caixa() {
   }, [loadCaixa, loadMovimentacoes, loadOptions])
 
   /* ── Cálculos ─────────────────────────────────────────── */
-  const totalVendas   = vendas.reduce((s, v) => s + Number(v.total), 0)
+  // Crediário não gera caixa no ato — a entrada vai para movimentacoes_extras
+  const totalVendas   = vendas.filter(v => v.forma_pagamento !== 'crediario').reduce((s, v) => s + Number(v.total), 0)
   const totalEntradas = extras.filter(e => e.tipo === 'entrada').reduce((s, e) => s + Number(e.valor), 0)
   const totalSaidas   = extras.filter(e => e.tipo === 'saida').reduce((s, e) => s + Number(e.valor), 0)
   const saldoEsperado = Number(caixa?.saldo_inicial || 0) + totalVendas + totalEntradas - totalSaidas
@@ -101,15 +103,6 @@ export default function Caixa() {
   const caixaFechado = caixa?.status === 'fechado'
   const semCaixa     = !caixa
 
-  /* ── Notificação Telegram ────────────────────────────── */
-  const notifyTelegram = useCallback(async (type, payload = {}) => {
-    try {
-      const { error } = await supabase.functions.invoke('telegram-notify', { body: { type, payload } })
-      if (error) console.error('[telegram-notify]', type, error)
-    } catch (e) {
-      console.error('[telegram-notify]', type, e)
-    }
-  }, [])
 
   /* ── Ações ────────────────────────────────────────────── */
   const handleAbrirCaixa = async (e) => {
@@ -178,7 +171,7 @@ export default function Caixa() {
     const os = ordensAbertas.find(o => o.id === osId)
     setSaving(true)
     const [{ error: e1 }, { error: e2 }] = await Promise.all([
-      supabase.from('movimentacoes_extras').insert({ caixa_id: caixa?.id || null, tipo: 'entrada', descricao: `OS ${os?.numero || ''} — ${(os?.descricao || '').slice(0, 40)}${osObs ? ` (${osObs})` : ''}`, valor, forma_pagamento: osForma }),
+      supabase.from('movimentacoes_extras').insert({ caixa_id: caixa?.id || null, tipo: 'entrada', descricao: `OS ${os?.numero || ''} — ${(os?.descricao || '').slice(0, 40)}${osObs ? ` (${osObs})` : ''}`, valor, forma_pagamento: osForma, user_id: user.id }),
       supabase.from('ordens_servico').update({ status: 'concluida', data_conclusao: new Date().toISOString(), valor_total: valor }).eq('id', osId),
     ])
     setSaving(false)
@@ -186,6 +179,12 @@ export default function Caixa() {
     setModal(null)
     setOsId(''); setOsValor(''); setOsForma('dinheiro'); setOsObs('')
     showToast('OS recebida e concluída!')
+    notifyTelegram('os_concluida', {
+      numero: os?.numero || '',
+      veiculo: os?.veiculos ? `${os.veiculos.placa} · ${os.veiculos.modelo}` : null,
+      valor,
+      forma_pagamento: FORMA_LABEL[osForma] || osForma,
+    })
     loadMovimentacoes(); loadOptions()
   }
 
@@ -197,7 +196,7 @@ export default function Caixa() {
     const res = reservasPendentes.find(r => r.id === reservaId)
     setSaving(true)
     const [{ error: e1 }, { error: e2 }] = await Promise.all([
-      supabase.from('movimentacoes_extras').insert({ caixa_id: caixa?.id || null, tipo: 'entrada', descricao: `Reserva — ${res?.nome_hospede || ''} (Qto ${res?.quartos?.numero || ''})`, valor, forma_pagamento: reservaForma }),
+      supabase.from('movimentacoes_extras').insert({ caixa_id: caixa?.id || null, tipo: 'entrada', descricao: `Reserva — ${res?.nome_hospede || ''} (Qto ${res?.quartos?.numero || ''})`, valor, forma_pagamento: reservaForma, user_id: user.id }),
       supabase.from('reservas').update({ valor_pago: Number(res?.valor_pago || 0) + valor, status: 'checkout', forma_pagamento: reservaForma }).eq('id', reservaId),
     ])
     setSaving(false)
@@ -205,6 +204,12 @@ export default function Caixa() {
     setModal(null)
     setReservaId(''); setReservaValor(''); setReservaForma('dinheiro')
     showToast('Reserva recebida e check-out realizado!')
+    notifyTelegram('reserva_recebida', {
+      hospede: res?.nome_hospede || '',
+      quarto: res?.quartos?.numero ? `Quarto ${res.quartos.numero}` : '—',
+      valor,
+      forma_pagamento: FORMA_LABEL[reservaForma] || reservaForma,
+    })
     loadMovimentacoes(); loadOptions()
   }
 
@@ -266,7 +271,7 @@ export default function Caixa() {
       <CaixaStats saldoEsperado={saldoEsperado} totalVendas={totalVendas} totalEntradas={totalEntradas} totalSaidas={totalSaidas} vendas={vendas} extras={extras} caixa={caixa} />
 
       {/* Botões de ação + busca */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20, flexWrap: 'wrap' }}>
+      <div className="caixa-actions-row" style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20, flexWrap: 'wrap' }}>
         {caixaAberto && (<>
           {businessType === 'oficina' ? (<>
             <button className="btn-primary" onClick={() => openModal('os', () => { setOsId(''); setOsValor(''); setOsForma('dinheiro'); setOsObs('') })}>
@@ -294,7 +299,7 @@ export default function Caixa() {
             <ArrowDownCircle size={14} /> Saída
           </button>
         </>)}
-        <div style={{ position: 'relative', flex: 1, maxWidth: 380, marginLeft: caixaAberto ? 'auto' : 0 }}>
+        <div className="search-below-mobile" style={{ position: 'relative', flex: 1, maxWidth: 380, marginLeft: caixaAberto ? 'auto' : 0 }}>
           <Search size={14} style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-subtle)' }} />
           <input className="input-field" placeholder="Buscar movimentação..." value={search} onChange={e => setSearch(e.target.value)} style={{ paddingLeft: 38, fontSize: 13 }} />
         </div>
@@ -393,6 +398,7 @@ export default function Caixa() {
       {modal === 'venda' && (
         <ModalVenda
           clientes={clientes} produtos={produtos}
+          caixaId={caixa?.id}
           title={businessType === 'hotel' ? 'Consumo avulso' : businessType === 'oficina' ? 'Venda avulsa' : 'Registrar venda'}
           onClose={() => setModal(null)}
           onSaved={(msg) => { setModal(null); showToast(msg); loadMovimentacoes(); loadOptions() }}
